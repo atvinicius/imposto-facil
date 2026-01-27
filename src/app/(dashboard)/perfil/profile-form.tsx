@@ -1,0 +1,192 @@
+"use client"
+
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { updateProfile } from "./actions"
+
+const UF_OPTIONS = [
+  "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
+  "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN",
+  "RS", "RO", "RR", "SC", "SP", "SE", "TO",
+]
+
+const SETOR_OPTIONS = [
+  "Agricultura",
+  "Comercio",
+  "Construcao",
+  "Educacao",
+  "Industria",
+  "Saude",
+  "Servicos",
+  "Tecnologia",
+  "Transporte",
+  "Outro",
+]
+
+const PORTE_OPTIONS = [
+  { value: "MEI", label: "MEI (Microempreendedor Individual)" },
+  { value: "ME", label: "ME (Microempresa)" },
+  { value: "EPP", label: "EPP (Empresa de Pequeno Porte)" },
+  { value: "MEDIO", label: "Medio Porte" },
+  { value: "GRANDE", label: "Grande Porte" },
+]
+
+interface ProfileFormProps {
+  initialData: {
+    nome: string
+    email: string
+    uf: string
+    setor: string
+    porte_empresa: string
+  }
+}
+
+export function ProfileForm({ initialData }: ProfileFormProps) {
+  const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function handleSubmit(formData: FormData) {
+    setLoading(true)
+    setSuccess(false)
+    setError(null)
+
+    const result = await updateProfile(formData)
+
+    if (result?.error) {
+      setError(result.error)
+    } else {
+      setSuccess(true)
+    }
+
+    setLoading(false)
+  }
+
+  return (
+    <form action={handleSubmit} className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Informacoes Pessoais</CardTitle>
+          <CardDescription>
+            Dados basicos da sua conta
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="nome">Nome</Label>
+            <Input
+              id="nome"
+              name="nome"
+              defaultValue={initialData.nome}
+              placeholder="Seu nome completo"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={initialData.email}
+              disabled
+              className="bg-muted"
+            />
+            <p className="text-xs text-muted-foreground">
+              O email nao pode ser alterado
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Informacoes da Empresa</CardTitle>
+          <CardDescription>
+            Esses dados ajudam a personalizar as orientacoes sobre a reforma
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="uf">Estado (UF)</Label>
+            <Select name="uf" defaultValue={initialData.uf}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o estado" />
+              </SelectTrigger>
+              <SelectContent>
+                {UF_OPTIONS.map((uf) => (
+                  <SelectItem key={uf} value={uf}>
+                    {uf}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="setor">Setor de Atuacao</Label>
+            <Select name="setor" defaultValue={initialData.setor}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o setor" />
+              </SelectTrigger>
+              <SelectContent>
+                {SETOR_OPTIONS.map((setor) => (
+                  <SelectItem key={setor} value={setor}>
+                    {setor}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="porte_empresa">Porte da Empresa</Label>
+            <Select name="porte_empresa" defaultValue={initialData.porte_empresa}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o porte" />
+              </SelectTrigger>
+              <SelectContent>
+                {PORTE_OPTIONS.map((porte) => (
+                  <SelectItem key={porte.value} value={porte.value}>
+                    {porte.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {error && (
+        <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">
+          {error}
+        </div>
+      )}
+
+      {success && (
+        <div className="bg-green-500/10 text-green-600 text-sm p-3 rounded-md">
+          Perfil atualizado com sucesso!
+        </div>
+      )}
+
+      <Button type="submit" disabled={loading}>
+        {loading ? "Salvando..." : "Salvar alteracoes"}
+      </Button>
+    </form>
+  )
+}
