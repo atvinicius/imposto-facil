@@ -1,11 +1,12 @@
 import OpenAI from "openai"
+import { getURL } from "@/lib/get-url"
 
 export function createOpenRouterClient() {
   return new OpenAI({
     baseURL: "https://openrouter.ai/api/v1",
     apiKey: process.env.OPENROUTER_API_KEY,
     defaultHeaders: {
-      "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+      "HTTP-Referer": getURL(),
       "X-Title": "ImpostoFacil",
     },
   })
