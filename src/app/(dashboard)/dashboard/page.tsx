@@ -38,7 +38,7 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      {!profile?.uf && (
+      {(!profile?.uf || !profile?.nivel_experiencia || !profile?.regime_tributario) && (
         <Card className="border-amber-500/50 bg-amber-500/10">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg flex items-center gap-2">
@@ -52,7 +52,7 @@ export default async function DashboardPage() {
               personalizadas sobre a reforma tributaria.
             </p>
             <Button asChild size="sm">
-              <Link href="/perfil">
+              <Link href="/onboarding">
                 Completar perfil
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>

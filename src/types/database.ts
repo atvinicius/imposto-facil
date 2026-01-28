@@ -17,6 +17,10 @@ export type Database = {
           uf: string | null
           setor: string | null
           porte_empresa: string | null
+          nivel_experiencia: string | null
+          regime_tributario: string | null
+          interesses: string[] | null
+          onboarding_completed_at: string | null
           created_at: string
           updated_at: string
         }
@@ -27,6 +31,10 @@ export type Database = {
           uf?: string | null
           setor?: string | null
           porte_empresa?: string | null
+          nivel_experiencia?: string | null
+          regime_tributario?: string | null
+          interesses?: string[] | null
+          onboarding_completed_at?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -37,6 +45,10 @@ export type Database = {
           uf?: string | null
           setor?: string | null
           porte_empresa?: string | null
+          nivel_experiencia?: string | null
+          regime_tributario?: string | null
+          interesses?: string[] | null
+          onboarding_completed_at?: string | null
           created_at?: string
           updated_at?: string
         }

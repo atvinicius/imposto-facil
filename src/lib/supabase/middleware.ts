@@ -36,8 +36,8 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Protected routes
-  const protectedPaths = ["/dashboard", "/assistente", "/conhecimento", "/perfil"]
+  // Protected routes (including onboarding)
+  const protectedPaths = ["/dashboard", "/assistente", "/conhecimento", "/perfil", "/onboarding"]
   const isProtectedPath = protectedPaths.some((path) =>
     request.nextUrl.pathname.startsWith(path)
   )
@@ -47,6 +47,26 @@ export async function updateSession(request: NextRequest) {
     url.pathname = "/login"
     url.searchParams.set("redirect", request.nextUrl.pathname)
     return NextResponse.redirect(url)
+  }
+
+  // Dashboard routes - check if onboarding is complete
+  const dashboardPaths = ["/dashboard", "/assistente", "/conhecimento", "/perfil"]
+  const isDashboardPath = dashboardPaths.some((path) =>
+    request.nextUrl.pathname.startsWith(path)
+  )
+
+  if (isDashboardPath && user) {
+    const { data: profile } = await supabase
+      .from("user_profiles")
+      .select("onboarding_completed_at")
+      .eq("id", user.id)
+      .single()
+
+    if (!profile?.onboarding_completed_at) {
+      const url = request.nextUrl.clone()
+      url.pathname = "/onboarding"
+      return NextResponse.redirect(url)
+    }
   }
 
   // Auth routes (redirect to dashboard if already logged in)
