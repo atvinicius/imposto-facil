@@ -1,7 +1,6 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
-import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 
 export type OnboardingData = {
@@ -88,11 +87,12 @@ export async function completeOnboarding(data: OnboardingData) {
     .eq("id", user.id)
 
   if (error) {
+    console.error("Supabase error completing onboarding:", error)
     return { error: "Erro ao completar onboarding" }
   }
 
   revalidatePath("/dashboard")
-  redirect("/dashboard")
+  return { success: true }
 }
 
 export async function skipOnboarding() {
@@ -116,9 +116,10 @@ export async function skipOnboarding() {
     .eq("id", user.id)
 
   if (error) {
+    console.error("Supabase error skipping onboarding:", error)
     return { error: "Erro ao pular onboarding" }
   }
 
   revalidatePath("/dashboard")
-  redirect("/dashboard")
+  return { success: true }
 }

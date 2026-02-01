@@ -40,15 +40,22 @@ export default function SignupPage() {
       return
     }
 
-    const result = await signup(formData)
+    try {
+      const result = await signup(formData)
 
-    if (result?.error) {
-      setError(result.error)
-    } else if (result?.success) {
-      setSuccess(true)
+      if (result?.error) {
+        setError(result.error)
+      } else if (result?.success) {
+        setSuccess(true)
+      } else {
+        setError("Ocorreu um erro inesperado. Tente novamente.")
+      }
+    } catch (err) {
+      console.error("Signup error:", err)
+      setError("Erro ao criar conta. Verifique sua conexao e tente novamente.")
+    } finally {
+      setLoading(false)
     }
-
-    setLoading(false)
   }
 
   return (

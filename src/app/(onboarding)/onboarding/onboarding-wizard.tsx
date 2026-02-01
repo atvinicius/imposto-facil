@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -32,8 +33,10 @@ interface OnboardingWizardProps {
 }
 
 export function OnboardingWizard({ initialData }: OnboardingWizardProps) {
+  const router = useRouter()
   const [currentStep, setCurrentStep] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [formData, setFormData] = useState<OnboardingData>({
     nome: initialData?.nome || "",
     nivel_experiencia: initialData?.nivel_experiencia || "",
@@ -58,12 +61,17 @@ export function OnboardingWizard({ initialData }: OnboardingWizardProps) {
 
   const handleNext = async () => {
     setIsLoading(true)
+    setError(null)
     try {
       const result = await saveOnboardingStep(formData)
       if (result.error) {
-        console.error(result.error)
+        setError(result.error)
+        return
       }
       setCurrentStep((prev) => prev + 1)
+    } catch (err) {
+      console.error("Error saving step:", err)
+      setError("Erro ao salvar. Tente novamente.")
     } finally {
       setIsLoading(false)
     }
@@ -71,22 +79,43 @@ export function OnboardingWizard({ initialData }: OnboardingWizardProps) {
 
   const handleBack = () => {
     setCurrentStep((prev) => prev - 1)
+    setError(null)
   }
 
   const handleComplete = async () => {
     setIsLoading(true)
+    setError(null)
     try {
-      await completeOnboarding(formData)
-    } catch {
+      const result = await completeOnboarding(formData)
+      if (result?.error) {
+        setError(result.error)
+        setIsLoading(false)
+        return
+      }
+      // If no error, redirect on client side
+      router.push("/dashboard")
+    } catch (err) {
+      console.error("Error completing onboarding:", err)
+      setError("Erro ao finalizar. Tente novamente.")
       setIsLoading(false)
     }
   }
 
   const handleSkip = async () => {
     setIsLoading(true)
+    setError(null)
     try {
-      await skipOnboarding()
-    } catch {
+      const result = await skipOnboarding()
+      if (result?.error) {
+        setError(result.error)
+        setIsLoading(false)
+        return
+      }
+      // If no error, redirect on client side
+      router.push("/dashboard")
+    } catch (err) {
+      console.error("Error skipping onboarding:", err)
+      setError("Erro ao pular. Tente novamente.")
       setIsLoading(false)
     }
   }
@@ -106,6 +135,11 @@ export function OnboardingWizard({ initialData }: OnboardingWizardProps) {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          {error && (
+            <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">
+              {error}
+            </div>
+          )}
           {currentStep === 0 && (
             <>
               <div className="space-y-2">
