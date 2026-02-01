@@ -25,6 +25,11 @@ type ProfileUpdate = {
   updated_at?: string
 }
 
+// Convert empty strings to null to satisfy database constraints
+function emptyToNull(value: string | undefined): string | null {
+  return value && value.trim() !== "" ? value : null
+}
+
 export async function saveOnboardingStep(data: OnboardingData) {
   const supabase = await createClient()
   const {
@@ -36,13 +41,13 @@ export async function saveOnboardingStep(data: OnboardingData) {
   }
 
   const updateData: ProfileUpdate = {
-    nome: data.nome,
-    nivel_experiencia: data.nivel_experiencia,
-    uf: data.uf,
-    setor: data.setor,
-    porte_empresa: data.porte_empresa,
-    regime_tributario: data.regime_tributario,
-    interesses: data.interesses,
+    nome: emptyToNull(data.nome),
+    nivel_experiencia: emptyToNull(data.nivel_experiencia),
+    uf: emptyToNull(data.uf),
+    setor: emptyToNull(data.setor),
+    porte_empresa: emptyToNull(data.porte_empresa),
+    regime_tributario: emptyToNull(data.regime_tributario),
+    interesses: data.interesses?.length ? data.interesses : null,
     updated_at: new Date().toISOString(),
   }
 
@@ -52,6 +57,7 @@ export async function saveOnboardingStep(data: OnboardingData) {
     .eq("id", user.id)
 
   if (error) {
+    console.error("Supabase error saving onboarding step:", error)
     return { error: "Erro ao salvar dados" }
   }
 
@@ -70,13 +76,13 @@ export async function completeOnboarding(data: OnboardingData) {
   }
 
   const updateData: ProfileUpdate = {
-    nome: data.nome,
-    nivel_experiencia: data.nivel_experiencia,
-    uf: data.uf,
-    setor: data.setor,
-    porte_empresa: data.porte_empresa,
-    regime_tributario: data.regime_tributario,
-    interesses: data.interesses,
+    nome: emptyToNull(data.nome),
+    nivel_experiencia: emptyToNull(data.nivel_experiencia),
+    uf: emptyToNull(data.uf),
+    setor: emptyToNull(data.setor),
+    porte_empresa: emptyToNull(data.porte_empresa),
+    regime_tributario: emptyToNull(data.regime_tributario),
+    interesses: data.interesses?.length ? data.interesses : null,
     onboarding_completed_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   }
