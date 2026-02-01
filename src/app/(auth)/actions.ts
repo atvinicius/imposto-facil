@@ -5,6 +5,19 @@ import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { getURL } from "@/lib/get-url"
 
+function translateAuthError(message: string): string {
+  const errorMap: Record<string, string> = {
+    "Invalid login credentials": "Email ou senha incorretos.",
+    "Email not confirmed": "Email ainda nao confirmado. Verifique sua caixa de entrada.",
+    "User already registered": "Este email ja esta cadastrado.",
+    "Password should be at least 6 characters": "A senha deve ter pelo menos 6 caracteres.",
+    "Unable to validate email address: invalid format": "Formato de email invalido.",
+    "Signup requires a valid password": "Senha obrigatoria.",
+    "User not found": "Usuario nao encontrado.",
+  }
+  return errorMap[message] || message
+}
+
 export async function login(formData: FormData) {
   const supabase = await createClient()
 
@@ -16,7 +29,7 @@ export async function login(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword(data)
 
   if (error) {
-    return { error: error.message }
+    return { error: translateAuthError(error.message) }
   }
 
   revalidatePath("/", "layout")
@@ -42,10 +55,10 @@ export async function signup(formData: FormData) {
   })
 
   if (error) {
-    return { error: error.message }
+    return { error: translateAuthError(error.message) }
   }
 
-  return { success: "Verifique seu email para confirmar o cadastro." }
+  return { success: true }
 }
 
 export async function resetPassword(formData: FormData) {
@@ -58,10 +71,10 @@ export async function resetPassword(formData: FormData) {
   })
 
   if (error) {
-    return { error: error.message }
+    return { error: translateAuthError(error.message) }
   }
 
-  return { success: "Verifique seu email para redefinir sua senha." }
+  return { success: "Enviamos um link para redefinir sua senha. Verifique seu email." }
 }
 
 export async function logout() {
@@ -81,7 +94,7 @@ export async function updatePassword(formData: FormData) {
   })
 
   if (error) {
-    return { error: error.message }
+    return { error: translateAuthError(error.message) }
   }
 
   revalidatePath("/", "layout")

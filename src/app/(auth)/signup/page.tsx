@@ -17,13 +17,13 @@ import { signup } from "../actions"
 
 export default function SignupPage() {
   const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(formData: FormData) {
     setLoading(true)
     setError(null)
-    setSuccess(null)
+    setSuccess(false)
 
     const password = formData.get("password") as string
     const confirmPassword = formData.get("confirmPassword") as string
@@ -45,7 +45,7 @@ export default function SignupPage() {
     if (result?.error) {
       setError(result.error)
     } else if (result?.success) {
-      setSuccess(result.success)
+      setSuccess(true)
     }
 
     setLoading(false)
@@ -67,8 +67,9 @@ export default function SignupPage() {
             </div>
           )}
           {success && (
-            <div className="bg-green-500/10 text-green-600 text-sm p-3 rounded-md">
-              {success}
+            <div className="bg-green-500/10 text-green-600 text-sm p-3 rounded-md space-y-2">
+              <p className="font-medium">Quase la!</p>
+              <p>Enviamos um link de confirmacao para seu email. Clique no link para ativar sua conta e comecar a usar o ImpostoFacil.</p>
             </div>
           )}
           <div className="space-y-2">

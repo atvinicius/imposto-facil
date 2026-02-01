@@ -20,7 +20,12 @@ import { login } from "../actions"
 function LoginForm() {
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get("redirect") || "/dashboard"
-  const [error, setError] = useState<string | null>(null)
+  const callbackError = searchParams.get("error")
+  const [error, setError] = useState<string | null>(
+    callbackError === "auth_callback_error"
+      ? "O link de confirmacao expirou ou e invalido. Tente fazer login ou solicite um novo link."
+      : null
+  )
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(formData: FormData) {
