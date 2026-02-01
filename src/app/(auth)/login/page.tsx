@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { login } from "../actions"
+import { GoogleButton } from "@/components/auth/google-button"
 
 function LoginForm() {
   const searchParams = useSearchParams()
@@ -90,6 +91,15 @@ function LoginForm() {
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Entrando..." : "Entrar"}
           </Button>
+          <div className="relative w-full">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">ou</span>
+            </div>
+          </div>
+          <GoogleButton mode="login" />
           <p className="text-sm text-muted-foreground text-center">
             Ainda nao tem conta?{" "}
             <Link href="/signup" className="text-primary hover:underline">

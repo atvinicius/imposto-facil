@@ -14,6 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { signup } from "../actions"
+import { GoogleButton } from "@/components/auth/google-button"
 
 export default function SignupPage() {
   const [error, setError] = useState<string | null>(null)
@@ -126,6 +127,15 @@ export default function SignupPage() {
           <Button type="submit" className="w-full" disabled={loading || !!success}>
             {loading ? "Criando conta..." : "Criar conta"}
           </Button>
+          <div className="relative w-full">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">ou</span>
+            </div>
+          </div>
+          <GoogleButton mode="signup" />
           <p className="text-sm text-muted-foreground text-center">
             Ja tem uma conta?{" "}
             <Link href="/login" className="text-primary hover:underline">
