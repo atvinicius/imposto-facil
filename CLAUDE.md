@@ -29,6 +29,7 @@ npm run lint      # ESLint with Next.js + TypeScript rules
   - `(onboarding)` - Post-signup onboarding wizard
 - `src/components/ui/` - shadcn/ui components
 - `src/components/onboarding/` - Onboarding-specific components (step indicator)
+- `src/components/landing/` - Landing page section components
 - `src/lib/supabase/` - Supabase clients (server.ts for SSR, client.ts for browser, admin.ts for service role)
 - `src/lib/openrouter/` - LLM client with system prompt template
 - `src/lib/embeddings/` - OpenAI embeddings and hybrid search logic
@@ -76,6 +77,29 @@ Key files:
 - `src/app/(onboarding)/onboarding/constants.ts` - All dropdown/select options
 
 Users can skip onboarding but will see a reminder card on the dashboard.
+
+### Landing Page Architecture
+The public landing page (`src/app/page.tsx`) is a high-converting page with urgency messaging about the 2026 tax reform deadline.
+
+**Data file**: `src/lib/landing-data.ts` - Centralized content (features, testimonials, pricing, FAQs, stats)
+
+**Section components** (`src/components/landing/`):
+| Component | Type | Purpose |
+|-----------|------|---------|
+| `hero-section.tsx` | Server | Urgency badge, countdown, headline, CTAs |
+| `countdown-timer.tsx` | Client | Live countdown to Jan 1, 2026 |
+| `problem-section.tsx` | Server | Pain points, before/after comparison |
+| `solution-section.tsx` | Server | 4 feature cards |
+| `social-proof-section.tsx` | Server | Stats, testimonials, trust badges |
+| `how-it-works-section.tsx` | Server | 3-step process |
+| `pricing-section.tsx` | Server | 4 pricing tiers |
+| `pricing-card.tsx` | Server | Reusable pricing card |
+| `faq-section.tsx` | Server | FAQ wrapper |
+| `faq-item.tsx` | Client | Collapsible accordion |
+| `final-cta-section.tsx` | Server | Final urgency CTA |
+| `landing-footer.tsx` | Server | 4-column footer |
+
+**Hydration note**: `countdown-timer.tsx` uses `suppressHydrationWarning` and starts with null state to handle server/client rendering differences.
 
 ## Database Schema
 
