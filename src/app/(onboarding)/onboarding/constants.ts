@@ -48,11 +48,11 @@ export const SETOR_OPTIONS = [
 ] as const
 
 export const PORTE_EMPRESA_OPTIONS = [
-  { value: "mei", label: "MEI", description: "Microempreendedor Individual" },
-  { value: "me", label: "ME", description: "Microempresa" },
-  { value: "epp", label: "EPP", description: "Empresa de Pequeno Porte" },
-  { value: "medio", label: "Médio Porte", description: "Empresa de médio porte" },
-  { value: "grande", label: "Grande Porte", description: "Empresa de grande porte" },
+  { value: "MEI", label: "MEI", description: "Microempreendedor Individual" },
+  { value: "ME", label: "ME", description: "Microempresa" },
+  { value: "EPP", label: "EPP", description: "Empresa de Pequeno Porte" },
+  { value: "MEDIO", label: "Médio Porte", description: "Empresa de médio porte" },
+  { value: "GRANDE", label: "Grande Porte", description: "Empresa de grande porte" },
 ] as const
 
 export const REGIME_TRIBUTARIO_OPTIONS = [
