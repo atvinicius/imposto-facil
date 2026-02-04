@@ -1,12 +1,15 @@
 import { createClient } from "@/lib/supabase/server"
-import { createOpenRouterClient, DEFAULT_MODEL, SYSTEM_PROMPT } from "@/lib/openrouter/client"
+import { createOpenRouterClient, DEFAULT_MODEL, SYSTEM_PROMPT, isValidModel } from "@/lib/openrouter/client"
 import { hybridSearch } from "@/lib/embeddings/search"
 
 export const runtime = "edge"
 
 export async function POST(request: Request) {
   try {
-    const { messages, conversationId } = await request.json()
+    const { messages, conversationId, model: requestedModel } = await request.json()
+
+    // Validate and use requested model or fall back to default
+    const model = requestedModel && isValidModel(requestedModel) ? requestedModel : DEFAULT_MODEL
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return new Response(
@@ -84,7 +87,7 @@ export async function POST(request: Request) {
 
     // Create streaming response
     const response = await client.chat.completions.create({
-      model: DEFAULT_MODEL,
+      model,
       messages: [
         { role: "system", content: systemPrompt },
         ...messages,

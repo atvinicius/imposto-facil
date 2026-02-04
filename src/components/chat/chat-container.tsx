@@ -1,10 +1,11 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { MessageCircle } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { ChatMessage } from "./chat-message"
 import { ChatInput } from "./chat-input"
+import { ModelSelector, DEFAULT_MODEL } from "./model-selector"
 import { useChat } from "@/hooks/use-chat"
 import { Skeleton } from "@/components/ui/skeleton"
 
@@ -13,8 +14,10 @@ interface ChatContainerProps {
 }
 
 export function ChatContainer({ conversationId }: ChatContainerProps) {
+  const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL)
   const { messages, isLoading, error, sendMessage } = useChat({
     conversationId,
+    model: selectedModel,
   })
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -26,6 +29,14 @@ export function ChatContainer({ conversationId }: ChatContainerProps) {
 
   return (
     <div className="flex flex-col h-[calc(100vh-12rem)]">
+      <div className="flex items-center justify-between pb-3 mb-3 border-b">
+        <span className="text-sm text-muted-foreground">Modelo:</span>
+        <ModelSelector
+          value={selectedModel}
+          onValueChange={setSelectedModel}
+          disabled={isLoading}
+        />
+      </div>
       <ScrollArea className="flex-1 pr-4" ref={scrollRef}>
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center p-8">

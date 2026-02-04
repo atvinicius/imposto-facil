@@ -12,7 +12,7 @@ export function createOpenRouterClient() {
   })
 }
 
-export const DEFAULT_MODEL = "anthropic/claude-3.5-sonnet"
+export { DEFAULT_MODEL, isValidModel } from "./models"
 
 export const SYSTEM_PROMPT = `Voce e um assistente especializado na reforma tributaria brasileira (Emenda Constitucional 132/2023). Seu papel e ajudar usuarios a entender as mudancas no sistema tributario, incluindo:
 

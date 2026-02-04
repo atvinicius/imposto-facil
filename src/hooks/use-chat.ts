@@ -11,11 +11,12 @@ export interface Message {
 
 export interface UseChatOptions {
   conversationId?: string
+  model?: string
   onError?: (error: Error) => void
 }
 
 export function useChat(options: UseChatOptions = {}) {
-  const { conversationId, onError } = options
+  const { conversationId, model, onError } = options
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
@@ -57,6 +58,7 @@ export function useChat(options: UseChatOptions = {}) {
               content: m.content,
             })),
             conversationId,
+            model,
           }),
           signal: abortControllerRef.current.signal,
         })
@@ -135,7 +137,7 @@ export function useChat(options: UseChatOptions = {}) {
         abortControllerRef.current = null
       }
     },
-    [messages, conversationId, isLoading, onError]
+    [messages, conversationId, model, isLoading, onError]
   )
 
   const stop = useCallback(() => {
