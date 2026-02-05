@@ -244,4 +244,14 @@ export const TRUST_BADGES = [
   },
 ]
 
-export const TARGET_DATE = new Date("2026-01-01T00:00:00")
+// Deadline: End of penalty-free adaptation period (approximately April 2026)
+// Source: TOTVS / Receita Federal - "período de adaptação se estende até abril de 2026"
+export const TARGET_DATE = new Date("2026-04-30T23:59:59")
+
+export const PENALTY_DEADLINE_INFO = {
+  date: "Abril de 2026",
+  title: "Fim do período sem multas",
+  description: "A Receita Federal e o Comitê Gestor do IBS estabeleceram um período de adaptação de até 4 meses após a publicação dos regulamentos (janeiro de 2026). Durante esse período, não há aplicação automática de multas por falhas no preenchimento do IBS e CBS nos documentos fiscais. Após esse prazo, as regras passam a ser exigidas com possibilidade de penalidades.",
+  source: "TOTVS / Receita Federal",
+  sourceUrl: "https://www.totvs.com/blog/adequacao-a-legislacao/reforma-tributaria/"
+}

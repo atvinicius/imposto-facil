@@ -72,7 +72,7 @@ export const config = {
   },
   
   // Which posting method to use: 'direct' | 'ayrshare'
-  postingMethod: 'direct' as const,
+  postingMethod: 'direct' as 'direct' | 'ayrshare',
 
   // ============================================
   // OUTPUT SETTINGS

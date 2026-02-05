@@ -1,19 +1,52 @@
 import Link from "next/link"
-import { ArrowRight, Calculator, Clock, TrendingUp } from "lucide-react"
+import { ArrowRight, Calculator, Clock, TrendingUp, Info } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { CountdownTimer } from "./countdown-timer"
+import { PENALTY_DEADLINE_INFO } from "@/lib/landing-data"
 
 export function HeroSection() {
   return (
     <section className="py-16 md:py-24 overflow-hidden">
       <div className="container mx-auto px-4">
         <div className="flex flex-col items-center text-center max-w-4xl mx-auto">
-          {/* Urgency Badge */}
-          <Badge variant="destructive" className="mb-6 px-4 py-2 text-sm animate-pulse">
-            <Clock className="h-3 w-3 mr-1" />
-            Período sem multas acaba em abril
-          </Badge>
+          {/* Urgency Badge with Tooltip */}
+          <TooltipProvider>
+            <Tooltip delayDuration={300}>
+              <TooltipTrigger asChild>
+                <Badge variant="destructive" className="mb-6 px-4 py-2 text-sm cursor-help animate-pulse">
+                  <Clock className="h-3 w-3 mr-1" />
+                  Período sem multas acaba em abril
+                  <Info className="h-3 w-3 ml-1 opacity-70" />
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-sm p-4">
+                <div className="space-y-2">
+                  <p className="font-semibold">{PENALTY_DEADLINE_INFO.title}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {PENALTY_DEADLINE_INFO.description}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Fonte:{" "}
+                    <a 
+                      href={PENALTY_DEADLINE_INFO.sourceUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="underline hover:text-foreground"
+                    >
+                      {PENALTY_DEADLINE_INFO.source}
+                    </a>
+                  </p>
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
 
           {/* Countdown */}
           <div className="mb-8">
