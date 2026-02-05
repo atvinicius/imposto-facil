@@ -11,7 +11,7 @@ export function FaqSection() {
             Perguntas frequentes
           </h2>
           <p className="text-xl text-muted-foreground text-center mb-12">
-            Tire suas duvidas sobre a reforma e o ImpostoFacil
+            Tire suas dúvidas sobre a reforma e o ImpostoFácil
           </p>
 
           <Card>

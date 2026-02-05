@@ -22,7 +22,7 @@ export function HeroSection() {
               <TooltipTrigger asChild>
                 <Badge variant="destructive" className="mb-6 px-4 py-2 text-sm cursor-help animate-pulse">
                   <Clock className="h-3 w-3 mr-1" />
-                  Período sem multas acaba em abril
+                  2026: Ano de transição já começou
                   <Info className="h-3 w-3 ml-1 opacity-70" />
                 </Badge>
               </TooltipTrigger>
@@ -50,6 +50,7 @@ export function HeroSection() {
 
           {/* Countdown */}
           <div className="mb-8">
+            <p className="text-sm text-muted-foreground mb-2">Tempo restante em 2026:</p>
             <CountdownTimer />
           </div>
 

@@ -102,7 +102,7 @@ export default function SimuladorPage() {
       <header className="border-b bg-background/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="text-xl font-bold">
-            ImpostoFacil
+            ImpostoFácil
           </Link>
           <Link href="/" className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1">
             <ArrowLeft className="h-4 w-4" />

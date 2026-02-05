@@ -34,7 +34,7 @@ export default async function DashboardPage() {
           {greeting()}, {profile?.nome || user?.email?.split("@")[0]}!
         </h1>
         <p className="text-muted-foreground mt-2">
-          Bem-vindo ao ImpostoFacil. O que voce gostaria de explorar hoje?
+          Bem-vindo ao ImpostoFácil. O que você gostaria de explorar hoje?
         </p>
       </div>
 
@@ -48,8 +48,8 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">
-              Adicione informacoes sobre sua empresa para receber orientacoes
-              personalizadas sobre a reforma tributaria.
+              Adicione informações sobre sua empresa para receber orientações
+              personalizadas sobre a reforma tributária.
             </p>
             <Button asChild size="sm">
               <Link href="/onboarding">
@@ -70,7 +70,7 @@ export default async function DashboardPage() {
               </div>
               <CardTitle className="mt-4">Assistente Virtual</CardTitle>
               <CardDescription>
-                Tire suas duvidas sobre a reforma tributaria com nosso
+                Tire suas dúvidas sobre a reforma tributária com nosso
                 assistente de IA
               </CardDescription>
             </CardHeader>
@@ -112,7 +112,7 @@ export default async function DashboardPage() {
               </div>
               <CardTitle className="mt-4">Meu Perfil</CardTitle>
               <CardDescription>
-                Configure seu perfil para receber orientacoes personalizadas
+                Configure seu perfil para receber orientações personalizadas
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -132,13 +132,13 @@ export default async function DashboardPage() {
             <CardHeader className="pb-2">
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-muted-foreground" />
-                <CardTitle className="text-base">Cronograma de Transicao</CardTitle>
+                <CardTitle className="text-base">Cronograma de Transição</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                A transicao para o novo sistema tributario ocorrera entre 2026 e
-                2033, com implementacao gradual dos novos tributos.
+                A transição para o novo sistema tributário ocorrerá entre 2026 e
+                2033, com implementação gradual dos novos tributos.
               </p>
               <Button variant="link" asChild className="p-0 h-auto mt-2">
                 <Link href="/conhecimento/transicao/cronograma">
@@ -157,7 +157,7 @@ export default async function DashboardPage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Os dois novos tributos que formarao o IVA Dual brasileiro,
+                Os dois novos tributos que formarão o IVA Dual brasileiro,
                 substituindo cinco impostos atuais.
               </p>
               <Button variant="link" asChild className="p-0 h-auto mt-2">

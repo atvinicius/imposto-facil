@@ -30,7 +30,7 @@ export default function SignupPage() {
     const confirmPassword = formData.get("confirmPassword") as string
 
     if (password !== confirmPassword) {
-      setError("As senhas nao coincidem")
+      setError("As senhas não coincidem")
       setLoading(false)
       return
     }
@@ -53,7 +53,7 @@ export default function SignupPage() {
       }
     } catch (err) {
       console.error("Signup error:", err)
-      setError("Erro ao criar conta. Verifique sua conexao e tente novamente.")
+      setError("Erro ao criar conta. Verifique sua conexão e tente novamente.")
     } finally {
       setLoading(false)
     }
@@ -76,8 +76,8 @@ export default function SignupPage() {
           )}
           {success && (
             <div className="bg-green-500/10 text-green-600 text-sm p-3 rounded-md space-y-2">
-              <p className="font-medium">Quase la!</p>
-              <p>Enviamos um link de confirmacao para seu email. Clique no link para ativar sua conta e comecar a usar o ImpostoFacil.</p>
+              <p className="font-medium">Quase lá!</p>
+              <p>Enviamos um link de confirmação para seu email. Clique no link para ativar sua conta e começar a usar o ImpostoFácil.</p>
             </div>
           )}
           <div className="space-y-2">
@@ -137,7 +137,7 @@ export default function SignupPage() {
           </div>
           <GoogleButton mode="signup" />
           <p className="text-sm text-muted-foreground text-center">
-            Ja tem uma conta?{" "}
+            Já tem uma conta?{" "}
             <Link href="/login" className="text-primary hover:underline">
               Entrar
             </Link>

@@ -11,10 +11,10 @@ export const FEATURES = [
   {
     icon: MessageCircle,
     title: "Assistente IA Especializado",
-    description: "Tire duvidas complexas sobre a reforma em segundos, com respostas baseadas na legislacao oficial.",
+    description: "Tire dúvidas complexas sobre a reforma em segundos, com respostas baseadas na legislação oficial.",
     benefits: [
       "Respostas em tempo real 24/7",
-      "Citacoes da EC 132/2023",
+      "Citações da EC 132/2023",
       "Linguagem simples e direta",
     ],
   },
@@ -24,28 +24,28 @@ export const FEATURES = [
     description: "Saiba exatamente o que sua empresa precisa fazer para se adequar aos novos tributos.",
     benefits: [
       "Tarefas organizadas por prazo",
-      "Adaptado ao seu regime tributario",
-      "Atualizacoes automaticas",
+      "Adaptado ao seu regime tributário",
+      "Atualizações automáticas",
     ],
   },
   {
     icon: Building2,
-    title: "Orientacao por Setor",
-    description: "Cada setor tem regras especificas. Receba orientacao personalizada para sua area de atuacao.",
+    title: "Orientação por Setor",
+    description: "Cada setor tem regras específicas. Receba orientação personalizada para sua área de atuação.",
     benefits: [
-      "Aliquotas especificas por setor",
+      "Alíquotas específicas por setor",
       "Regimes diferenciados",
-      "Casos praticos do seu mercado",
+      "Casos práticos do seu mercado",
     ],
   },
   {
     icon: Bell,
-    title: "Alertas de Regulamentacao",
-    description: "Seja notificado sobre novas leis complementares e regulamentacoes que afetam sua empresa.",
+    title: "Alertas de Regulamentação",
+    description: "Seja notificado sobre novas leis complementares e regulamentações que afetam sua empresa.",
     benefits: [
-      "Atualizacoes em tempo real",
-      "Filtro por relevancia",
-      "Resumo executivo das mudancas",
+      "Atualizações em tempo real",
+      "Filtro por relevância",
+      "Resumo executivo das mudanças",
     ],
   },
 ]
@@ -54,19 +54,19 @@ export const TESTIMONIALS = [
   {
     name: "Ricardo Mendes",
     role: "CEO, TechSolutions Ltda",
-    quote: "O ImpostoFacil me economizou horas de pesquisa. Em 10 minutos entendi como a reforma vai impactar minha empresa de software.",
+    quote: "O ImpostoFácil me economizou horas de pesquisa. Em 10 minutos entendi como a reforma vai impactar minha empresa de software.",
     avatar: "RM",
   },
   {
     name: "Ana Paula Costa",
-    role: "Contadora, Escritorio Costa & Associados",
-    quote: "Uso a plataforma para me manter atualizada e tirar duvidas rapidas dos meus clientes. A base de conhecimento e muito completa.",
+    role: "Contadora, Escritório Costa & Associados",
+    quote: "Uso a plataforma para me manter atualizada e tirar dúvidas rápidas dos meus clientes. A base de conhecimento é muito completa.",
     avatar: "AC",
   },
   {
     name: "Fernando Silva",
     role: "Diretor Financeiro, Distribuidora ABC",
-    quote: "A simulacao de impacto nos ajudou a planejar o fluxo de caixa para o periodo de transicao. Ferramenta essencial.",
+    quote: "A simulação de impacto nos ajudou a planejar o fluxo de caixa para o período de transição. Ferramenta essencial.",
     avatar: "FS",
   },
 ]
@@ -75,32 +75,32 @@ export const PRICING_TIERS = [
   {
     name: "Gratuito",
     price: "R$ 0",
-    period: "/mes",
-    description: "Para quem quer comecar a entender a reforma",
+    period: "/mês",
+    description: "Para quem quer começar a entender a reforma",
     features: [
-      "5 perguntas ao assistente/mes",
-      "Artigos basicos da base de conhecimento",
-      "Glossario completo",
-      "Cronograma de transicao",
+      "5 perguntas ao assistente/mês",
+      "Artigos básicos da base de conhecimento",
+      "Glossário completo",
+      "Cronograma de transição",
     ],
     limitations: [
       "Sem checklists personalizados",
-      "Sem alertas de regulamentacao",
+      "Sem alertas de regulamentação",
     ],
-    cta: "Comecar gratis",
+    cta: "Começar grátis",
     highlighted: false,
   },
   {
     name: "Profissional",
     price: "R$ 49",
-    period: "/mes",
-    description: "Para empresarios que precisam se preparar",
+    period: "/mês",
+    description: "Para empresários que precisam se preparar",
     features: [
       "Perguntas ilimitadas ao assistente",
       "Base de conhecimento completa",
       "Checklists de conformidade",
-      "Alertas de regulamentacao",
-      "Suporte prioritario",
+      "Alertas de regulamentação",
+      "Suporte prioritário",
     ],
     limitations: [],
     cta: "Assinar agora",
@@ -109,14 +109,14 @@ export const PRICING_TIERS = [
   {
     name: "Empresarial",
     price: "R$ 199",
-    period: "/mes",
+    period: "/mês",
     description: "Para empresas com equipes fiscais",
     features: [
       "Tudo do plano Profissional",
-      "Ate 5 usuarios",
-      "Relatorios de impacto",
-      "1 hora de consultoria/mes",
-      "API de integracao",
+      "Até 5 usuários",
+      "Relatórios de impacto",
+      "1 hora de consultoria/mês",
+      "API de integração",
     ],
     limitations: [],
     cta: "Falar com vendas",
@@ -125,11 +125,11 @@ export const PRICING_TIERS = [
   {
     name: "Contador",
     price: "R$ 399",
-    period: "/mes",
-    description: "Para escritorios de contabilidade",
+    period: "/mês",
+    description: "Para escritórios de contabilidade",
     features: [
       "Tudo do plano Empresarial",
-      "Gestao multi-cliente",
+      "Gestão multi-cliente",
       "White-label (sua marca)",
       "API completa",
       "Suporte dedicado",
@@ -142,28 +142,28 @@ export const PRICING_TIERS = [
 
 export const FAQ_ITEMS = [
   {
-    question: "O que e a reforma tributaria EC 132/2023?",
-    answer: "A Emenda Constitucional 132/2023 e a maior reforma do sistema tributario brasileiro em decadas. Ela substitui 5 tributos (ICMS, ISS, PIS, Cofins e IPI) por 3 novos: IBS (estadual/municipal), CBS (federal) e Imposto Seletivo. O objetivo e simplificar o sistema, acabar com a cumulatividade e unificar a legislacao nacional.",
+    question: "O que é a reforma tributária EC 132/2023?",
+    answer: "A Emenda Constitucional 132/2023 é a maior reforma do sistema tributário brasileiro em décadas. Ela substitui 5 tributos (ICMS, ISS, PIS, Cofins e IPI) por 3 novos: IBS (estadual/municipal), CBS (federal) e Imposto Seletivo. O objetivo é simplificar o sistema, acabar com a cumulatividade e unificar a legislação nacional.",
   },
   {
     question: "Como a reforma afeta minha empresa?",
-    answer: "O impacto varia conforme seu setor, estado e regime tributario. Empresas que hoje tem muitos creditos acumulados (como exportadores) tendem a se beneficiar. Ja empresas do setor de servicos podem ter aumento de carga. O ImpostoFacil analisa seu perfil e mostra especificamente como voce sera afetado.",
+    answer: "O impacto varia conforme seu setor, estado e regime tributário. Empresas que hoje têm muitos créditos acumulados (como exportadores) tendem a se beneficiar. Já empresas do setor de serviços podem ter aumento de carga. O ImpostoFácil analisa seu perfil e mostra especificamente como você será afetado.",
   },
   {
-    question: "Preciso me preparar agora? A reforma so comeca em 2026.",
-    answer: "Sim, e urgente comecar agora. Em 2026 ja comeca a cobranca (com aliquotas reduzidas) e sua empresa precisa estar com sistemas, processos e contratos adaptados. Empresas que deixarem para ultima hora vao enfrentar custos muito maiores de adequacao e podem perder creditos tributarios.",
+    question: "Preciso me preparar agora? A reforma só começa em 2026.",
+    answer: "Sim, é urgente começar agora. Em 2026 já começa a cobrança (com alíquotas reduzidas) e sua empresa precisa estar com sistemas, processos e contratos adaptados. Empresas que deixarem para última hora vão enfrentar custos muito maiores de adequação e podem perder créditos tributários.",
   },
   {
-    question: "O plano gratuito tem limitacoes?",
-    answer: "O plano gratuito permite 5 perguntas ao assistente por mes e acesso aos artigos basicos. E ideal para quem quer conhecer a plataforma. Para uso profissional, recomendamos o plano Profissional que oferece perguntas ilimitadas, checklists personalizados e alertas de regulamentacao.",
+    question: "O plano gratuito tem limitações?",
+    answer: "O plano gratuito permite 5 perguntas ao assistente por mês e acesso aos artigos básicos. É ideal para quem quer conhecer a plataforma. Para uso profissional, recomendamos o plano Profissional que oferece perguntas ilimitadas, checklists personalizados e alertas de regulamentação.",
   },
   {
     question: "Posso cancelar a qualquer momento?",
-    answer: "Sim, todos os planos pagos podem ser cancelados a qualquer momento, sem multa ou fidelidade. Alem disso, oferecemos garantia de 7 dias - se voce nao ficar satisfeito, devolvemos seu dinheiro integralmente.",
+    answer: "Sim, todos os planos pagos podem ser cancelados a qualquer momento, sem multa ou fidelidade. Além disso, oferecemos garantia de 7 dias - se você não ficar satisfeito, devolvemos seu dinheiro integralmente.",
   },
   {
-    question: "As informacoes sao confiaveis?",
-    answer: "Sim. Todo nosso conteudo e baseado na legislacao oficial: Emenda Constitucional 132/2023, leis complementares e regulamentacoes da Receita Federal. Nosso time juridico revisa o conteudo regularmente. Importante: somos uma ferramenta educacional e nao substituimos a consultoria de um contador ou advogado tributarista.",
+    question: "As informações são confiáveis?",
+    answer: "Sim. Todo nosso conteúdo é baseado na legislação oficial: Emenda Constitucional 132/2023, leis complementares e regulamentações da Receita Federal. Nosso time jurídico revisa o conteúdo regularmente. Importante: somos uma ferramenta educacional e não substituímos a consultoria de um contador ou advogado tributarista.",
   },
 ]
 
@@ -172,19 +172,19 @@ export const HOW_IT_WORKS_STEPS = [
     icon: User,
     number: 1,
     title: "Crie seu perfil",
-    description: "Informe seu estado, setor e regime tributario em menos de 2 minutos.",
+    description: "Informe seu estado, setor e regime tributário em menos de 2 minutos.",
   },
   {
     icon: BarChart,
     number: 2,
-    title: "Receba analise personalizada",
+    title: "Receba análise personalizada",
     description: "Nosso sistema analisa como a reforma impacta especificamente sua empresa.",
   },
   {
     icon: Bell,
     number: 3,
     title: "Mantenha-se atualizado",
-    description: "Receba alertas sobre novas regulamentacoes e prazos importantes.",
+    description: "Receba alertas sobre novas regulamentações e prazos importantes.",
   },
 ]
 
@@ -192,17 +192,17 @@ export const PROBLEM_STATS = [
   {
     value: "5",
     label: "tributos diferentes",
-    description: "ICMS, ISS, PIS, Cofins, IPI - cada um com suas proprias regras",
+    description: "ICMS, ISS, PIS, Cofins, IPI - cada um com suas próprias regras",
   },
   {
     value: "27",
-    label: "legislacoes estaduais",
-    description: "Cada estado com aliquotas e beneficios diferentes",
+    label: "legislações estaduais",
+    description: "Cada estado com alíquotas e benefícios diferentes",
   },
   {
     value: "1.500+",
     label: "horas/ano",
-    description: "Tempo medio gasto por empresas em compliance tributario",
+    description: "Tempo médio gasto por empresas em compliance tributário",
   },
 ]
 
@@ -211,8 +211,8 @@ export const BEFORE_AFTER = {
     title: "Sistema Atual",
     items: [
       "5 tributos sobre consumo",
-      "27 legislacoes estaduais diferentes",
-      "Cumulatividade e creditos perdidos",
+      "27 legislações estaduais diferentes",
+      "Cumulatividade e créditos perdidos",
       "Guerra fiscal entre estados",
       "Complexidade extrema",
     ],
@@ -221,9 +221,9 @@ export const BEFORE_AFTER = {
     title: "Novo Sistema (2033)",
     items: [
       "3 tributos simplificados (IBS, CBS, IS)",
-      "Legislacao nacional unificada",
-      "Nao-cumulatividade plena",
-      "Cobranca no destino",
+      "Legislação nacional unificada",
+      "Não-cumulatividade plena",
+      "Cobrança no destino",
       "Regras claras e transparentes",
     ],
   },
@@ -232,7 +232,7 @@ export const BEFORE_AFTER = {
 export const TRUST_BADGES = [
   {
     title: "Baseado na EC 132/2023",
-    description: "Legislacao oficial",
+    description: "Legislação oficial",
   },
   {
     title: "Fontes: Receita Federal",
@@ -244,14 +244,15 @@ export const TRUST_BADGES = [
   },
 ]
 
-// Deadline: End of penalty-free adaptation period (approximately April 2026)
-// Source: TOTVS / Receita Federal - "período de adaptação se estende até abril de 2026"
-export const TARGET_DATE = new Date("2026-04-30T23:59:59")
+// Deadline: End of 2026 test period
+// Note: The exact penalty deadline is uncertain. 2026 is a test year with reduced penalties.
+// Source: LC 214/2025 - 2026 is the "período de teste" with CBS 0.9% + IBS 0.1%
+export const TARGET_DATE = new Date("2026-12-31T23:59:59")
 
 export const PENALTY_DEADLINE_INFO = {
-  date: "Abril de 2026",
-  title: "Fim do período sem multas",
-  description: "A Receita Federal e o Comitê Gestor do IBS estabeleceram um período de adaptação de até 4 meses após a publicação dos regulamentos (janeiro de 2026). Durante esse período, não há aplicação automática de multas por falhas no preenchimento do IBS e CBS nos documentos fiscais. Após esse prazo, as regras passam a ser exigidas com possibilidade de penalidades.",
-  source: "TOTVS / Receita Federal",
-  sourceUrl: "https://www.totvs.com/blog/adequacao-a-legislacao/reforma-tributaria/"
+  date: "2026",
+  title: "Ano de transição e testes",
+  description: "2026 é o período de teste da reforma tributária, com alíquotas reduzidas (CBS 0,9% + IBS 0,1%). Durante este período, o fisco está focado em adaptação dos sistemas. A partir de 2027, a CBS entra em vigor efetivamente e as exigências aumentam significativamente.",
+  source: "LC 214/2025",
+  sourceUrl: "https://www.planalto.gov.br/ccivil_03/leis/lcp/Lcp214.htm"
 }

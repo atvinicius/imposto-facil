@@ -8,10 +8,10 @@ export function ProblemSection() {
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
-            O caos tributario brasileiro
+            O caos tributário brasileiro
           </h2>
           <p className="text-xl text-muted-foreground text-center mb-12">
-            Entenda por que a reforma e urgente e como ela vai mudar tudo
+            Entenda por que a reforma é urgente e como ela vai mudar tudo
           </p>
 
           {/* Stats Cards */}
@@ -77,15 +77,15 @@ export function ProblemSection() {
                 </div>
                 <div>
                   <h3 className="font-bold text-lg mb-1">
-                    O custo de nao se preparar
+                    O custo de não se preparar
                   </h3>
                   <p className="text-muted-foreground">
                     Empresas despreparadas podem perder de{" "}
                     <strong className="text-foreground">
                       R$ 50.000 a R$ 500.000
                     </strong>{" "}
-                    em creditos tributarios durante a transicao, alem de multas
-                    por nao conformidade e retrabalho em sistemas.
+                    em créditos tributários durante a transição, além de multas
+                    por não conformidade e retrabalho em sistemas.
                   </p>
                 </div>
               </div>

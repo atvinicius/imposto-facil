@@ -8,11 +8,11 @@ export function LandingFooter() {
           {/* Brand */}
           <div>
             <Link href="/" className="text-xl font-bold">
-              ImpostoFacil
+              ImpostoFácil
             </Link>
             <p className="text-sm text-muted-foreground mt-2">
-              Entenda a reforma tributaria de forma simples e prepare sua
-              empresa para as mudancas.
+              Entenda a reforma tributária de forma simples e prepare sua
+              empresa para as mudanças.
             </p>
           </div>
 
@@ -20,6 +20,14 @@ export function LandingFooter() {
           <div>
             <h4 className="font-semibold mb-4">Produto</h4>
             <ul className="space-y-2 text-sm">
+              <li>
+                <Link
+                  href="/simulador"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Simulador de Impacto
+                </Link>
+              </li>
               <li>
                 <Link
                   href="/conhecimento"
@@ -41,7 +49,7 @@ export function LandingFooter() {
                   href="#precos"
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Precos
+                  Preços
                 </Link>
               </li>
             </ul>
@@ -72,7 +80,7 @@ export function LandingFooter() {
                   href="/conhecimento/transicao"
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Cronograma de Transicao
+                  Cronograma de Transição
                 </Link>
               </li>
             </ul>
@@ -95,12 +103,12 @@ export function LandingFooter() {
                   href="/privacidade"
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Privacidade
+                  Política de Privacidade
                 </Link>
               </li>
               <li>
                 <Link
-                  href="mailto:contato@impostofacil.com.br"
+                  href="mailto:contato@impostofacil.com"
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Contato
@@ -113,14 +121,14 @@ export function LandingFooter() {
         <div className="border-t pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-muted-foreground">
-              2024 ImpostoFacil. Todos os direitos reservados.
+              © 2026 ImpostoFácil. Todos os direitos reservados.
             </p>
           </div>
           <p className="text-xs text-muted-foreground mt-4 text-center md:text-left">
-            As informacoes fornecidas nesta plataforma sao apenas para fins
-            educacionais e nao constituem aconselhamento juridico ou tributario.
-            Consulte um contador ou advogado tributarista para orientacao
-            especifica ao seu caso.
+            As informações fornecidas nesta plataforma são apenas para fins
+            educacionais e não constituem aconselhamento jurídico ou tributário.
+            Consulte um contador ou advogado tributarista para orientação
+            específica ao seu caso.
           </p>
         </div>
       </div>

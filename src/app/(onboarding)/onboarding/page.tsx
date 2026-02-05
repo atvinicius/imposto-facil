@@ -18,7 +18,7 @@ export default async function OnboardingPage() {
   return (
     <div className="container max-w-4xl py-10">
       <div className="text-center mb-10">
-        <h1 className="text-3xl font-bold tracking-tight">Bem-vindo ao ImpostoFacil!</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Bem-vindo ao ImpostoFácil!</h1>
         <p className="text-muted-foreground mt-2">
           Vamos personalizar sua experiência em poucos passos.
         </p>
