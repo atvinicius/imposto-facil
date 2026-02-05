@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, Calculator } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { CountdownTimer } from "./countdown-timer"
 
@@ -9,10 +9,10 @@ export function FinalCtaSection() {
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Nao deixe sua empresa para tras
+            Você vai pagar mais ou menos imposto?
           </h2>
           <p className="text-xl opacity-90 mb-8">
-            A reforma vai acontecer. Sua empresa estara preparada?
+            Descubra agora. A simulação leva 60 segundos.
           </p>
 
           <div className="flex justify-center mb-8">
@@ -23,16 +23,17 @@ export function FinalCtaSection() {
             size="lg"
             variant="secondary"
             asChild
-            className="text-base px-8"
+            className="text-lg px-8 py-6 h-auto"
           >
-            <Link href="/signup">
-              Comecar gratis agora
+            <Link href="/simulador">
+              <Calculator className="mr-2 h-5 w-5" />
+              Fazer simulação gratuita
               <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
           </Button>
 
           <p className="text-sm opacity-75 mt-4">
-            Sem cartao de credito. Cancele quando quiser.
+            Sem cadastro. Sem cartão de crédito. Resultado imediato.
           </p>
         </div>
       </div>

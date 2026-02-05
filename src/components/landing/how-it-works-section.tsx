@@ -1,7 +1,27 @@
 import Link from "next/link"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, Calculator, FileText, Bell } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { HOW_IT_WORKS_STEPS } from "@/lib/landing-data"
+
+const STEPS = [
+  {
+    icon: Calculator,
+    number: 1,
+    title: "Faça a simulação",
+    description: "Responda 4 perguntas sobre sua empresa em menos de 60 segundos.",
+  },
+  {
+    icon: FileText,
+    number: 2,
+    title: "Receba seu diagnóstico",
+    description: "Veja o impacto em reais, alertas personalizados e o que fazer agora.",
+  },
+  {
+    icon: Bell,
+    number: 3,
+    title: "Mantenha-se preparado",
+    description: "Receba alertas sobre novas regras e prazos que afetam sua empresa.",
+  },
+]
 
 export function HowItWorksSection() {
   return (
@@ -12,7 +32,7 @@ export function HowItWorksSection() {
             Como funciona
           </h2>
           <p className="text-xl text-muted-foreground text-center mb-12">
-            Comece a se preparar em menos de 5 minutos
+            Descubra seu impacto em menos de 2 minutos
           </p>
 
           <div className="relative">
@@ -20,7 +40,7 @@ export function HowItWorksSection() {
             <div className="hidden md:block absolute top-16 left-1/2 -translate-x-1/2 w-2/3 h-0.5 bg-border" />
 
             <div className="grid md:grid-cols-3 gap-8 md:gap-12">
-              {HOW_IT_WORKS_STEPS.map((step) => {
+              {STEPS.map((step) => {
                 const Icon = step.icon
                 return (
                   <div key={step.number} className="relative text-center">
@@ -45,8 +65,8 @@ export function HowItWorksSection() {
 
           <div className="text-center mt-12">
             <Button size="lg" asChild className="text-base px-8">
-              <Link href="/signup">
-                Comecar agora - e gratis
+              <Link href="/simulador">
+                Fazer simulação gratuita
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
