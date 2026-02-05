@@ -169,7 +169,7 @@ function gerarAlertas(input: SimuladorInput, percentual: number): string[] {
   }
   
   // Alertas gerais de timing
-  alertas.push("⏰ Período sem multas termina em abril de 2026 - adeque seus sistemas")
+  alertas.push("⏰ 2026 é o ano de teste - aproveite para adaptar seus sistemas sem penalidades severas")
   alertas.push("💳 Split payment começa em 2027 - prepare seu fluxo de caixa")
   
   return alertas
@@ -178,14 +178,14 @@ function gerarAlertas(input: SimuladorInput, percentual: number): string[] {
 function gerarDatasImportantes(input: SimuladorInput): SimuladorResult["datasImportantes"] {
   const datas: SimuladorResult["datasImportantes"] = [
     {
-      data: "Abril 2026",
-      descricao: "Fim do período de adaptação sem multas",
-      urgencia: "danger",
+      data: "2026",
+      descricao: "Ano de teste - CBS 0,9% e IBS 0,1% destacados em NF (sem recolhimento efetivo)",
+      urgencia: "warning",
     },
     {
       data: "Janeiro 2027",
-      descricao: "CBS entra em vigor definitivamente + Split Payment",
-      urgencia: "warning",
+      descricao: "CBS entra em vigor definitivamente + Split Payment + Extinção do PIS/Cofins",
+      urgencia: "danger",
     },
     {
       data: "2029",
