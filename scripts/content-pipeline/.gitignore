@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Output files (generated content)
+output/
+
+# Config with real API keys
+config.ts
+
+# TypeScript build output
+dist/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo

@@ -1,0 +1,219 @@
+{
+  "name": "ImpostoFacil Faceless Vertical",
+  "description": "Template for faceless videos with text overlays and voiceover",
+  "format": {
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "duration": "auto"
+  },
+  "instructions": "This template is designed to be used with Creatomate API. Create this template in your Creatomate dashboard and replace the template_id in config.ts",
+  "elements": [
+    {
+      "name": "Background",
+      "type": "shape",
+      "shape": "rectangle",
+      "fill_color": "#2563eb",
+      "width": "100%",
+      "height": "100%"
+    },
+    {
+      "name": "Pattern-Overlay",
+      "type": "shape",
+      "comment": "Optional subtle pattern for visual interest",
+      "shape": "rectangle",
+      "fill_color": "rgba(0, 0, 0, 0.1)",
+      "width": "100%",
+      "height": "100%"
+    },
+    {
+      "name": "Audio-1",
+      "type": "audio",
+      "comment": "This will be replaced with the generated voiceover",
+      "source": "placeholder.mp3"
+    },
+    {
+      "name": "Text-Hook",
+      "type": "text",
+      "comment": "The attention-grabbing hook text",
+      "text": "Hook text goes here",
+      "font_family": "Inter",
+      "font_weight": "700",
+      "font_size": "64 px",
+      "fill_color": "#ffffff",
+      "x": "50%",
+      "y": "40%",
+      "width": "80%",
+      "x_alignment": "50%",
+      "y_alignment": "50%",
+      "text_alignment": "center",
+      "line_height": "120%",
+      "time": 0,
+      "duration": 3,
+      "animations": [
+        {
+          "type": "text-scale",
+          "scope": "split-clip",
+          "split": "word",
+          "duration": "0.5 s"
+        }
+      ]
+    },
+    {
+      "name": "Text-Body-1",
+      "type": "text",
+      "comment": "First body text section",
+      "text": "Body text 1",
+      "font_family": "Inter",
+      "font_weight": "500",
+      "font_size": "48 px",
+      "fill_color": "#ffffff",
+      "x": "50%",
+      "y": "45%",
+      "width": "85%",
+      "x_alignment": "50%",
+      "y_alignment": "50%",
+      "text_alignment": "center",
+      "line_height": "130%",
+      "time": 3,
+      "duration": 8,
+      "animations": [
+        {
+          "type": "fade",
+          "fade_in_duration": 0.3,
+          "fade_out_duration": 0.3
+        }
+      ]
+    },
+    {
+      "name": "Text-Body-2",
+      "type": "text",
+      "comment": "Second body text section",
+      "text": "Body text 2",
+      "font_family": "Inter",
+      "font_weight": "500",
+      "font_size": "48 px",
+      "fill_color": "#ffffff",
+      "x": "50%",
+      "y": "45%",
+      "width": "85%",
+      "x_alignment": "50%",
+      "y_alignment": "50%",
+      "text_alignment": "center",
+      "line_height": "130%",
+      "time": 11,
+      "duration": 8,
+      "animations": [
+        {
+          "type": "fade",
+          "fade_in_duration": 0.3,
+          "fade_out_duration": 0.3
+        }
+      ]
+    },
+    {
+      "name": "Text-Body-3",
+      "type": "text",
+      "comment": "Third body text section",
+      "text": "Body text 3",
+      "font_family": "Inter",
+      "font_weight": "500",
+      "font_size": "48 px",
+      "fill_color": "#ffffff",
+      "x": "50%",
+      "y": "45%",
+      "width": "85%",
+      "x_alignment": "50%",
+      "y_alignment": "50%",
+      "text_alignment": "center",
+      "line_height": "130%",
+      "time": 19,
+      "duration": 8,
+      "animations": [
+        {
+          "type": "fade",
+          "fade_in_duration": 0.3,
+          "fade_out_duration": 0.3
+        }
+      ]
+    },
+    {
+      "name": "Text-CTA",
+      "type": "text",
+      "comment": "Call to action at the end",
+      "text": "Link na bio!",
+      "font_family": "Inter",
+      "font_weight": "700",
+      "font_size": "56 px",
+      "fill_color": "#fcd34d",
+      "x": "50%",
+      "y": "75%",
+      "width": "80%",
+      "x_alignment": "50%",
+      "y_alignment": "50%",
+      "text_alignment": "center",
+      "time": 35,
+      "duration": 10,
+      "animations": [
+        {
+          "type": "scale",
+          "start_scale": "80%",
+          "fade_in_duration": 0.5
+        }
+      ]
+    },
+    {
+      "name": "Logo-Watermark",
+      "type": "text",
+      "comment": "Brand watermark",
+      "text": "ImpostoFacil",
+      "font_family": "Inter",
+      "font_weight": "600",
+      "font_size": "28 px",
+      "fill_color": "rgba(255, 255, 255, 0.5)",
+      "x": "50%",
+      "y": "95%",
+      "x_alignment": "50%",
+      "y_alignment": "50%"
+    },
+    {
+      "name": "Progress-Bar",
+      "type": "shape",
+      "comment": "Visual progress indicator at bottom",
+      "shape": "rectangle",
+      "fill_color": "#fcd34d",
+      "x": "0%",
+      "y": "99%",
+      "width": "0%",
+      "height": "8 px",
+      "y_alignment": "100%",
+      "animations": [
+        {
+          "type": "wipe",
+          "x_anchor": "0%",
+          "duration": null
+        }
+      ]
+    }
+  ],
+  "api_example": {
+    "description": "Example API call to render this template",
+    "endpoint": "POST https://api.creatomate.com/v1/renders",
+    "headers": {
+      "Authorization": "Bearer YOUR_API_KEY",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "template_id": "YOUR_TEMPLATE_ID",
+      "modifications": {
+        "Audio-1": "data:audio/mpeg;base64,YOUR_AUDIO_BASE64",
+        "Background": "#1e40af",
+        "Text-Hook": "A maior mudança tributária...",
+        "Text-Body-1": "Em janeiro de 2026...",
+        "Text-Body-2": "O ICMS, ISS, PIS, Cofins...",
+        "Text-Body-3": "83% dos empresários...",
+        "Text-CTA": "Link na bio pra simulação gratuita!"
+      }
+    }
+  }
+}
