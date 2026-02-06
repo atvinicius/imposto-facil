@@ -137,31 +137,46 @@ export type Database = {
           id: string
           source_path: string
           title: string
+          section_title: string | null
           category: string
           content: string
+          chunk_index: number
+          source_hash: string | null
+          difficulty: "basico" | "intermediario" | "avancado"
           embedding: number[] | null
           metadata: Json | null
           created_at: string
+          updated_at: string
         }
         Insert: {
           id?: string
           source_path: string
           title: string
+          section_title?: string | null
           category: string
           content: string
+          chunk_index?: number
+          source_hash?: string | null
+          difficulty?: "basico" | "intermediario" | "avancado"
           embedding?: number[] | null
           metadata?: Json | null
           created_at?: string
+          updated_at?: string
         }
         Update: {
           id?: string
           source_path?: string
           title?: string
+          section_title?: string | null
           category?: string
           content?: string
+          chunk_index?: number
+          source_hash?: string | null
+          difficulty?: "basico" | "intermediario" | "avancado"
           embedding?: number[] | null
           metadata?: Json | null
           created_at?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -175,27 +190,59 @@ export type Database = {
           query_embedding: number[]
           match_threshold: number
           match_count: number
+          filter_category?: string | null
+          filter_difficulty?: string | null
         }
         Returns: {
           id: string
           source_path: string
           title: string
+          section_title: string | null
           category: string
           content: string
           similarity: number
+          difficulty: string
+          metadata: Json | null
         }[]
       }
       search_content: {
         Args: {
           search_query: string
+          filter_category?: string | null
+          filter_difficulty?: string | null
+        }
+        Returns: {
+          id: string
+          source_path: string
+          title: string
+          section_title: string | null
+          category: string
+          content: string
+          rank: number
+          difficulty: string
+          metadata: Json | null
+        }[]
+      }
+      get_content_stats: {
+        Args: Record<string, never>
+        Returns: {
+          category: string
+          chunk_count: number
+          article_count: number
+          avg_similarity: number
+        }[]
+      }
+      find_related_content: {
+        Args: {
+          chunk_id: string
+          match_count?: number
         }
         Returns: {
           id: string
           source_path: string
           title: string
           category: string
-          content: string
-          rank: number
+          similarity: number
         }[]
       }
     }
