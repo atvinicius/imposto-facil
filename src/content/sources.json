@@ -1,0 +1,86 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2025-01-15",
+  "sources": [
+    {
+      "id": "ec-132-2023",
+      "name": "Emenda Constitucional 132/2023",
+      "shortName": "EC 132/2023",
+      "url": "https://www.planalto.gov.br/ccivil_03/constituicao/emendas/emc/emc132.htm",
+      "publishDate": "2023-12-20",
+      "lastChecked": "2025-01-15",
+      "status": "active",
+      "type": "legislation"
+    },
+    {
+      "id": "lc-214-2025",
+      "name": "Lei Complementar 214/2025",
+      "shortName": "LC 214/2025",
+      "url": "https://www.planalto.gov.br/ccivil_03/leis/lcp/Lcp214.htm",
+      "publishDate": "2025-01-16",
+      "lastChecked": "2025-01-20",
+      "status": "active",
+      "type": "legislation"
+    },
+    {
+      "id": "cf-1988",
+      "name": "Constituicao Federal de 1988",
+      "shortName": "CF/88",
+      "url": "https://www.planalto.gov.br/ccivil_03/constituicao/constituicao.htm",
+      "publishDate": "1988-10-05",
+      "lastChecked": "2025-01-15",
+      "status": "active",
+      "type": "legislation"
+    },
+    {
+      "id": "rfb-perguntas-respostas",
+      "name": "RFB - Perguntas e Respostas sobre a Reforma Tributaria",
+      "shortName": "RFB P&R",
+      "url": "https://www.gov.br/receitafederal/pt-br/assuntos/reforma-tributaria",
+      "publishDate": "2024-01-01",
+      "lastChecked": "2025-01-15",
+      "status": "active",
+      "type": "guidance"
+    },
+    {
+      "id": "senado-reforma",
+      "name": "Senado Federal - Portal da Reforma Tributaria",
+      "shortName": "Senado",
+      "url": "https://www12.senado.leg.br/noticias/entenda-o-assunto/reforma-tributaria",
+      "publishDate": "2023-12-01",
+      "lastChecked": "2025-01-15",
+      "status": "active",
+      "type": "official"
+    },
+    {
+      "id": "camara-reforma",
+      "name": "Camara dos Deputados - Reforma Tributaria",
+      "shortName": "Camara",
+      "url": "https://www.camara.leg.br/noticias/tema/reforma-tributaria",
+      "publishDate": "2023-12-01",
+      "lastChecked": "2025-01-15",
+      "status": "active",
+      "type": "official"
+    },
+    {
+      "id": "ministerio-fazenda-ibs-cbs",
+      "name": "Ministerio da Fazenda - IBS e CBS",
+      "shortName": "Min. Fazenda",
+      "url": "https://www.gov.br/fazenda/pt-br/assuntos/reforma-tributaria",
+      "publishDate": "2024-01-01",
+      "lastChecked": "2025-01-15",
+      "status": "active",
+      "type": "official"
+    },
+    {
+      "id": "cfc-reforma",
+      "name": "CFC - Conselho Federal de Contabilidade",
+      "shortName": "CFC",
+      "url": "https://cfc.org.br/reforma-tributaria/",
+      "publishDate": "2024-01-01",
+      "lastChecked": "2025-01-15",
+      "status": "active",
+      "type": "guidance"
+    }
+  ]
+}
