@@ -6,7 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "kb:ingest": "tsx scripts/knowledge-base/ingest.ts",
+    "kb:ingest:dry": "tsx scripts/knowledge-base/ingest.ts --dry-run",
+    "kb:ingest:force": "tsx scripts/knowledge-base/ingest.ts --force --verbose",
+    "kb:validate": "tsx scripts/knowledge-base/ingest.ts --dry-run --verbose",
+    "kb:verify-sources": "tsx scripts/knowledge-base/verify-sources.ts --check-urls",
+    "kb:test-search": "tsx scripts/knowledge-base/test-search.ts"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.11",
@@ -44,10 +50,12 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^16.4.7",
     "eslint": "^9",
     "eslint-config-next": "16.1.5",
     "gray-matter": "^4.0.3",
     "tailwindcss": "^4",
+    "tsx": "^4.19.2",
     "typescript": "^5"
   }
 }
