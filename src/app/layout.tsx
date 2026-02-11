@@ -13,7 +13,10 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "ImpostoFácil - Guia da Reforma Tributária Brasileira",
+  title: {
+    default: "ImpostoFácil - Guia da Reforma Tributária Brasileira",
+    template: "%s | ImpostoFácil",
+  },
   description:
     "Plataforma de orientação sobre a reforma tributária brasileira. Tire suas dúvidas sobre IBS, CBS, Imposto Seletivo e mais com nosso assistente de IA.",
   keywords: [
@@ -29,6 +32,9 @@ export const metadata: Metadata = {
     "tributos",
     "Brasil",
   ],
+  icons: {
+    icon: "/icon.svg",
+  },
 }
 
 export default function RootLayout({
