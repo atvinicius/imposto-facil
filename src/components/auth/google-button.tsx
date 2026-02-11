@@ -7,19 +7,24 @@ import { getURL } from "@/lib/get-url"
 
 interface GoogleButtonProps {
   mode: "login" | "signup"
+  next?: string
 }
 
-export function GoogleButton({ mode }: GoogleButtonProps) {
+export function GoogleButton({ mode, next }: GoogleButtonProps) {
   const [loading, setLoading] = useState(false)
 
   async function handleGoogleSignIn() {
     setLoading(true)
     const supabase = createClient()
 
+    const redirectTo = next
+      ? `${getURL()}auth/callback?next=${encodeURIComponent(next)}`
+      : `${getURL()}auth/callback`
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${getURL()}auth/callback`,
+        redirectTo,
         queryParams: {
           access_type: "offline",
           prompt: "consent",

@@ -6,11 +6,9 @@ import {
   Calculator,
   ClipboardCheck,
   Clock,
-  FileDown,
   FileText,
   LineChart,
   MessageCircle,
-  User,
 } from "lucide-react"
 import {
   Card,
@@ -40,9 +38,6 @@ export default async function DashboardPage() {
   }
 
   const firstName = profile?.nome || user?.email?.split("@")[0]
-  const profileCompleted = Boolean(
-    profile?.uf && profile?.nivel_experiencia && profile?.regime_tributario
-  )
   const hasSimulatorData = Boolean(
     profile?.setor && profile?.faturamento && profile?.uf
   )
@@ -92,12 +87,6 @@ export default async function DashboardPage() {
   ]
 
   const comingSoon = [
-    {
-      title: "Relatório em PDF",
-      description:
-        "Exporte seu diagnóstico completo para compartilhar com seu contador.",
-      icon: FileDown,
-    },
     {
       title: "Alertas por E-mail",
       description:
@@ -154,23 +143,23 @@ export default async function DashboardPage() {
         </Card>
       )}
 
-      {!profileCompleted && !hasSimulatorData && (
+      {!hasSimulatorData && (
         <Card className="border-amber-200 bg-amber-50/50">
           <CardContent className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <div className="rounded-lg bg-amber-100 p-2">
-                <User className="h-5 w-5 text-amber-600" />
+                <Calculator className="h-5 w-5 text-amber-600" />
               </div>
               <div>
-                <p className="font-medium text-sm">Complete seu perfil</p>
+                <p className="font-medium text-sm">Simule o impacto da reforma</p>
                 <p className="text-sm text-muted-foreground">
-                  Dados da empresa permitem recomendações mais precisas.
+                  Em menos de 2 minutos, descubra como a reforma afeta sua empresa.
                 </p>
               </div>
             </div>
-            <Button asChild size="sm" variant="outline">
-              <Link href="/onboarding">
-                Completar
+            <Button asChild size="sm">
+              <Link href="/simulador">
+                Simular agora
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
@@ -214,7 +203,7 @@ export default async function DashboardPage() {
       {/* Coming soon */}
       <section>
         <h2 className="mb-4 text-lg font-semibold tracking-tight">Em breve</h2>
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2">
           {comingSoon.map((item) => {
             const Icon = item.icon
             return (

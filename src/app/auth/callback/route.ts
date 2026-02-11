@@ -7,11 +7,11 @@ export async function GET(request: Request) {
   const code = searchParams.get("code")
   const token_hash = searchParams.get("token_hash")
   const type = searchParams.get("type") as EmailOtpType | null
-  const nextParam = searchParams.get("next") ?? "/onboarding"
+  const nextParam = searchParams.get("next") ?? "/dashboard"
   // Validate redirect to prevent open redirect attacks
   const next = nextParam.startsWith("/") && !nextParam.startsWith("//") && !nextParam.includes("@")
     ? nextParam
-    : "/onboarding"
+    : "/dashboard"
 
   const supabase = await createClient()
 

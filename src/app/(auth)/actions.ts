@@ -32,8 +32,14 @@ export async function login(formData: FormData) {
     return { error: translateAuthError(error.message) }
   }
 
+  const redirectTo = (formData.get("redirect") as string) || "/dashboard"
+  // Validate redirect to prevent open redirect attacks
+  const safeRedirect = redirectTo.startsWith("/") && !redirectTo.startsWith("//") && !redirectTo.includes("@")
+    ? redirectTo
+    : "/dashboard"
+
   revalidatePath("/", "layout")
-  redirect("/dashboard")
+  redirect(safeRedirect)
 }
 
 export async function signup(formData: FormData) {

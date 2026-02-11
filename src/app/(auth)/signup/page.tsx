@@ -247,7 +247,7 @@ function SimulatorSignupFlow() {
             </div>
           </div>
 
-          <GoogleButton mode="signup" />
+          <GoogleButton mode="signup" next="/diagnostico" />
 
           <p className="text-sm text-muted-foreground text-center">
             Já tem uma conta?{" "}

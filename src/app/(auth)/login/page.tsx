@@ -99,7 +99,7 @@ function LoginForm() {
               <span className="bg-card px-2 text-muted-foreground">ou</span>
             </div>
           </div>
-          <GoogleButton mode="login" />
+          <GoogleButton mode="login" next={redirectTo !== "/dashboard" ? redirectTo : undefined} />
           <p className="text-sm text-muted-foreground text-center">
             Ainda nao tem conta?{" "}
             <Link href="/signup" className="text-primary hover:underline">
