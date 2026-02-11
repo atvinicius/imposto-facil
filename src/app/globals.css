@@ -174,7 +174,7 @@
   mask-image: linear-gradient(to bottom, black 16%, var(--landing-grid-fade) 52%, transparent 88%);
 }
 
-.landing-root > * {
+.landing-root > :not(.landing-backdrop):not(.landing-grid) {
   position: relative;
   z-index: 1;
 }
