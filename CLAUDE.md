@@ -21,6 +21,9 @@ npm run lint      # ESLint with Next.js + TypeScript rules
 - **UI**: Tailwind CSS 4, shadcn/ui components, Radix UI primitives
 - **Database/Auth**: Supabase (PostgreSQL + Auth)
 - **AI**: OpenRouter API (Claude 3.5 Sonnet), OpenAI embeddings
+- **Payments**: Stripe (Checkout Sessions, webhooks)
+- **PDF**: @react-pdf/renderer for diagnostic export
+- **Analytics**: Custom event tracking (client + server)
 
 ### Key Directories
 - `src/app/` - Next.js App Router with route groups:
@@ -33,20 +36,30 @@ npm run lint      # ESLint with Next.js + TypeScript rules
 - `src/lib/supabase/` - Supabase clients (server.ts for SSR, client.ts for browser, admin.ts for service role)
 - `src/lib/openrouter/` - LLM client with system prompt template
 - `src/lib/embeddings/` - OpenAI embeddings and hybrid search logic
-- `src/content/` - Static MDX articles organized by category (ibs, cbs, is, transicao, glossario)
+- `src/content/` - Static MDX articles organized by category (ibs, cbs, is, transicao, glossario, setores, regimes, faq) — 20 articles total
 - `src/hooks/use-chat.ts` - Client-side chat state management with SSE streaming
+- `src/hooks/use-conversations.ts` - Conversation list management
+- `src/lib/simulator/tax-data.ts` - Cited tax data registry with legislative sources
+- `src/lib/stripe/client.ts` - Stripe client initialization
+- `src/lib/pdf/diagnostico-pdf.tsx` - PDF generation for diagnostic report
+- `src/lib/analytics/` - Event tracking (track.ts for client, track-server.ts for server)
+- `src/lib/readiness/score.ts` - Readiness score calculation for dashboard
+- `src/components/chat/` - Chat UI (container, messages, sidebar, Duda avatar/welcome, follow-up suggestions)
 - `supabase/migrations/` - SQL migration files for database setup
 
 ### Chat System Architecture
 1. **API Route** (`src/app/api/chat/route.ts`): Edge Runtime endpoint that:
-   - Fetches user profile for personalized context
+   - Fetches full user profile for personalized context (nome, UF, setor, porte, regime, faturamento, experiencia, interesses, simulator results)
    - Performs hybrid search (70% semantic + 30% full-text) on knowledge base
    - Streams responses via Server-Sent Events
    - Persists messages to Supabase
+   - Parses follow-up suggestions from assistant responses
 
 2. **Client Hook** (`src/hooks/use-chat.ts`): Manages streaming response parsing, message queue, and conversation state
 
-3. **System Prompt**: Located in `src/lib/openrouter/client.ts` with `{{USER_CONTEXT}}` and `{{KNOWLEDGE_CONTEXT}}` placeholders
+3. **Chat UI** (`src/components/chat/`): "Duda" branded assistant with conversation sidebar, follow-up suggestion chips, and category-colored source badges
+
+4. **System Prompt**: Located in `src/lib/openrouter/client.ts` with `{{USER_CONTEXT}}` and `{{KNOWLEDGE_CONTEXT}}` placeholders. Model selection in `src/lib/openrouter/models.ts`
 
 ### Search Implementation
 Hybrid search in `src/lib/embeddings/search.ts` combines:
@@ -96,41 +109,46 @@ LANDING PAGE → SIMULATOR (public, no login) → RESULTS + localStorage persist
 Simulator users skip the 4-step onboarding wizard — their profile is auto-filled from simulator data (`simulatorInputToProfile()` in `src/lib/simulator/storage.ts`).
 
 ### Simulator System
-- `src/lib/simulator/types.ts` — All types (`SimuladorInput`, `SimuladorResult`, `SimuladorTeaser`)
-- `src/lib/simulator/calculator.ts` — Core calculation engine with:
-  - Tax impact calculation (current vs new system)
-  - Risk level determination
-  - Alert generation (sector/regime-specific)
-  - Timeline generation
-  - Action recommendations
-  - **Gated content**: 15-20 item checklist, year-by-year projection (2026-2033), regime comparison analysis
+- `src/lib/simulator/tax-data.ts` — **Cited data registry**: all tax rates wrapped in `CitedValue<T>` with `source` (legislation reference), `confidence` (legislada/estimativa_oficial/derivada), and optional `notes`. Includes `FATURAMENTO_MEDIO`, `CARGA_ATUAL`, `CARGA_NOVA`, `AJUSTE_REGIME`, `TRANSICAO_TIMELINE`, `UF_INCENTIVOS_FISCAIS`
+- `src/lib/simulator/types.ts` — All types (`SimuladorInput`, `SimuladorResult`, `SimuladorTeaser`). Result includes `metodologia` field with confidence level, sources list, limitations, and last-updated date
+- `src/lib/simulator/calculator.ts` — Core calculation engine, imports all data from `tax-data.ts`. Populates methodology metadata per calculation. UF-aware alerts for states with major ICMS incentive programs
 - `src/lib/simulator/storage.ts` — localStorage bridge (`saveSimulatorData`, `getStoredSimulatorData`, `clearStoredSimulatorData`, `simulatorInputToProfile`)
-- `src/app/simulador/page.tsx` — 4-step public quiz, persists results to localStorage, CTAs route to `/signup?from=simulador`. Results page shows blurred year-by-year projection preview and regime analysis teaser to drive signups.
+- `src/components/ui/methodology-card.tsx` — Reusable transparency component: compact mode (expandable line) on simulator, full mode (card with sources/limitations) on diagnostic
+- `src/app/simulador/page.tsx` — 4-step public quiz, persists results to localStorage, shows methodology card on results. CTAs route to `/signup?from=simulador`
 
 ### Diagnostic Report System (`/diagnostico`)
 Protected route (requires auth, does NOT require onboarding completion).
 
 - `src/app/(dashboard)/diagnostico/page.tsx` — Server component: loads profile, runs simulation server-side, checks `isPaid` status
 - `src/app/(dashboard)/diagnostico/diagnostico-client.tsx` — Client bridge: reads localStorage, saves to profile via server action, triggers page refresh
-- `src/app/(dashboard)/diagnostico/diagnostico-report.tsx` — Full report UI with 8 sections:
+- `src/app/(dashboard)/diagnostico/diagnostico-report.tsx` — Client component with analytics tracking. Full report UI with 9 sections:
   1. Impact Summary (FREE) — risk badge, R$ range
-  2. Alerts (PARTIAL) — first 3 free, rest gated with `<GatedSection>`
-  3. Timeline (FREE) — key dates
-  4. Action Checklist (PARTIAL) — first 2 free, rest + full checklist gated
-  5. Regime Comparison (PAID) — full analysis gated
-  6. Year-by-Year Projection (PAID) — 2026-2033 projection gated
-  7. PDF Export (PAID) — button locked
-  8. Upgrade CTA — links to `/checkout`, shows alert count + action count
-- `src/app/(dashboard)/diagnostico/actions.ts` — `saveSimulatorDataToProfile()` server action
+  2. Methodology (FREE) — `<MethodologyCard>` with sources, confidence, limitations
+  3. Alerts (PARTIAL) — first 3 free, rest gated with `<GatedSection>`
+  4. Timeline (FREE) — key dates
+  5. Action Checklist (PARTIAL) — first 2 free, rest + full interactive checklist gated (uses `<ChecklistItem>`)
+  6. Regime Comparison (PAID) — full analysis gated
+  7. Year-by-Year Projection (PAID) — 2026-2033 projection gated
+  8. PDF Export (PAID) — `<PdfDownloadButton>` generates PDF via `/api/diagnostico/pdf`
+  9. Upgrade CTA — links to `/checkout`, shows alert count + action count
+- `src/app/(dashboard)/diagnostico/actions.ts` — `saveSimulatorDataToProfile()` and `toggleChecklistItem()` server actions
+- `src/app/(dashboard)/diagnostico/checklist-item.tsx` — Interactive checkbox with optimistic UI
 - `src/components/ui/gated-section.tsx` — Reusable `<GatedSection locked={boolean}>` component: renders real content with `blur(5px)` + lock icon overlay when locked
 
 ### Checkout & Payment Flow (`/checkout`)
-Protected route. Simulates Stripe paywall with promo code bypass (Stripe integration pending for Phase 2).
+Protected route. Stripe Checkout integration + promo code bypass.
 
-- `src/app/(dashboard)/checkout/page.tsx` — Client component: side-by-side Free vs Paid tier comparison, disabled Stripe button ("em breve"), promo code input with validation
-- `src/app/(dashboard)/checkout/actions.ts` — `redeemPromoCode()` server action: validates against `VALID_PROMO_CODES` map (currently: "amigos"), updates `subscription_tier` + `diagnostico_purchased_at` in profile
+- `src/app/(dashboard)/checkout/page.tsx` — Client component: side-by-side Free vs Paid tier comparison, Stripe checkout button, promo code input
+- `src/app/(dashboard)/checkout/actions.ts` — `redeemPromoCode()` server action: validates against `VALID_PROMO_CODES` map (currently: "amigos"), updates `subscription_tier` + `diagnostico_purchased_at`
+- `src/app/api/stripe/checkout/route.ts` — Creates Stripe Checkout Session, redirects to Stripe
+- `src/app/api/stripe/webhook/route.ts` — Handles `checkout.session.completed` webhook, updates user profile
+- `src/lib/stripe/client.ts` — Stripe SDK initialization
 - On success: redirects to `/diagnostico?unlocked=true` which shows a success banner
-- Diagnostico page reads `?unlocked=true` searchParam and passes `justUnlocked` prop to the report component
+
+### PDF Export
+- `src/app/api/diagnostico/pdf/route.ts` — API route generates PDF from diagnostic data
+- `src/lib/pdf/diagnostico-pdf.tsx` — React-PDF document template
+- `src/components/pdf-download-button.tsx` — Download button with loading state
 
 ### Signup Flow
 Two variants based on `?from=simulador` search param:
@@ -158,7 +176,7 @@ Landing page styles are in `src/app/globals.css` (`.landing-root`, `.landing-bac
 - **Diagnóstico Completo (R$29 one-time)**: All alerts, full checklist, year-by-year projection, regime analysis, PDF export — currently unlockable via promo code "amigos" at `/checkout`
 - **Pro (R$19/month)**: Unlimited AI chat, updated diagnostics, priority models — coming later
 
-Database columns ready: `diagnostico_purchased_at`, `subscription_tier`, `stripe_customer_id` in `user_profiles`. Stripe integration is Phase 2.
+Database columns: `diagnostico_purchased_at`, `subscription_tier`, `stripe_customer_id` in `user_profiles`. Stripe Checkout is live.
 
 ## Database Schema
 
@@ -184,7 +202,10 @@ Database columns ready: `diagnostico_purchased_at`, `subscription_tier`, `stripe
 ### Other Tables
 - `conversations` - Chat conversation metadata
 - `messages` - Individual chat messages with role and sources
-- `content_chunks` - RAG knowledge base with embeddings
+- `content_chunks` - RAG knowledge base with embeddings (177 chunks from 20 articles)
+- `analytics_events` - Custom event tracking
+- `newsletter_subscribers` - Email collection
+- `checklist_progress` - Diagnostic checklist completion state per user
 
 ## Environment Variables
 
@@ -196,13 +217,25 @@ SUPABASE_SERVICE_ROLE_KEY
 OPENROUTER_API_KEY
 OPENAI_API_KEY
 NEXT_PUBLIC_APP_URL
+STRIPE_SECRET_KEY
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+STRIPE_WEBHOOK_SECRET
 ```
 
 ## Database Setup
 
 Run migrations in order in Supabase SQL Editor:
 1. `supabase/migrations/00001_initial_schema.sql` — Base schema (requires extensions: `uuid-ossp`, `vector`)
-2. `supabase/migrations/00003_diagnostico.sql` — Adds diagnostic/monetization columns to `user_profiles`
+2. `supabase/migrations/00002_enhanced_content_chunks.sql` — Enhanced content chunks for RAG
+3. `supabase/migrations/00003_diagnostico.sql` — Adds diagnostic/monetization columns to `user_profiles`
+4. `supabase/migrations/00004_analytics_checklist_newsletter.sql` — Analytics events, checklist progress, newsletter subscribers
+
+### Knowledge Base Ingestion
+```bash
+npx tsx scripts/knowledge-base/ingest.ts --force --verbose  # Ingest all 20 articles into Supabase
+npx tsx scripts/knowledge-base/ingest.ts --dry-run          # Preview without writing
+```
+Loads `.env.local` for credentials. Generates OpenAI embeddings and writes to `content_chunks` table.
 
 ## Path Alias
 
