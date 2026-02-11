@@ -21,7 +21,7 @@ export default async function KnowledgePage({ searchParams }: KnowledgePageProps
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Base de Conhecimento</h1>
           <p className="text-muted-foreground mt-2">
-            Resultados da busca por "{query}"
+            Resultados da busca por &ldquo;{query}&rdquo;
           </p>
         </div>
 
@@ -32,7 +32,7 @@ export default async function KnowledgePage({ searchParams }: KnowledgePageProps
         {results.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-muted-foreground">
-              Nenhum resultado encontrado para "{query}"
+              Nenhum resultado encontrado para &ldquo;{query}&rdquo;
             </p>
           </div>
         ) : (

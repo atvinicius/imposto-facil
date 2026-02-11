@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Menu, X, LogOut, User, Settings } from "lucide-react"
+import { Menu, X, LogOut, User } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -25,6 +25,7 @@ interface HeaderProps {
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard" },
+  { name: "Simulador", href: "/simulador" },
   { name: "Assistente", href: "/assistente" },
   { name: "Conhecimento", href: "/conhecimento" },
 ]
@@ -96,12 +97,6 @@ export function Header({ user }: HeaderProps) {
                 <Link href="/perfil" className="cursor-pointer">
                   <User className="mr-2 h-4 w-4" />
                   Meu Perfil
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/perfil" className="cursor-pointer">
-                  <Settings className="mr-2 h-4 w-4" />
-                  Configuracoes
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />

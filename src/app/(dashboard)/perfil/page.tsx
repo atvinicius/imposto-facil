@@ -27,6 +27,8 @@ export default async function ProfilePage() {
           uf: profile?.uf || "",
           setor: profile?.setor || "",
           porte_empresa: profile?.porte_empresa || "",
+          nivel_experiencia: profile?.nivel_experiencia || "",
+          regime_tributario: profile?.regime_tributario || "",
         }}
       />
     </div>

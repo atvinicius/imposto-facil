@@ -47,6 +47,19 @@ const PORTE_OPTIONS = [
   { value: "GRANDE", label: "Grande Porte" },
 ]
 
+const NIVEL_EXPERIENCIA_OPTIONS = [
+  { value: "iniciante", label: "Iniciante - Pouco conhecimento sobre tributacao" },
+  { value: "intermediario", label: "Intermediario - Entendo o basico de impostos" },
+  { value: "avancado", label: "Avancado - Experiencia profissional na area" },
+]
+
+const REGIME_TRIBUTARIO_OPTIONS = [
+  { value: "simples", label: "Simples Nacional" },
+  { value: "lucro_presumido", label: "Lucro Presumido" },
+  { value: "lucro_real", label: "Lucro Real" },
+  { value: "nao_sei", label: "Nao sei" },
+]
+
 interface ProfileFormProps {
   initialData: {
     nome: string
@@ -54,6 +67,8 @@ interface ProfileFormProps {
     uf: string
     setor: string
     porte_empresa: string
+    nivel_experiencia: string
+    regime_tributario: string
   }
 }
 
@@ -111,6 +126,22 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
               O email nao pode ser alterado
             </p>
           </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="nivel_experiencia">Nivel de experiencia com tributacao</Label>
+            <Select name="nivel_experiencia" defaultValue={initialData.nivel_experiencia}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione seu nivel" />
+              </SelectTrigger>
+              <SelectContent>
+                {NIVEL_EXPERIENCIA_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </CardContent>
       </Card>
 
@@ -164,6 +195,22 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
                 {PORTE_OPTIONS.map((porte) => (
                   <SelectItem key={porte.value} value={porte.value}>
                     {porte.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="regime_tributario">Regime Tributario</Label>
+            <Select name="regime_tributario" defaultValue={initialData.regime_tributario}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o regime" />
+              </SelectTrigger>
+              <SelectContent>
+                {REGIME_TRIBUTARIO_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
                   </SelectItem>
                 ))}
               </SelectContent>

@@ -18,12 +18,16 @@ export async function updateProfile(formData: FormData) {
   const uf = formData.get("uf") as string
   const setor = formData.get("setor") as string
   const porte_empresa = formData.get("porte_empresa") as string
+  const nivel_experiencia = formData.get("nivel_experiencia") as string
+  const regime_tributario = formData.get("regime_tributario") as string
 
   const updateData = {
     nome: nome || null,
     uf: uf || null,
     setor: setor || null,
     porte_empresa: porte_empresa || null,
+    nivel_experiencia: nivel_experiencia || null,
+    regime_tributario: regime_tributario || null,
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
