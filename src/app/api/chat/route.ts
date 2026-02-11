@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       .from("user_profiles")
       .select("*")
       .eq("id", user.id)
-      .single() as { data: { nome?: string; uf?: string; setor?: string; porte_empresa?: string } | null }
+      .single() as { data: { nome?: string; uf?: string; setor?: string; porte_empresa?: string; regime_tributario?: string; faturamento?: string; nivel_experiencia?: string; interesses?: string[]; simulator_result?: { riskLevel?: string; impactRange?: { min: number; max: number } } } | null }
 
     // Get the last user message for context search
     const lastUserMessage = messages.filter((m: { role: string }) => m.role === "user").pop()
@@ -68,7 +68,16 @@ export async function POST(request: Request) {
       if (profile.nome) contextParts.push(`Nome: ${profile.nome}`)
       if (profile.uf) contextParts.push(`Estado (UF): ${profile.uf}`)
       if (profile.setor) contextParts.push(`Setor: ${profile.setor}`)
-      if (profile.porte_empresa) contextParts.push(`Porte: ${profile.porte_empresa}`)
+      if (profile.porte_empresa) contextParts.push(`Porte da empresa: ${profile.porte_empresa}`)
+      if (profile.regime_tributario) contextParts.push(`Regime tributario: ${profile.regime_tributario}`)
+      if (profile.faturamento) contextParts.push(`Faixa de faturamento: ${profile.faturamento}`)
+      if (profile.nivel_experiencia) contextParts.push(`Nivel de experiencia com tributacao: ${profile.nivel_experiencia}`)
+      if (profile.interesses && profile.interesses.length > 0) contextParts.push(`Interesses: ${profile.interesses.join(", ")}`)
+      if (profile.simulator_result) {
+        const sim = profile.simulator_result
+        if (sim.riskLevel) contextParts.push(`Nivel de risco (simulador): ${sim.riskLevel}`)
+        if (sim.impactRange) contextParts.push(`Faixa de impacto estimado: R$${sim.impactRange.min} a R$${sim.impactRange.max}`)
+      }
       if (contextParts.length > 0) {
         userContext = contextParts.join("\n")
       }

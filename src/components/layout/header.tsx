@@ -27,7 +27,7 @@ const navigation = [
   { name: "Dashboard", href: "/dashboard" },
   { name: "Diagnóstico", href: "/diagnostico" },
   { name: "Simulador", href: "/simulador" },
-  { name: "Assistente", href: "/assistente" },
+  { name: "Duda", href: "/assistente" },
   { name: "Conhecimento", href: "/conhecimento" },
 ]
 
