@@ -1,0 +1,208 @@
+---
+title: Split Payment - Como Funciona o Pagamento Dividido
+description: Entenda o mecanismo de split payment (pagamento dividido) da reforma tributaria, seu impacto no fluxo de caixa e como se preparar.
+category: faq
+tags: [split payment, pagamento dividido, fluxo de caixa, arrecadacao, nota fiscal, sistema de pagamento]
+publishedAt: 2025-01-15
+lastUpdated: 2025-01-20
+lastVerified: 2025-01-20
+status: published
+difficulty: intermediario
+searchKeywords: [split payment reforma, pagamento dividido, imposto automatico, fluxo caixa impacto, split payment 2026, recolhimento automatico tributo]
+commonQuestions:
+  - O que e split payment?
+  - Como o split payment afeta meu fluxo de caixa?
+  - Quando o split payment comeca a funcionar?
+  - Minha empresa precisa de sistema especial para o split payment?
+  - O split payment e obrigatorio?
+relatedArticles:
+  - ibs/introducao
+  - cbs/introducao
+  - transicao/cronograma
+sources:
+  - name: "Emenda Constitucional 132/2023"
+    url: "https://www.planalto.gov.br/ccivil_03/constituicao/emendas/emc/emc132.htm"
+    dateAccessed: "2025-01-20"
+    articles: ["art. 156-A, § 5o"]
+  - name: "Lei Complementar 214/2025"
+    url: "https://www.planalto.gov.br/ccivil_03/leis/lcp/Lcp214.htm"
+    dateAccessed: "2025-01-20"
+  - name: "Banco Central do Brasil - Regulamentacao PIX"
+    url: "https://www.bcb.gov.br/estabilidadefinanceira/pix"
+    dateAccessed: "2025-01-20"
+---
+
+# Split Payment - Como Funciona o Pagamento Dividido
+
+O **split payment** (pagamento dividido) e uma das inovacoes mais significativas da reforma tributaria brasileira. Ele muda fundamentalmente a forma como os impostos sao recolhidos: em vez de a empresa receber o valor total e depois pagar o imposto, o tributo e **separado automaticamente no momento do pagamento**.
+
+## O que e split payment?
+
+No modelo atual, o ciclo tributario funciona assim:
+
+1. Empresa vende produto ou servico
+2. Empresa recebe o valor **total** (incluindo o imposto)
+3. Empresa apura o imposto ao final do periodo
+4. Empresa recolhe o imposto via guia (DARF, GNRE, etc.)
+
+Com o split payment, o ciclo muda:
+
+1. Empresa vende produto ou servico
+2. No momento do pagamento, o valor e **dividido automaticamente**
+3. A parcela do imposto vai direto para o fisco
+4. A empresa recebe apenas o valor liquido (sem o imposto)
+
+> **Em resumo:** O split payment elimina a etapa em que a empresa "guarda" o dinheiro do imposto. O tributo nunca passa pela conta da empresa.
+
+## Como funciona na pratica
+
+### O mecanismo tecnico
+
+O split payment funcionara integrado aos meios de pagamento eletronico do Brasil:
+
+| Meio de pagamento | Como funciona o split |
+|-------------------|-----------------------|
+| **PIX** | Ao pagar via PIX, o sistema identifica a NF-e vinculada e separa automaticamente o IBS/CBS |
+| **Cartao de credito/debito** | A adquirente (maquininha) retira a parcela do imposto antes de repassar ao lojista |
+| **Boleto bancario** | O banco emissor direciona a parcela tributaria ao fisco |
+| **TED/DOC** | Sistema bancario faz a separacao automatica |
+| **Dinheiro (especie)** | Split payment **nao se aplica** - recolhimento segue modelo tradicional |
+
+### Fluxo detalhado
+
+```
+Cliente paga R$ 100,00
+        |
+        v
+Sistema identifica NF-e
+        |
+        v
+Calcula IBS + CBS (ex: R$ 26,50)
+        |
+        ├── R$ 73,50 → Conta da empresa
+        ├── R$ 17,70 → Conta do Comite Gestor (IBS)
+        └── R$  8,80 → Conta da Receita Federal (CBS)
+```
+
+### Papel dos intermediarios financeiros
+
+Os **bancos**, **adquirentes de cartao** e **instituicoes de pagamento** serao os responsaveis operacionais pelo split payment. Eles deverao:
+
+- Integrar seus sistemas com o cadastro fiscal (NF-e)
+- Realizar a separacao automatica dos valores
+- Repassar a parcela tributaria ao fisco em tempo real ou D+1
+- Fornecer comprovantes detalhados ao contribuinte
+
+## Impacto no fluxo de caixa
+
+Esta e a principal preocupacao das empresas. O split payment tem impacto **direto e significativo** no fluxo de caixa.
+
+### Antes do split payment (modelo atual)
+
+| Meses | Receita | Imposto pago | Caixa disponivel |
+|-------|---------|--------------|------------------|
+| Janeiro | R$ 100.000 | R$ 0 (apuracao) | R$ 100.000 |
+| Fevereiro | R$ 100.000 | R$ 26.500 (jan) | R$ 173.500 |
+| Marco | R$ 100.000 | R$ 26.500 (fev) | R$ 247.000 |
+
+A empresa usa o valor do imposto como **capital de giro** ate o momento do recolhimento.
+
+### Com split payment
+
+| Mes | Receita bruta | Imposto retido | Caixa disponivel |
+|-----|---------------|----------------|------------------|
+| Janeiro | R$ 100.000 | R$ 26.500 | R$ 73.500 |
+| Fevereiro | R$ 100.000 | R$ 26.500 | R$ 147.000 |
+| Marco | R$ 100.000 | R$ 26.500 | R$ 220.500 |
+
+> **Impacto:** A empresa perde o uso temporario dos recursos tributarios. Para negocios que dependem desse capital de giro, o ajuste pode ser significativo.
+
+### Setores mais impactados
+
+| Setor | Impacto no fluxo de caixa | Motivo |
+|-------|---------------------------|--------|
+| Varejo | **Alto** | Volume alto de transacoes eletronicas, margens apertadas |
+| Servicos | **Alto** | Recebem a prazo, mas imposto e retido no pagamento |
+| Industria | **Medio** | Creditos de insumos compensam parte do impacto |
+| E-commerce | **Alto** | 100% das transacoes sao eletronicas |
+| Comercio atacadista | **Medio** | Operacoes maiores, maior poder de negociacao |
+
+## Cronograma de implementacao
+
+O split payment sera implementado gradualmente:
+
+| Periodo | Situacao |
+|---------|----------|
+| 2026 | **Testes iniciais** com aliquotas de 0,1% (IBS) e 0,9% (CBS) |
+| 2027 | Funcionamento com CBS em aliquota plena |
+| 2028 | Consolidacao dos sistemas bancarios |
+| 2029 | Split payment em plena operacao com reducao progressiva do ICMS/ISS |
+| 2033 | Sistema completamente operacional |
+
+## Requisitos tecnicos para empresas
+
+### O que sua empresa precisa ter
+
+1. **Nota fiscal eletronica atualizada** - NF-e e NFC-e com os novos campos de IBS e CBS
+2. **Cadastro bancario regularizado** - Conta bancaria vinculada ao CNPJ
+3. **Sistema ERP compativel** - Seu software de gestao precisa reconhecer o valor liquido recebido
+4. **Conciliacao bancaria ajustada** - O extrato mostrara o valor liquido (sem imposto)
+
+### O que sua empresa NAO precisa fazer
+
+- Instalar software especial para o split payment
+- Contratar servico de pagamento adicional
+- Mudar de banco ou de maquininha de cartao
+
+A responsabilidade tecnica e dos **intermediarios financeiros** (bancos e adquirentes), nao da empresa vendedora.
+
+## Vantagens do split payment
+
+Apesar do impacto no fluxo de caixa, o split payment traz beneficios:
+
+1. **Fim da inadimplencia tributaria involuntaria** - O imposto e pago automaticamente
+2. **Reducao de obrigacoes acessorias** - Menos guias para emitir e prazos para controlar
+3. **Menor risco de autuacao** - Sem risco de esquecer ou atrasar o pagamento
+4. **Combate a sonegacao** - Dificulta a emissao de notas frias e operacoes irregulares
+5. **Possivel reducao de aliquotas** - Com menor evasao, as aliquotas podem ser menores
+
+## Como se preparar
+
+### Acoes imediatas (2025-2026)
+
+1. **Diagnostico de fluxo de caixa** - Calcule quanto do seu capital de giro depende dos recursos tributarios
+2. **Revisao de precificacao** - Ajuste precos considerando que o imposto nao ficara mais disponivel
+3. **Negociacao com fornecedores** - Alinhe prazos de pagamento e recebimento
+4. **Linha de credito** - Considere contratar uma linha de capital de giro para compensar a perda de liquidez
+
+### Acoes de medio prazo (2027-2029)
+
+1. **Adaptacao contabil** - Ajuste plano de contas e conciliacao para o modelo liquido
+2. **Treinamento de equipe** - Financeiro, fiscal e comercial precisam entender o novo fluxo
+3. **Monitoramento de creditos** - Acompanhe creditos de IBS/CBS para maximizar compensacoes
+
+## Perguntas frequentes
+
+**Transacoes em dinheiro tambem terao split payment?**
+Nao. O split payment so funciona em meios de pagamento eletronico. Para vendas em dinheiro, o recolhimento seguira o modelo tradicional (apuracao e guia).
+
+**E se o cliente pagar parcelado?**
+O split payment incide em cada parcela paga. Se o cliente parcela em 3 vezes, o imposto e retido em cada uma das 3 parcelas.
+
+**Vendas com desconto ou devolucao?**
+O sistema devera prever mecanismos de ajuste para devolucoes, cancelamentos e descontos posteriores a emissao da nota fiscal.
+
+## Fontes oficiais
+
+- [EC 132/2023 - Art. 156-A, § 5o](https://www.planalto.gov.br/ccivil_03/constituicao/emendas/emc/emc132.htm)
+- [LC 214/2025 - Regulamentacao](https://www.planalto.gov.br/ccivil_03/leis/lcp/Lcp214.htm)
+- [Banco Central - PIX](https://www.bcb.gov.br/estabilidadefinanceira/pix)
+
+## Proximos passos
+
+Aprofunde seu entendimento sobre os impactos da reforma:
+
+- Cronograma completo da transicao
+- Preparacao para 2026
+- Creditos acumulados na transicao
+- Introducao ao IBS e a CBS

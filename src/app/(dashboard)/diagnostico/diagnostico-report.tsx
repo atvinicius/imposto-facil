@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { GatedSection } from "@/components/ui/gated-section"
 import { PdfDownloadButton } from "@/components/pdf-download-button"
+import { MethodologyCard } from "@/components/ui/methodology-card"
 import type { SimuladorInput, SimuladorResult } from "@/lib/simulator"
 import { NIVEL_RISCO_LABELS, gerarTeaser } from "@/lib/simulator"
 
@@ -90,6 +91,9 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked }: Diagn
           </p>
         </CardContent>
       </Card>
+
+      {/* Methodology */}
+      <MethodologyCard metodologia={result.metodologia} />
 
       {/* Alerts (PARTIAL) */}
       <Card>

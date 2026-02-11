@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { ChevronRight, BookOpen, FileText, Clock, AlertTriangle, BookMarked } from "lucide-react"
+import { ChevronRight, BookOpen, FileText, Clock, AlertTriangle, BookMarked, Building2, Scale, HelpCircle } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import type { CategoryKey } from "@/lib/content"
 
@@ -9,6 +9,9 @@ const categoryIcons: Record<CategoryKey, React.ReactNode> = {
   is: <AlertTriangle className="h-5 w-5" />,
   transicao: <Clock className="h-5 w-5" />,
   glossario: <BookMarked className="h-5 w-5" />,
+  setores: <Building2 className="h-5 w-5" />,
+  regimes: <Scale className="h-5 w-5" />,
+  faq: <HelpCircle className="h-5 w-5" />,
 }
 
 interface CategoryCardProps {
