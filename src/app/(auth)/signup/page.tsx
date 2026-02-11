@@ -8,6 +8,7 @@ import {
   ArrowRight,
   CheckCircle,
   Clock,
+  Loader2,
   Lock,
   Shield,
   TrendingUp,
@@ -213,7 +214,12 @@ function SimulatorSignupFlow() {
           </div>
 
           <Button type="submit" className="w-full" size="lg" disabled={loading}>
-            {loading ? "Criando conta..." : (
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Criando sua conta...
+              </>
+            ) : (
               <>
                 Desbloquear diagnóstico
                 <ArrowRight className="h-4 w-4 ml-2" />
@@ -328,7 +334,12 @@ function StandardSignupForm() {
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
             <Button type="submit" className="w-full" disabled={loading || !!success}>
-              {loading ? "Criando conta..." : "Criar conta"}
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Criando sua conta...
+                </>
+              ) : "Criar conta"}
             </Button>
             <div className="relative w-full">
               <div className="absolute inset-0 flex items-center">

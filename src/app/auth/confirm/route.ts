@@ -25,5 +25,5 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.redirect(`${origin}/login?error=verification_error`)
+  return NextResponse.redirect(`${origin}/login?error=auth_callback_error`)
 }

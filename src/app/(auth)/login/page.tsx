@@ -23,8 +23,8 @@ function LoginForm() {
   const redirectTo = searchParams.get("redirect") || "/dashboard"
   const callbackError = searchParams.get("error")
   const [error, setError] = useState<string | null>(
-    callbackError === "auth_callback_error"
-      ? "O link de confirmacao expirou ou e invalido. Tente fazer login ou solicite um novo link."
+    callbackError === "auth_callback_error" || callbackError === "verification_error"
+      ? "O link de confirmação expirou ou é inválido. Tente fazer login com email e senha, ou crie uma nova conta."
       : null
   )
   const [loading, setLoading] = useState(false)
