@@ -26,6 +26,7 @@ export type Database = {
           diagnostico_purchased_at: string | null
           subscription_tier: string
           stripe_customer_id: string | null
+          checklist_progress: Json | null
           created_at: string
           updated_at: string
         }
@@ -45,6 +46,7 @@ export type Database = {
           diagnostico_purchased_at?: string | null
           subscription_tier?: string
           stripe_customer_id?: string | null
+          checklist_progress?: Json | null
           created_at?: string
           updated_at?: string
         }
@@ -64,6 +66,7 @@ export type Database = {
           diagnostico_purchased_at?: string | null
           subscription_tier?: string
           stripe_customer_id?: string | null
+          checklist_progress?: Json | null
           created_at?: string
           updated_at?: string
         }
@@ -192,6 +195,65 @@ export type Database = {
           metadata?: Json | null
           created_at?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      analytics_events: {
+        Row: {
+          id: string
+          user_id: string | null
+          session_id: string
+          event_name: string
+          properties: Json
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          session_id: string
+          event_name: string
+          properties?: Json
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          session_id?: string
+          event_name?: string
+          properties?: Json
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      newsletter_subscribers: {
+        Row: {
+          id: string
+          email: string
+          subscribed_at: string
+          unsubscribed_at: string | null
+          source: string
+        }
+        Insert: {
+          id?: string
+          email: string
+          subscribed_at?: string
+          unsubscribed_at?: string | null
+          source: string
+        }
+        Update: {
+          id?: string
+          email?: string
+          subscribed_at?: string
+          unsubscribed_at?: string | null
+          source?: string
         }
         Relationships: []
       }

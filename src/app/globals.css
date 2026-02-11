@@ -209,3 +209,11 @@
     animation: none;
   }
 }
+
+@media (max-width: 768px) {
+  button,
+  [role="button"],
+  a.inline-flex {
+    min-height: 44px;
+  }
+}
