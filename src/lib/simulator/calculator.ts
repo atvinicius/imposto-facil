@@ -1,10 +1,10 @@
-import type { 
-  SimuladorInput, 
-  SimuladorResult, 
+import type {
+  SimuladorInput,
+  SimuladorResult,
   SimuladorTeaser,
   RegimeTributario,
   Setor,
-  FaixaFaturamento 
+  FaixaFaturamento,
 } from "./types"
 
 // Faturamento médio estimado por faixa (ponto médio)
@@ -238,10 +238,164 @@ function gerarAcoesRecomendadas(input: SimuladorInput): string[] {
   return acoes
 }
 
+function gerarChecklistCompleto(input: SimuladorInput): string[] {
+  const checklist: string[] = [
+    "Atualizar sistema de emissão de NF-e para incluir campos IBS e CBS",
+    "Cadastrar empresa no portal do IBS (quando disponível)",
+    "Revisar todos os contratos de longo prazo para cláusulas de reajuste tributário",
+    "Mapear produtos/serviços e identificar alíquotas diferenciadas aplicáveis",
+    "Simular fluxo de caixa com split payment (retenção automática na liquidação)",
+    "Treinar equipe fiscal nas novas obrigações acessórias",
+    "Revisar precificação de produtos/serviços com nova carga tributária",
+    "Configurar sistema contábil para apuração dual (período de transição)",
+    "Verificar créditos tributários acumulados e planejar compensação",
+    "Atualizar cadastro fiscal em todos os municípios de atuação",
+    "Revisar enquadramento no Simples Nacional vs regime normal",
+    "Preparar documentação para regime de transição (créditos presumidos)",
+    "Avaliar impacto em operações interestaduais (destino vs origem)",
+    "Revisar benefícios fiscais estaduais/municipais que serão extintos",
+    "Criar cronograma interno de adequação com marcos trimestrais",
+  ]
+
+  if (input.setor === "servicos" || input.setor === "tecnologia") {
+    checklist.push("Analisar impacto da não-cumulatividade limitada em serviços (sem crédito de folha)")
+    checklist.push("Avaliar reestruturação societária para otimizar créditos")
+  }
+
+  if (input.setor === "comercio") {
+    checklist.push("Revisar cadeia de fornecedores quanto à emissão de documentos com IBS/CBS")
+    checklist.push("Preparar sistema de PDV para nova tributação")
+  }
+
+  if (input.setor === "industria") {
+    checklist.push("Mapear toda cadeia de insumos para aproveitamento de créditos")
+    checklist.push("Avaliar impacto em exportações (manutenção da desoneração)")
+  }
+
+  if (input.setor === "agronegocio") {
+    checklist.push("Planejar recuperação de créditos de ICMS acumulados antes da extinção")
+    checklist.push("Verificar enquadramento em regime diferenciado do agronegócio")
+  }
+
+  if (input.regime === "lucro_presumido") {
+    checklist.push("Realizar simulação comparativa Lucro Presumido vs Lucro Real no novo sistema")
+    checklist.push("Avaliar timing ideal para eventual migração de regime")
+  }
+
+  return checklist
+}
+
+function gerarProjecaoAnual(input: SimuladorInput): SimuladorResult["gatedContent"]["projecaoAnual"] {
+  const faturamento = FATURAMENTO_MEDIO[input.faturamento]
+  const cargaAtual = CARGA_ATUAL[input.regime][input.setor]
+  const cargaAtualMedia = (cargaAtual.min + cargaAtual.max) / 2
+  const impostoAtual = faturamento * (cargaAtualMedia / 100)
+
+  // Transition schedule: IBS and CBS phase-in
+  const transicao = [
+    { ano: 2026, ibsPct: 0.1, cbsPct: 0.9, descricao: "Ano de teste — alíquotas destacadas em NF, sem recolhimento efetivo" },
+    { ano: 2027, ibsPct: 0.1, cbsPct: 8.8, descricao: "CBS em vigor pleno. PIS/Cofins extinto. Split payment inicia" },
+    { ano: 2028, ibsPct: 0.1, cbsPct: 8.8, descricao: "CBS consolidada. IBS ainda em fase inicial" },
+    { ano: 2029, ibsPct: 5.0, cbsPct: 8.8, descricao: "Início da extinção gradual do ICMS e ISS" },
+    { ano: 2030, ibsPct: 10.0, cbsPct: 8.8, descricao: "IBS em 2ª fase. ICMS/ISS reduzidos em ~25%" },
+    { ano: 2031, ibsPct: 13.0, cbsPct: 8.8, descricao: "IBS em 3ª fase. ICMS/ISS reduzidos em ~50%" },
+    { ano: 2032, ibsPct: 15.0, cbsPct: 8.8, descricao: "IBS em 4ª fase. ICMS/ISS reduzidos em ~75%" },
+    { ano: 2033, ibsPct: 17.7, cbsPct: 8.8, descricao: "Sistema novo 100% implementado. ICMS/ISS extintos" },
+  ]
+
+  const ajuste = AJUSTE_REGIME[input.regime]
+  const cargaNova = CARGA_NOVA[input.setor]
+  const cargaNovaMedia = ((cargaNova.min + cargaNova.max) / 2) * ajuste
+
+  return transicao.map(({ ano, ibsPct, cbsPct, descricao }) => {
+    // During transition, blend old and new systems
+    const proporcaoNovo = Math.min((ibsPct + cbsPct) / (17.7 + 8.8), 1)
+    const cargaTransicao = cargaAtualMedia * (1 - proporcaoNovo) + cargaNovaMedia * proporcaoNovo
+    const impostoEstimado = faturamento * (cargaTransicao / 100)
+    const diferenca = Math.round(impostoEstimado - impostoAtual)
+
+    return {
+      ano,
+      aliquotaIBS: ibsPct,
+      aliquotaCBS: cbsPct,
+      cargaEstimada: Math.round(impostoEstimado),
+      diferencaVsAtual: diferenca,
+      descricao,
+    }
+  })
+}
+
+function gerarAnaliseRegime(input: SimuladorInput): SimuladorResult["gatedContent"]["analiseRegime"] {
+  if (input.regime === "simples") {
+    return {
+      regimeAtual: "Simples Nacional",
+      regimeSugerido: null,
+      economiaEstimada: null,
+      justificativa: "O Simples Nacional mantém regime próprio na reforma. A principal preocupação é a perda de competitividade em vendas B2B, já que clientes não poderão aproveitar créditos de IBS/CBS nas compras do Simples.",
+      fatores: [
+        "Simples mantém regime diferenciado na reforma",
+        "Clientes PJ não aproveitam créditos em compras do Simples",
+        "Pode perder vendas B2B para concorrentes no regime normal",
+        "Avalie se o faturamento justifica migração para regime normal",
+      ],
+    }
+  }
+
+  const faturamento = FATURAMENTO_MEDIO[input.faturamento]
+  const cargaPresumido = CARGA_ATUAL.lucro_presumido[input.setor]
+  const cargaReal = CARGA_ATUAL.lucro_real[input.setor]
+  const cargaNova = CARGA_NOVA[input.setor]
+
+  const custoPresumidoNovo = faturamento * (((cargaNova.min + cargaNova.max) / 2) / 100) * AJUSTE_REGIME.lucro_presumido
+  const custoRealNovo = faturamento * (((cargaNova.min + cargaNova.max) / 2) / 100) * AJUSTE_REGIME.lucro_real
+  const economia = Math.round(custoPresumidoNovo - custoRealNovo)
+
+  if (input.regime === "lucro_presumido") {
+    const deveMigrar = economia > faturamento * 0.01 // >1% do faturamento
+    return {
+      regimeAtual: "Lucro Presumido",
+      regimeSugerido: deveMigrar ? "Lucro Real" : null,
+      economiaEstimada: deveMigrar ? economia : null,
+      justificativa: deveMigrar
+        ? `Com a reforma, o Lucro Real permite aproveitamento pleno de créditos de IBS/CBS. Para seu perfil, a economia estimada seria de R$ ${economia.toLocaleString("pt-BR")}/ano.`
+        : "Para seu perfil, a diferença entre os regimes é pequena no novo sistema. Mantenha o Lucro Presumido pela simplicidade operacional.",
+      fatores: [
+        "Lucro Real permite crédito pleno de IBS e CBS",
+        `Carga atual estimada: ${((cargaPresumido.min + cargaPresumido.max) / 2).toFixed(1)}%`,
+        `Carga no Lucro Real: ${((cargaReal.min + cargaReal.max) / 2).toFixed(1)}%`,
+        deveMigrar ? "Recomendação: avalie migração com seu contador" : "Recomendação: manter regime atual",
+        "Lucro Real exige escrituração contábil completa",
+      ],
+    }
+  }
+
+  // lucro_real or nao_sei
+  return {
+    regimeAtual: input.regime === "lucro_real" ? "Lucro Real" : "Não informado",
+    regimeSugerido: null,
+    economiaEstimada: null,
+    justificativa: input.regime === "lucro_real"
+      ? "O Lucro Real é o regime que mais se beneficia da reforma por permitir aproveitamento pleno de créditos. Mantenha o foco em documentar bem todos os insumos para maximizar os créditos de IBS e CBS."
+      : "Sem informação do regime atual, não é possível fazer uma comparação precisa. Recomendamos que consulte seu contador para identificar seu regime e simule novamente.",
+    fatores: input.regime === "lucro_real"
+      ? [
+          "Lucro Real já é o regime mais vantajoso para créditos",
+          "Foco deve ser em maximizar documentação de insumos",
+          "Split payment automatiza parte da apuração",
+          "Transição tende a ser mais suave neste regime",
+        ]
+      : [
+          "Identifique seu regime tributário atual com seu contador",
+          "Refaça a simulação com o regime correto para resultados precisos",
+          "Cada regime tem impacto diferente na reforma",
+        ],
+  }
+}
+
 export function calcularSimulacao(input: SimuladorInput): SimuladorResult {
   const impacto = calcularImpacto(input)
   const nivelRisco = determinarNivelRisco(impacto.percentualMedio, input.setor, input.regime)
-  
+
   return {
     impactoAnual: {
       min: impacto.diferencaMin,
@@ -253,20 +407,16 @@ export function calcularSimulacao(input: SimuladorInput): SimuladorResult {
     datasImportantes: gerarDatasImportantes(input),
     acoesRecomendadas: gerarAcoesRecomendadas(input),
     gatedContent: {
-      checklistCompleto: [
-        "Checklist de adequação de sistemas",
-        "Cronograma personalizado de preparação",
-        "Lista de documentos para revisar",
-        "Guia de comunicação com contador",
-        "Modelo de cláusulas contratuais",
-      ],
+      checklistCompleto: gerarChecklistCompleto(input),
       analiseDetalhada: "Análise completa do impacto por linha de produto/serviço",
       comparativoRegimes: input.regime !== "simples",
+      projecaoAnual: gerarProjecaoAnual(input),
+      analiseRegime: gerarAnaliseRegime(input),
     },
   }
 }
 
-export function gerarTeaser(result: SimuladorResult, input: SimuladorInput): SimuladorTeaser {
+export function gerarTeaser(result: SimuladorResult, _input: SimuladorInput): SimuladorTeaser {
   const impactoTexto = result.impactoAnual.max > 0
     ? `Sua empresa pode pagar até R$ ${Math.abs(result.impactoAnual.max).toLocaleString("pt-BR")} a mais por ano`
     : `Sua empresa pode economizar até R$ ${Math.abs(result.impactoAnual.min).toLocaleString("pt-BR")} por ano`

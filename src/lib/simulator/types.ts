@@ -53,11 +53,26 @@ export interface SimuladorResult {
   // Ações recomendadas (teaser - só mostra 2, resto fica gated)
   acoesRecomendadas: string[]
   
-  // Seção gated (só mostra após signup)
+  // Seção gated (só mostra após signup/pagamento)
   gatedContent: {
     checklistCompleto: string[]
     analiseDetalhada: string
     comparativoRegimes: boolean
+    projecaoAnual: {
+      ano: number
+      aliquotaIBS: number
+      aliquotaCBS: number
+      cargaEstimada: number
+      diferencaVsAtual: number
+      descricao: string
+    }[]
+    analiseRegime: {
+      regimeAtual: string
+      regimeSugerido: string | null
+      economiaEstimada: number | null
+      justificativa: string
+      fatores: string[]
+    } | null
   }
 }
 

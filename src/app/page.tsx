@@ -1,146 +1,46 @@
 import Link from "next/link"
 import {
+  AlertTriangle,
   ArrowRight,
-  BarChart,
-  BookOpen,
-  Calculator,
+  BarChart3,
   CheckCircle,
-  ChevronRight,
-  FileText,
+  Clock,
+  Lock,
   MessageCircle,
   ShieldCheck,
-  Sparkles,
-  User,
-  type LucideIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { categories, getAllArticles } from "@/lib/content"
-
-interface Capability {
-  title: string
-  description: string
-  bullets: string[]
-  href: string
-  cta: string
-  icon: LucideIcon
-}
-
-const CAPABILITIES: Capability[] = [
-  {
-    title: "Assistente Tributário com IA",
-    description:
-      "Converse em linguagem simples sobre IBS, CBS, Imposto Seletivo e regras de transição.",
-    bullets: [
-      "Perguntas e respostas em formato de chat",
-      "Modelos de IA selecionáveis no painel",
-      "Fluxo direto para dúvidas práticas do dia a dia",
-    ],
-    href: "/signup",
-    cta: "Criar conta para usar o assistente",
-    icon: MessageCircle,
-  },
-  {
-    title: "Simulador de Impacto",
-    description:
-      "Faça um diagnóstico inicial com base em regime, setor, faturamento e estado da empresa.",
-    bullets: [
-      "Questionário guiado em 4 etapas",
-      "Estimativa de impacto anual e nível de risco",
-      "Alertas e datas importantes para ação",
-    ],
-    href: "/simulador",
-    cta: "Rodar simulação gratuita",
-    icon: Calculator,
-  },
-  {
-    title: "Base de Conhecimento",
-    description:
-      "Acesse conteúdos estruturados para estudar a reforma tributária com mais clareza.",
-    bullets: [
-      "Busca por temas e termos-chave",
-      "Navegação por categorias",
-      "Conteúdo organizado para consultas rápidas",
-    ],
-    href: "/conhecimento",
-    cta: "Explorar base de conhecimento",
-    icon: BookOpen,
-  },
-  {
-    title: "Personalização por Perfil",
-    description:
-      "Cadastre o contexto da empresa para orientar recomendações mais relevantes.",
-    bullets: [
-      "Onboarding com dados fiscais essenciais",
-      "Segmentação por UF, setor e regime tributário",
-      "Prioridades práticas no dashboard",
-    ],
-    href: "/signup",
-    cta: "Configurar perfil da empresa",
-    icon: User,
-  },
-]
-
-const TIMELINE = [
-  {
-    year: "2026",
-    title: "Ano de teste",
-    description: "Período de adaptação com destaque de CBS/IBS nas operações.",
-  },
-  {
-    year: "2027",
-    title: "Virada operacional",
-    description:
-      "Entrada efetiva da CBS e mudanças que exigem revisão de processos internos.",
-  },
-  {
-    year: "2029",
-    title: "Fase intermediária",
-    description: "Avanço da substituição gradual de tributos legados.",
-  },
-  {
-    year: "2033",
-    title: "Novo sistema consolidado",
-    description: "Conclusão da transição para o novo modelo de tributação sobre consumo.",
-  },
-]
 
 const FAQ_ITEMS = [
   {
-    question: "Para quem o ImpostoFácil foi construído?",
+    question: "É diferente do BotRTC e do simulador da Receita?",
     answer:
-      "Para donos de pequenas e médias empresas (MEI, ME, EPP) que precisam entender como a reforma tributária afeta seu negócio, sem depender de linguagem técnica.",
+      "Sim. O BotRTC responde perguntas genéricas. O simulador da Receita mostra alíquotas. O ImpostoFácil cruza o perfil da sua empresa (regime, setor, faturamento, UF) para gerar um diagnóstico personalizado com alertas, checklist de ações e projeção ano a ano.",
   },
   {
-    question: "Preciso começar agora ou posso esperar?",
+    question: "Preciso de um contador ainda?",
     answer:
-      "2026 já é o ano de testes da reforma (CBS 0,9% + IBS 0,1%). A partir de 2027, a CBS entra em vigor efetivamente. Quanto antes você entender os impactos, melhor preparado estará.",
+      "Sim, para ações formais. O ImpostoFácil te prepara para a conversa com seu contador: você chega sabendo o impacto estimado, os riscos e as ações prioritárias. O relatório PDF pode ser compartilhado diretamente com ele.",
   },
   {
-    question: "O simulador substitui uma consultoria tributária?",
+    question: "Quanto custa?",
     answer:
-      "Não. O simulador oferece uma estimativa inicial para orientar suas próximas decisões. Para ações formais, valide com seu contador ou advogado tributarista.",
+      "O simulador e o diagnóstico básico são gratuitos. O Diagnóstico Completo (com checklist, projeção ano a ano e análise de regime) custa R$29 — pagamento único, sem assinatura. Uma fração do custo de uma consultoria tributária.",
   },
   {
-    question: "As informações são confiáveis?",
+    question: "Meus dados são seguros?",
     answer:
-      "O conteúdo é baseado na legislação oficial (EC 132/2023 e LC 214/2025) e revisado periodicamente. Ainda assim, somos uma ferramenta educacional em beta — não substituímos orientação profissional.",
-  },
-  {
-    question: "É realmente gratuito?",
-    answer:
-      "Sim. O ImpostoFácil está em fase beta e todas as funcionalidades são gratuitas: simulador, assistente com IA e base de conhecimento.",
+      "Sim. Usamos Supabase (infraestrutura PostgreSQL) com autenticação segura. Não compartilhamos seus dados com terceiros. O conteúdo é baseado na EC 132/2023 e LC 214/2025.",
   },
 ]
 
 export default function LandingPage() {
-  const totalArticles = getAllArticles().length
-  const totalCategories = Object.keys(categories).length
-
   return (
     <div className="landing-root relative min-h-screen overflow-x-clip">
       <div className="landing-backdrop" aria-hidden />
       <div className="landing-grid" aria-hidden />
 
+      {/* Header */}
       <header className="sticky top-0 z-50 border-b border-white/40 bg-background/75 backdrop-blur-lg">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
@@ -154,8 +54,11 @@ export default function LandingPage() {
             <Link href="/simulador" className="text-muted-foreground transition-colors hover:text-foreground">
               Simulador
             </Link>
-            <Link href="#funcionalidades" className="text-muted-foreground transition-colors hover:text-foreground">
-              Funcionalidades
+            <Link href="#como-funciona" className="text-muted-foreground transition-colors hover:text-foreground">
+              Como funciona
+            </Link>
+            <Link href="#precos" className="text-muted-foreground transition-colors hover:text-foreground">
+              Preços
             </Link>
             <Link href="#faq" className="text-muted-foreground transition-colors hover:text-foreground">
               FAQ
@@ -164,252 +67,376 @@ export default function LandingPage() {
 
           <div className="flex items-center gap-2">
             <Button variant="ghost" asChild className="hidden sm:inline-flex">
-              <Link href="/login">Entrar</Link>
+              <Link href="/login">Já tenho conta</Link>
             </Button>
             <Button asChild>
-              <Link href="/signup">Criar conta grátis</Link>
+              <Link href="/simulador">
+                Simular impacto
+                <ArrowRight className="h-4 w-4" />
+              </Link>
             </Button>
           </div>
         </div>
       </header>
 
       <main>
+        {/* Hero */}
         <section className="container relative mx-auto px-4 pb-16 pt-14 sm:pt-20 lg:pb-24">
           <div className="grid items-start gap-10 lg:grid-cols-[1.1fr_0.9fr]">
             <div className="landing-reveal space-y-7">
-              <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.2em] text-primary">
-                <Sparkles className="h-3.5 w-3.5" />
-                Beta — Ferramenta educacional gratuita
+              <span className="inline-flex items-center gap-2 rounded-full border border-amber-300/40 bg-amber-50 px-4 py-1.5 text-xs font-medium text-amber-800">
+                <Clock className="h-3.5 w-3.5" />
+                A reforma tributária já começou em 2026
               </span>
 
               <div className="space-y-5">
-                <h1 className="max-w-3xl text-4xl font-semibold leading-tight tracking-tight text-slate-950 sm:text-5xl lg:text-6xl">
-                  Entenda como a reforma tributária afeta a sua empresa
+                <h1 className="max-w-3xl text-4xl font-semibold leading-tight tracking-tight text-slate-950 sm:text-5xl lg:text-[3.5rem]">
+                  Descubra em 2 minutos quanto a reforma tributária vai custar para sua empresa
                 </h1>
                 <p className="max-w-2xl text-base leading-7 text-slate-700 sm:text-lg">
-                  O ImpostoFácil é uma ferramenta gratuita com simulador de impacto, assistente com IA e
-                  base de conhecimento para ajudar donos de pequenas empresas a entender o novo sistema
-                  tributário (IBS, CBS e IS) sem juridiquês.
+                  Responda 4 perguntas sobre sua empresa e receba um diagnóstico tributário personalizado com alertas, ações e projeção de impacto até 2033.
                 </p>
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
                 <Button size="lg" asChild>
                   <Link href="/simulador">
-                    Fazer simulação agora
+                    Simular impacto agora
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
                 <Button size="lg" variant="outline" asChild>
-                  <Link href="/signup">Criar conta grátis</Link>
+                  <Link href="/login">Já tenho conta</Link>
                 </Button>
               </div>
 
-              <div className="grid gap-3 text-sm text-slate-700 sm:grid-cols-3">
-                <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-sm">
-                  <p className="font-semibold text-slate-900">Diagnóstico rápido</p>
-                  <p className="mt-1 text-slate-600">Fluxo guiado para mapear impacto inicial.</p>
-                </div>
-                <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-sm">
-                  <p className="font-semibold text-slate-900">Conteúdo organizado</p>
-                  <p className="mt-1 text-slate-600">Consulta prática por temas prioritários.</p>
-                </div>
-                <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-sm">
-                  <p className="font-semibold text-slate-900">Acompanhamento contínuo</p>
-                  <p className="mt-1 text-slate-600">Trilhe o plano de transição sem improviso.</p>
-                </div>
-              </div>
+              <p className="text-sm text-slate-500">Gratuito. Sem cadastro para simular.</p>
             </div>
 
+            {/* Diagnostic preview mockup */}
             <div className="landing-reveal landing-reveal-delay-1 rounded-3xl border border-slate-200/80 bg-white/90 p-6 shadow-[0_20px_70px_-40px_rgba(6,24,44,0.6)] backdrop-blur">
-              <div className="mb-5 flex items-center justify-between">
-                <p className="text-sm font-medium text-slate-700">Painel de prontidão</p>
-                <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                  Comece em menos de 3 min
+              <div className="mb-4 flex items-center justify-between">
+                <p className="text-sm font-medium text-slate-700">Diagnóstico Tributário</p>
+                <span className="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700">
+                  Risco: Alto
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-2xl border border-slate-200/70 bg-slate-50 p-4">
-                  <p className="text-xs uppercase tracking-wide text-slate-500">Trilhas ativas</p>
-                  <p className="mt-2 text-3xl font-semibold text-slate-900">{totalCategories}</p>
+              <div className="rounded-2xl border border-slate-200/70 bg-slate-50 p-4 mb-4">
+                <p className="text-xs uppercase tracking-wide text-slate-500">Impacto estimado</p>
+                <p className="mt-1 text-2xl font-bold text-red-600">+R$ 47.000/ano</p>
+                <p className="text-xs text-slate-500 mt-1">Aumento de 68% na carga tributária</p>
+              </div>
+
+              <div className="space-y-2 mb-4">
+                <div className="flex items-start gap-2 rounded-xl bg-amber-50 p-3">
+                  <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+                  <p className="text-xs text-amber-800">Setor de serviços em Lucro Presumido: grupo de maior impacto</p>
                 </div>
-                <div className="rounded-2xl border border-slate-200/70 bg-slate-50 p-4">
-                  <p className="text-xs uppercase tracking-wide text-slate-500">Artigos disponíveis</p>
-                  <p className="mt-2 text-3xl font-semibold text-slate-900">{totalArticles}</p>
-                </div>
-                <div className="rounded-2xl border border-slate-200/70 bg-slate-50 p-4">
-                  <p className="text-xs uppercase tracking-wide text-slate-500">Etapas do simulador</p>
-                  <p className="mt-2 text-3xl font-semibold text-slate-900">4</p>
-                </div>
-                <div className="rounded-2xl border border-slate-200/70 bg-slate-50 p-4">
-                  <p className="text-xs uppercase tracking-wide text-slate-500">Janela de transição</p>
-                  <p className="mt-2 text-3xl font-semibold text-slate-900">2026-2033</p>
+                <div className="flex items-start gap-2 rounded-xl bg-slate-50 border border-slate-200/80 p-3">
+                  <CheckCircle className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
+                  <p className="text-xs text-slate-700">Atualizar NF-e para campos IBS e CBS</p>
                 </div>
               </div>
 
-              <div className="mt-6 space-y-3 rounded-2xl border border-slate-200/80 bg-white p-4">
-                <p className="text-sm font-medium text-slate-800">O que você resolve no primeiro acesso</p>
-                <ul className="space-y-2 text-sm text-slate-600">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="mt-0.5 h-4 w-4 text-emerald-600" />
-                    Entender o risco fiscal da sua empresa por perfil tributário.
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="mt-0.5 h-4 w-4 text-emerald-600" />
-                    Identificar próximos passos de curto prazo para 2026/2027.
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="mt-0.5 h-4 w-4 text-emerald-600" />
-                    Organizar decisões com base em conteúdo técnico estruturado.
-                  </li>
-                </ul>
+              <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/50 p-4 text-center">
+                <Lock className="h-5 w-5 text-slate-400 mx-auto mb-1" />
+                <p className="text-xs text-slate-500">+15 ações, projeção 2026-2033 e análise de regime</p>
+                <p className="text-xs font-medium text-slate-700 mt-1">Disponível no diagnóstico completo</p>
               </div>
             </div>
           </div>
         </section>
 
-        <section id="funcionalidades" className="container mx-auto px-4 pb-16 lg:pb-24">
-          <div className="landing-reveal landing-reveal-delay-2 mb-8 flex flex-col gap-3 sm:max-w-3xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-700">Funcionalidades centrais</p>
+        {/* Problem amplification */}
+        <section className="container mx-auto px-4 pb-16 lg:pb-24">
+          <div className="landing-reveal mb-8 flex flex-col gap-3 sm:max-w-3xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-red-700">O problema é real</p>
             <h2 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
-              Ferramentas práticas para sair da teoria e executar
+              Três perguntas que todo empresário deveria se fazer agora
             </h2>
-            <p className="text-slate-600">
-              Simulador de impacto, assistente com IA, base de conhecimento e perfil personalizado — tudo gratuito.
-            </p>
           </div>
 
-          <div className="grid gap-5 md:grid-cols-2">
-            {CAPABILITIES.map((item, index) => {
-              const Icon = item.icon
+          <div className="grid gap-5 md:grid-cols-3">
+            <article className="landing-reveal landing-reveal-delay-1 rounded-3xl border border-slate-200/80 bg-white/90 p-6 shadow-sm">
+              <div className="mb-4 rounded-xl bg-red-50 p-3 w-fit">
+                <BarChart3 className="h-6 w-6 text-red-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">Vai pagar mais ou menos?</h3>
+              <p className="text-sm text-slate-600 mb-3">
+                Serviços em Lucro Presumido: até +200% de carga tributária. Indústria com insumos: pode pagar menos. Depende do perfil.
+              </p>
+              <p className="text-xs font-medium text-red-600">A média nacional esconde a sua realidade.</p>
+            </article>
 
-              return (
-                <article
-                  key={item.title}
-                  className={`landing-reveal rounded-3xl border border-slate-200/80 bg-white/90 p-6 shadow-sm transition-transform duration-300 hover:-translate-y-1 ${
-                    index % 2 === 0 ? "landing-reveal-delay-1" : "landing-reveal-delay-2"
-                  }`}
-                >
-                  <div className="mb-5 flex items-center gap-3">
-                    <span className="rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-slate-700">
-                      <Icon className="h-5 w-5" />
-                    </span>
-                    <h3 className="text-xl font-semibold text-slate-900">{item.title}</h3>
-                  </div>
+            <article className="landing-reveal landing-reveal-delay-2 rounded-3xl border border-slate-200/80 bg-white/90 p-6 shadow-sm">
+              <div className="mb-4 rounded-xl bg-amber-50 p-3 w-fit">
+                <Clock className="h-6 w-6 text-amber-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">Quando precisa agir?</h3>
+              <p className="text-sm text-slate-600 mb-3">
+                2026 é ano de teste. Split payment começa em 2027. Créditos de ICMS precisam ser recuperados antes da extinção.
+              </p>
+              <p className="text-xs font-medium text-amber-600">A janela de preparação está fechando.</p>
+            </article>
 
-                  <p className="text-sm leading-6 text-slate-600">{item.description}</p>
-
-                  <ul className="mt-4 space-y-2 text-sm text-slate-700">
-                    {item.bullets.map((bullet) => (
-                      <li key={bullet} className="flex items-start gap-2">
-                        <CheckCircle className="mt-0.5 h-4 w-4 text-emerald-600" />
-                        {bullet}
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Button variant="ghost" asChild className="mt-5 h-auto px-0 text-sm text-slate-900">
-                    <Link href={item.href}>
-                      {item.cta}
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                </article>
-              )
-            })}
+            <article className="landing-reveal rounded-3xl border border-slate-200/80 bg-white/90 p-6 shadow-sm">
+              <div className="mb-4 rounded-xl bg-slate-100 p-3 w-fit">
+                <MessageCircle className="h-6 w-6 text-slate-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">Seu contador tem respostas?</h3>
+              <p className="text-sm text-slate-600 mb-3">
+                A maioria dos contadores ainda está aprendendo as novas regras. Consultoria especializada custa R$500-2.000+.
+              </p>
+              <p className="text-xs font-medium text-slate-600">Chegue preparado na próxima conversa.</p>
+            </article>
           </div>
         </section>
 
-        <section id="processo" className="container mx-auto px-4 pb-16 lg:pb-24">
-          <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-            <div className="landing-reveal rounded-3xl border border-slate-200/80 bg-slate-950 p-7 text-slate-100 shadow-lg">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-300">Método em 3 etapas</p>
-              <h2 className="mt-3 text-3xl font-semibold tracking-tight">Planejamento tributário orientado por execução</h2>
-              <div className="mt-7 space-y-5">
-                <div className="flex gap-3">
-                  <BarChart className="mt-0.5 h-5 w-5 text-sky-300" />
-                  <div>
-                    <p className="font-medium">1. Mapeie impacto real</p>
-                    <p className="mt-1 text-sm text-slate-300">
-                      Rode o simulador para criar uma visão inicial de risco e priorizar esforços.
-                    </p>
+        {/* Product preview */}
+        <section className="container mx-auto px-4 pb-16 lg:pb-24">
+          <div className="landing-reveal rounded-3xl border border-slate-200/80 bg-gradient-to-br from-slate-950 to-slate-900 p-7 text-white shadow-lg sm:p-10">
+            <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-300">Diagnóstico Tributário</p>
+                <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+                  Um relatório completo para sua empresa
+                </h2>
+                <p className="mt-4 text-sm leading-6 text-slate-300 sm:text-base">
+                  Baseado no perfil da sua empresa, você recebe um diagnóstico personalizado com tudo que precisa para se preparar.
+                </p>
+                <ul className="mt-6 space-y-3 text-sm text-slate-200">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="mt-0.5 h-4 w-4 text-emerald-400 shrink-0" />
+                    Impacto estimado em reais (melhor e pior cenário)
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="mt-0.5 h-4 w-4 text-emerald-400 shrink-0" />
+                    Alertas específicos para seu setor e regime
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="mt-0.5 h-4 w-4 text-emerald-400 shrink-0" />
+                    Checklist de adequação com 15-20 ações priorizadas
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="mt-0.5 h-4 w-4 text-emerald-400 shrink-0" />
+                    Projeção ano a ano de 2026 a 2033
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="mt-0.5 h-4 w-4 text-emerald-400 shrink-0" />
+                    Análise de regime: vale mudar de tributação?
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="mt-0.5 h-4 w-4 text-emerald-400 shrink-0" />
+                    PDF para compartilhar com seu contador
+                  </li>
+                </ul>
+                <Button asChild size="lg" className="mt-8 bg-white text-slate-900 hover:bg-slate-100">
+                  <Link href="/simulador">
+                    Veja o seu em 3 minutos
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between rounded-xl bg-white/10 p-3">
+                    <span className="text-sm">Nível de risco</span>
+                    <span className="rounded-full bg-red-500/20 px-3 py-1 text-xs font-medium text-red-300">Crítico</span>
                   </div>
-                </div>
-                <div className="flex gap-3">
-                  <MessageCircle className="mt-0.5 h-5 w-5 text-sky-300" />
-                  <div>
-                    <p className="font-medium">2. Tire dúvidas operacionais</p>
-                    <p className="mt-1 text-sm text-slate-300">
-                      Use o assistente para validar cenários, terminologia e próximos movimentos.
-                    </p>
+                  <div className="flex items-center justify-between rounded-xl bg-white/10 p-3">
+                    <span className="text-sm">Impacto estimado</span>
+                    <span className="text-sm font-bold text-red-300">+R$ 47.000/ano</span>
                   </div>
-                </div>
-                <div className="flex gap-3">
-                  <FileText className="mt-0.5 h-5 w-5 text-sky-300" />
-                  <div>
-                    <p className="font-medium">3. Estruture o plano interno</p>
-                    <p className="mt-1 text-sm text-slate-300">
-                      Transforme o aprendizado em cronograma e tarefas para seu time financeiro.
-                    </p>
+                  <div className="flex items-center justify-between rounded-xl bg-white/10 p-3">
+                    <span className="text-sm">Alertas encontrados</span>
+                    <span className="text-sm font-bold">6</span>
+                  </div>
+                  <div className="flex items-center justify-between rounded-xl bg-white/10 p-3">
+                    <span className="text-sm">Ações recomendadas</span>
+                    <span className="text-sm font-bold">18</span>
+                  </div>
+                  <div className="flex items-center justify-between rounded-xl bg-white/10 p-3">
+                    <span className="text-sm">Regime sugerido</span>
+                    <span className="text-sm font-bold text-emerald-300">Lucro Real</span>
+                  </div>
+                  <div className="flex items-center justify-between rounded-xl bg-white/10 p-3">
+                    <span className="text-sm">Economia com migração</span>
+                    <span className="text-sm font-bold text-emerald-300">R$ 12.400/ano</span>
                   </div>
                 </div>
               </div>
-              <Button asChild size="lg" className="mt-8 bg-white text-slate-900 hover:bg-slate-100">
+            </div>
+          </div>
+        </section>
+
+        {/* How it works */}
+        <section id="como-funciona" className="container mx-auto px-4 pb-16 lg:pb-24">
+          <div className="landing-reveal mb-8 flex flex-col gap-3 sm:max-w-3xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-700">Como funciona</p>
+            <h2 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+              3 passos para saber onde você está
+            </h2>
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-3">
+            <div className="landing-reveal landing-reveal-delay-1 rounded-3xl border border-slate-200/80 bg-white/90 p-6 shadow-sm">
+              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-sky-50 text-lg font-bold text-sky-700">
+                1
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">Responda 4 perguntas</h3>
+              <p className="text-sm text-slate-600">
+                Regime tributário, setor, faturamento e estado. Menos de 2 minutos, sem cadastro.
+              </p>
+            </div>
+
+            <div className="landing-reveal landing-reveal-delay-2 rounded-3xl border border-slate-200/80 bg-white/90 p-6 shadow-sm">
+              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-lg font-bold text-emerald-700">
+                2
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">Receba seu diagnóstico grátis</h3>
+              <p className="text-sm text-slate-600">
+                Impacto estimado, nível de risco, alertas principais e primeiras ações recomendadas.
+              </p>
+            </div>
+
+            <div className="landing-reveal rounded-3xl border border-slate-200/80 bg-white/90 p-6 shadow-sm">
+              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-lg font-bold text-violet-700">
+                3
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">Desbloqueie o relatório completo</h3>
+              <p className="text-sm text-slate-600">
+                Checklist completo, projeção ano a ano, análise de regime e PDF para seu contador.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Pricing */}
+        <section id="precos" className="container mx-auto px-4 pb-16 lg:pb-24">
+          <div className="landing-reveal mb-8 flex flex-col gap-3 sm:max-w-3xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">Preços</p>
+            <h2 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+              Invista menos que um almoço para proteger sua empresa
+            </h2>
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-3">
+            {/* Free */}
+            <article className="landing-reveal landing-reveal-delay-1 rounded-3xl border border-slate-200/80 bg-white/90 p-6 shadow-sm">
+              <p className="text-sm font-medium text-slate-500">Diagnóstico Básico</p>
+              <p className="mt-2 text-4xl font-bold text-slate-900">Grátis</p>
+              <p className="mt-1 text-sm text-slate-500">Para sempre</p>
+              <ul className="mt-6 space-y-3 text-sm text-slate-700">
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
+                  Simulação completa de impacto
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
+                  Nível de risco personalizado
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
+                  3 alertas principais
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
+                  2 ações recomendadas
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
+                  Cronograma de datas importantes
+                </li>
+              </ul>
+              <Button asChild className="mt-6 w-full" variant="outline">
+                <Link href="/simulador">Começar grátis</Link>
+              </Button>
+            </article>
+
+            {/* Diagnóstico Completo */}
+            <article className="landing-reveal landing-reveal-delay-2 rounded-3xl border-2 border-primary bg-white/90 p-6 shadow-lg relative">
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-4 py-1 text-xs font-medium text-primary-foreground">
+                Mais popular
+              </span>
+              <p className="text-sm font-medium text-slate-500">Diagnóstico Completo</p>
+              <p className="mt-2 text-4xl font-bold text-slate-900">R$29</p>
+              <p className="mt-1 text-sm text-slate-500">Pagamento único</p>
+              <ul className="mt-6 space-y-3 text-sm text-slate-700">
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
+                  Tudo do plano grátis
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
+                  Todos os alertas com explicações
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
+                  Checklist completo de adequação (15-20 itens)
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
+                  Projeção ano a ano (2026-2033)
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
+                  Análise de regime tributário
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
+                  Exportação em PDF
+                </li>
+              </ul>
+              <Button asChild className="mt-6 w-full">
                 <Link href="/simulador">
-                  Iniciar simulação
+                  Simular e desbloquear
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
-            </div>
+            </article>
 
-            <div className="landing-reveal landing-reveal-delay-1 rounded-3xl border border-slate-200/80 bg-white/90 p-7 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">Linha do tempo crítica</p>
-              <h3 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950">Marcos para monitorar de 2026 a 2033</h3>
-              <ul className="mt-7 space-y-4">
-                {TIMELINE.map((item) => (
-                  <li key={item.year} className="flex gap-3 rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4">
-                    <span className="inline-flex h-10 min-w-10 items-center justify-center rounded-xl bg-white text-sm font-semibold text-slate-800 shadow-sm">
-                      {item.year}
-                    </span>
-                    <div>
-                      <p className="font-medium text-slate-900">{item.title}</p>
-                      <p className="mt-1 text-sm leading-6 text-slate-600">{item.description}</p>
-                    </div>
-                  </li>
-                ))}
+            {/* Pro */}
+            <article className="landing-reveal rounded-3xl border border-slate-200/80 bg-white/90 p-6 shadow-sm">
+              <p className="text-sm font-medium text-slate-500">Pro</p>
+              <p className="mt-2 text-4xl font-bold text-slate-900">R$19<span className="text-lg font-normal text-slate-500">/mês</span></p>
+              <p className="mt-1 text-sm text-slate-500">Em breve</p>
+              <ul className="mt-6 space-y-3 text-sm text-slate-700">
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
+                  Tudo do Diagnóstico Completo
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
+                  Chat com IA ilimitado
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
+                  Diagnóstico atualizado com mudanças regulatórias
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
+                  Modelos de IA prioritários
+                </li>
               </ul>
-              <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                <Link href="/conhecimento/transicao/cronograma" className="group rounded-2xl border border-slate-200 p-4 transition-colors hover:border-slate-400">
-                  <p className="text-sm font-medium text-slate-900">Ver cronograma completo</p>
-                  <p className="mt-1 text-sm text-slate-600">Acessar conteúdo de transição</p>
-                  <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-slate-900">
-                    Abrir artigo
-                    <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </span>
-                </Link>
-                <Link href="/signup" className="group rounded-2xl border border-slate-200 p-4 transition-colors hover:border-slate-400">
-                  <p className="text-sm font-medium text-slate-900">Montar plano no dashboard</p>
-                  <p className="mt-1 text-sm text-slate-600">Centralizar decisões por perfil</p>
-                  <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-slate-900">
-                    Criar conta
-                    <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </span>
-                </Link>
-              </div>
-            </div>
+              <Button className="mt-6 w-full" variant="outline" disabled>
+                Em breve
+              </Button>
+            </article>
           </div>
         </section>
 
+        {/* FAQ */}
         <section id="faq" className="container mx-auto px-4 pb-16 lg:pb-24">
           <div className="landing-reveal mb-8 flex flex-col gap-3 sm:max-w-3xl">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">FAQ</p>
             <h2 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
-              Perguntas comuns antes de começar
+              Perguntas frequentes
             </h2>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-3 max-w-3xl">
             {FAQ_ITEMS.map((item, index) => (
               <details
                 key={item.question}
@@ -426,47 +453,44 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* Final CTA */}
         <section className="container mx-auto px-4 pb-20">
           <div className="landing-reveal landing-reveal-delay-2 relative overflow-hidden rounded-3xl border border-slate-200/70 bg-gradient-to-r from-sky-900 via-slate-900 to-emerald-900 p-8 text-white shadow-2xl sm:p-10">
             <div className="pointer-events-none absolute -right-20 -top-16 h-56 w-56 rounded-full bg-white/10 blur-3xl" aria-hidden />
             <div className="pointer-events-none absolute -bottom-24 left-10 h-56 w-56 rounded-full bg-cyan-400/20 blur-3xl" aria-hidden />
-            <div className="relative grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-200">Pronto para sair do modo reativo?</p>
-                <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-                  Comece hoje com um plano de transição tributária mais claro
-                </h2>
-                <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-200 sm:text-base">
-                  Entre no ImpostoFácil, execute sua primeira simulação e organize as decisões críticas de 2026 a 2033 com mais previsibilidade.
-                </p>
-              </div>
-
-              <div className="flex flex-col gap-3 sm:flex-row lg:flex-col lg:items-start">
+            <div className="relative text-center max-w-2xl mx-auto space-y-6">
+              <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+                A reforma não espera. Simule agora.
+              </h2>
+              <p className="text-sm leading-6 text-slate-200 sm:text-base">
+                Em menos de 3 minutos, descubra o impacto na sua empresa e receba um plano de ação personalizado.
+              </p>
+              <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
                 <Button asChild size="lg" className="bg-white text-slate-900 hover:bg-slate-100">
-                  <Link href="/signup">
-                    Criar conta grátis
+                  <Link href="/simulador">
+                    Simular impacto agora
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
                 <Button asChild size="lg" variant="outline" className="border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white">
-                  <Link href="/simulador">Testar simulador primeiro</Link>
+                  <Link href="/login">Já tenho conta</Link>
                 </Button>
-                <p className="text-xs text-slate-300">Sem cartão de crédito para começar.</p>
               </div>
             </div>
           </div>
         </section>
       </main>
 
+      {/* Footer */}
       <footer className="border-t border-slate-200/70 bg-white/75">
         <div className="container mx-auto px-4 py-8">
           <p className="mb-4 rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3 text-xs leading-5 text-amber-800">
-            O ImpostoFácil é uma ferramenta educacional em fase beta. As informações e simulações apresentadas
+            O ImpostoFácil é uma ferramenta educacional. As informações e simulações apresentadas
             têm caráter informativo e não substituem a orientação de um contador ou advogado tributarista.
             Conteúdo baseado na EC 132/2023 e LC 214/2025.
           </p>
           <div className="flex flex-col gap-4 text-sm text-slate-600 sm:flex-row sm:items-center sm:justify-between">
-            <p>© 2026 ImpostoFácil. Todos os direitos reservados.</p>
+            <p>&copy; 2026 ImpostoFácil. Todos os direitos reservados.</p>
             <div className="flex items-center gap-5">
               <Link href="/termos" className="transition-colors hover:text-slate-900">
                 Termos

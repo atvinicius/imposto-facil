@@ -4,6 +4,7 @@ import {
   BookOpen,
   Building2,
   Clock,
+  ClipboardCheck,
   FileText,
   MessageCircle,
   Sparkles,
@@ -41,7 +42,21 @@ export default async function DashboardPage() {
     profile?.uf && profile?.nivel_experiencia && profile?.regime_tributario
   )
 
+  const hasSimulatorData = Boolean(profile?.setor && profile?.faturamento && profile?.uf)
+
   const actionCards = [
+    {
+      title: "Diagnóstico Tributário",
+      description:
+        hasSimulatorData
+          ? "Seu diagnóstico está pronto. Veja alertas, ações e projeções personalizadas."
+          : "Descubra como a reforma tributária impacta sua empresa com um relatório personalizado.",
+      href: "/diagnostico",
+      cta: hasSimulatorData ? "Ver diagnóstico" : "Gerar diagnóstico",
+      icon: ClipboardCheck,
+      surface:
+        "from-violet-500/25 via-purple-500/15 to-transparent border-violet-400/40",
+    },
     {
       title: "Assistente Virtual",
       description:
@@ -128,6 +143,28 @@ export default async function DashboardPage() {
         </div>
       </section>
 
+      {hasSimulatorData && (
+        <Card className="dashboard-enter border-violet-500/40 bg-gradient-to-r from-violet-500/10 to-purple-500/5">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <ClipboardCheck className="h-5 w-5" />
+              Seu Diagnóstico Tributário está pronto
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-muted-foreground sm:max-w-xl">
+              Veja alertas, ações recomendadas e a projeção de impacto ano a ano para sua empresa.
+            </p>
+            <Button asChild className="sm:shrink-0">
+              <Link href="/diagnostico">
+                Ver diagnóstico
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {!profileCompleted && (
         <Card className="dashboard-enter border-amber-500/40 bg-gradient-to-r from-amber-500/10 to-orange-500/5">
           <CardHeader className="pb-2">
@@ -160,7 +197,7 @@ export default async function DashboardPage() {
             Escolha por onde continuar seu fluxo de trabalho.
           </p>
         </div>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {actionCards.map((item) => {
             const Icon = item.icon
             return (

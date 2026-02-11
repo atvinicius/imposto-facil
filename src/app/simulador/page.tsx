@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { 
-  calcularSimulacao, 
+import {
+  calcularSimulacao,
   gerarTeaser,
+  saveSimulatorData,
   NIVEL_RISCO_LABELS,
   type SimuladorInput,
   type SimuladorResult,
@@ -64,12 +65,12 @@ export default function SimuladorPage() {
 
   const handleNext = () => {
     if (step === 4 && isStepComplete(4)) {
-      // Calculate result
       const fullInput = input as SimuladorInput
       const simulationResult = calcularSimulacao(fullInput)
       const simulationTeaser = gerarTeaser(simulationResult, fullInput)
       setResult(simulationResult)
       setTeaser(simulationTeaser)
+      saveSimulatorData(fullInput, simulationResult, simulationTeaser)
       setStep("result")
     } else if (typeof step === "number" && step < 4) {
       setStep((step + 1) as Step)
@@ -309,8 +310,8 @@ export default function SimuladorPage() {
 
                   {/* CTA */}
                   <Button asChild className="w-full" size="lg">
-                    <Link href="/signup">
-                      {teaser.ctaTexto}
+                    <Link href="/signup?from=simulador">
+                      Ver diagnóstico completo
                     </Link>
                   </Button>
                 </CardContent>
@@ -406,20 +407,17 @@ export default function SimuladorPage() {
               <Card className="bg-primary text-primary-foreground">
                 <CardContent className="p-6 text-center">
                   <h3 className="text-xl font-bold mb-2">
-                    Não deixe sua empresa para trás
+                    Receba seu Diagnóstico Tributário completo
                   </h3>
                   <p className="mb-4 text-primary-foreground/80">
-                    Crie sua conta gratuita e receba seu relatório completo agora
+                    Crie sua conta e veja alertas, checklist de ações e projeção ano a ano
                   </p>
                   <Button asChild variant="secondary" size="lg">
-                    <Link href="/signup">
-                      Criar conta gratuita
+                    <Link href="/signup?from=simulador">
+                      Ver diagnóstico completo
                       <ArrowRight className="h-4 w-4 ml-2" />
                     </Link>
                   </Button>
-                  <p className="text-xs mt-3 text-primary-foreground/60">
-                    Sem cartão de crédito. Cancele quando quiser.
-                  </p>
                 </CardContent>
               </Card>
 

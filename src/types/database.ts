@@ -21,6 +21,11 @@ export type Database = {
           regime_tributario: string | null
           interesses: string[] | null
           onboarding_completed_at: string | null
+          faturamento: string | null
+          simulator_result: Json | null
+          diagnostico_purchased_at: string | null
+          subscription_tier: string
+          stripe_customer_id: string | null
           created_at: string
           updated_at: string
         }
@@ -35,6 +40,11 @@ export type Database = {
           regime_tributario?: string | null
           interesses?: string[] | null
           onboarding_completed_at?: string | null
+          faturamento?: string | null
+          simulator_result?: Json | null
+          diagnostico_purchased_at?: string | null
+          subscription_tier?: string
+          stripe_customer_id?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -49,6 +59,11 @@ export type Database = {
           regime_tributario?: string | null
           interesses?: string[] | null
           onboarding_completed_at?: string | null
+          faturamento?: string | null
+          simulator_result?: Json | null
+          diagnostico_purchased_at?: string | null
+          subscription_tier?: string
+          stripe_customer_id?: string | null
           created_at?: string
           updated_at?: string
         }

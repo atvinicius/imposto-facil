@@ -1,10 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { Suspense, useState } from "react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
+import { AlertTriangle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Badge } from "@/components/ui/badge"
 import {
   Card,
   CardContent,
@@ -15,11 +18,18 @@ import {
 } from "@/components/ui/card"
 import { signup } from "../actions"
 import { GoogleButton } from "@/components/auth/google-button"
+import { getStoredSimulatorData, NIVEL_RISCO_LABELS } from "@/lib/simulator"
 
-export default function SignupPage() {
+function SignupForm() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
+  const searchParams = useSearchParams()
+  const fromSimulator = searchParams.get("from") === "simulador"
+
+  const simulatorData = typeof window !== "undefined" && fromSimulator
+    ? getStoredSimulatorData()
+    : null
 
   async function handleSubmit(formData: FormData) {
     setLoading(true)
@@ -39,6 +49,10 @@ export default function SignupPage() {
       setError("A senha deve ter pelo menos 6 caracteres")
       setLoading(false)
       return
+    }
+
+    if (fromSimulator) {
+      formData.set("from", "simulador")
     }
 
     try {
@@ -62,13 +76,32 @@ export default function SignupPage() {
   return (
     <Card>
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl">Criar conta</CardTitle>
+        <CardTitle className="text-2xl">
+          {fromSimulator ? "Crie sua conta para ver seu diagnóstico" : "Criar conta"}
+        </CardTitle>
         <CardDescription>
-          Preencha os dados abaixo para criar sua conta
+          {fromSimulator
+            ? "Seu Diagnóstico Tributário está quase pronto"
+            : "Preencha os dados abaixo para criar sua conta"
+          }
         </CardDescription>
       </CardHeader>
       <form action={handleSubmit}>
         <CardContent className="space-y-4">
+          {fromSimulator && simulatorData && (
+            <div className="rounded-lg border bg-muted/50 p-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-amber-500" />
+                <span className="text-sm font-medium">Resultado da sua simulação</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge className={NIVEL_RISCO_LABELS[simulatorData.teaser.nivelRisco].color}>
+                  Risco: {NIVEL_RISCO_LABELS[simulatorData.teaser.nivelRisco].label}
+                </Badge>
+              </div>
+              <p className="text-sm text-muted-foreground">{simulatorData.teaser.impactoResumo}</p>
+            </div>
+          )}
           {error && (
             <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">
               {error}
@@ -77,7 +110,7 @@ export default function SignupPage() {
           {success && (
             <div className="bg-green-500/10 text-green-600 text-sm p-3 rounded-md space-y-2">
               <p className="font-medium">Quase lá!</p>
-              <p>Enviamos um link de confirmação para seu email. Clique no link para ativar sua conta e começar a usar o ImpostoFácil.</p>
+              <p>Enviamos um link de confirmação para seu email. Clique no link para ativar sua conta e {fromSimulator ? "ver seu diagnóstico" : "começar a usar o ImpostoFácil"}.</p>
             </div>
           )}
           <div className="space-y-2">
@@ -125,7 +158,7 @@ export default function SignupPage() {
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
           <Button type="submit" className="w-full" disabled={loading || !!success}>
-            {loading ? "Criando conta..." : "Criar conta"}
+            {loading ? "Criando conta..." : fromSimulator ? "Criar conta e ver diagnóstico" : "Criar conta"}
           </Button>
           <div className="relative w-full">
             <div className="absolute inset-0 flex items-center">
@@ -145,5 +178,13 @@ export default function SignupPage() {
         </CardFooter>
       </form>
     </Card>
+  )
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense>
+      <SignupForm />
+    </Suspense>
   )
 }

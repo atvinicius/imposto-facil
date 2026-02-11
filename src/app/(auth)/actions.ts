@@ -42,6 +42,11 @@ export async function signup(formData: FormData) {
   const email = formData.get("email") as string
   const password = formData.get("password") as string
   const nome = formData.get("nome") as string
+  const from = formData.get("from") as string | null
+
+  const callbackUrl = from === "simulador"
+    ? `${getURL()}auth/callback?next=/diagnostico`
+    : `${getURL()}auth/callback`
 
   const { error } = await supabase.auth.signUp({
     email,
@@ -50,7 +55,7 @@ export async function signup(formData: FormData) {
       data: {
         nome,
       },
-      emailRedirectTo: `${getURL()}auth/callback`,
+      emailRedirectTo: callbackUrl,
     },
   })
 
