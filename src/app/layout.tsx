@@ -32,9 +32,6 @@ export const metadata: Metadata = {
     "tributos",
     "Brasil",
   ],
-  icons: {
-    icon: "/icon.svg",
-  },
 }
 
 export default function RootLayout({
