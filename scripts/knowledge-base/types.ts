@@ -37,6 +37,7 @@ export const CategorySchema = z.enum([
   "transicao",
   "glossario",
   "setores",
+  "regimes",
   "faq",
 ])
 export type Category = z.infer<typeof CategorySchema>

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
+import { MethodologyCard } from "@/components/ui/methodology-card"
 import {
   calcularSimulacao,
   gerarTeaser,
@@ -330,6 +331,9 @@ export default function SimuladorPage() {
                   </Button>
                 </CardContent>
               </Card>
+
+              {/* Methodology */}
+              <MethodologyCard metodologia={result.metodologia} compact />
 
               {/* Alerts */}
               <Card>

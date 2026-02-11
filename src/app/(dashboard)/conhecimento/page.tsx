@@ -1,4 +1,6 @@
 import { Suspense } from "react"
+import Link from "next/link"
+import { MessageSquare } from "lucide-react"
 import { categories, getArticlesByCategory, searchArticles, type CategoryKey } from "@/lib/content"
 import { CategoryCard } from "@/components/knowledge/category-card"
 import { ArticleCard } from "@/components/knowledge/article-card"
@@ -30,10 +32,17 @@ export default async function KnowledgePage({ searchParams }: KnowledgePageProps
         </Suspense>
 
         {results.length === 0 ? (
-          <div className="text-center py-12">
+          <div className="text-center py-12 space-y-4">
             <p className="text-muted-foreground">
               Nenhum resultado encontrado para &ldquo;{query}&rdquo;
             </p>
+            <Link
+              href="/assistente"
+              className="inline-flex items-center gap-2 text-primary hover:underline"
+            >
+              <MessageSquare className="h-4 w-4" />
+              Pergunte ao assistente virtual
+            </Link>
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

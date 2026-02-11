@@ -11,6 +11,17 @@ export interface ArticleFrontmatter {
   tags?: string[]
   publishedAt?: string
   updatedAt?: string
+  lastVerified?: string
+  difficulty?: "basico" | "intermediario" | "avancado"
+  sources?: {
+    name: string
+    url?: string
+    dateAccessed?: string
+    articles?: string[]
+  }[]
+  relatedArticles?: string[]
+  searchKeywords?: string[]
+  commonQuestions?: string[]
 }
 
 export interface Article {
@@ -26,6 +37,9 @@ export interface ArticleSummary {
   title: string
   description: string
   tags?: string[]
+  searchKeywords?: string[]
+  commonQuestions?: string[]
+  difficulty?: "basico" | "intermediario" | "avancado"
 }
 
 export const categories = {
@@ -54,6 +68,21 @@ export const categories = {
     description: "Termos e definicoes importantes",
     fullName: "Glossario de Termos",
   },
+  setores: {
+    name: "Setores",
+    description: "Impacto por setor de atividade",
+    fullName: "Impacto por Setor",
+  },
+  regimes: {
+    name: "Regimes",
+    description: "Guias por regime tributario",
+    fullName: "Guias por Regime Tributario",
+  },
+  faq: {
+    name: "FAQ",
+    description: "Perguntas frequentes sobre a reforma",
+    fullName: "Perguntas Frequentes",
+  },
 } as const
 
 export type CategoryKey = keyof typeof categories
@@ -79,6 +108,9 @@ export function getArticlesByCategory(category: string): ArticleSummary[] {
       title: data.title || slug,
       description: data.description || "",
       tags: data.tags || [],
+      searchKeywords: data.searchKeywords || [],
+      commonQuestions: data.commonQuestions || [],
+      difficulty: data.difficulty,
     }
   })
 
@@ -104,7 +136,13 @@ export function getArticle(category: string, slug: string): Article | null {
       category: data.category || category,
       tags: data.tags || [],
       publishedAt: data.publishedAt,
-      updatedAt: data.updatedAt,
+      updatedAt: data.updatedAt || data.lastUpdated,
+      lastVerified: data.lastVerified,
+      difficulty: data.difficulty,
+      sources: data.sources || [],
+      relatedArticles: data.relatedArticles || [],
+      searchKeywords: data.searchKeywords || [],
+      commonQuestions: data.commonQuestions || [],
     },
     content,
   }
@@ -129,6 +167,8 @@ export function searchArticles(query: string): ArticleSummary[] {
     (article) =>
       article.title.toLowerCase().includes(lowerQuery) ||
       article.description.toLowerCase().includes(lowerQuery) ||
-      article.tags?.some((tag) => tag.toLowerCase().includes(lowerQuery))
+      article.tags?.some((tag) => tag.toLowerCase().includes(lowerQuery)) ||
+      article.searchKeywords?.some((kw) => kw.toLowerCase().includes(lowerQuery)) ||
+      article.commonQuestions?.some((q) => q.toLowerCase().includes(lowerQuery))
   )
 }

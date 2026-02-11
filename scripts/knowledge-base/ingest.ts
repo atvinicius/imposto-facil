@@ -12,7 +12,9 @@
  *   --category   Filter by category (can be repeated)
  */
 
-import "dotenv/config"
+import { config } from "dotenv"
+config({ path: ".env.local" })
+config()
 import * as fs from "fs"
 import * as path from "path"
 import * as crypto from "crypto"

@@ -53,6 +53,15 @@ export interface SimuladorResult {
   // Ações recomendadas (teaser - só mostra 2, resto fica gated)
   acoesRecomendadas: string[]
   
+  // Metodologia e fontes da simulação
+  metodologia: {
+    resumo: string
+    confianca: "alta" | "media" | "baixa"
+    fontes: string[]
+    limitacoes: string[]
+    ultimaAtualizacao: string
+  }
+
   // Seção gated (só mostra após signup/pagamento)
   gatedContent: {
     checklistCompleto: string[]
