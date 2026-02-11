@@ -7,7 +7,6 @@ import {
   ArrowRight,
   CheckCircle,
   Clock,
-  Download,
   Lock,
   Sparkles,
   TrendingUp,
@@ -16,6 +15,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { GatedSection } from "@/components/ui/gated-section"
+import { PdfDownloadButton } from "@/components/pdf-download-button"
 import type { SimuladorInput, SimuladorResult } from "@/lib/simulator"
 import { NIVEL_RISCO_LABELS, gerarTeaser } from "@/lib/simulator"
 import { useAnalytics } from "@/lib/analytics/track"
@@ -332,20 +332,12 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
       <Card>
         <CardContent className="p-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Download className="h-5 w-5 text-muted-foreground" />
             <div>
               <p className="font-medium">Exportar PDF</p>
               <p className="text-sm text-muted-foreground">Compartilhe com seu contador</p>
             </div>
           </div>
-          <Button variant="outline" disabled={!isPaid}>
-            {isPaid ? "Baixar PDF" : (
-              <>
-                <Lock className="h-4 w-4 mr-2" />
-                Exclusivo do plano completo
-              </>
-            )}
-          </Button>
+          <PdfDownloadButton isPaid={isPaid} />
         </CardContent>
       </Card>
 

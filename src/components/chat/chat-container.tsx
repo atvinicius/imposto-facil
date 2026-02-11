@@ -1,24 +1,22 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { MessageCircle } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { ChatMessage } from "./chat-message"
 import { ChatInput } from "./chat-input"
 import { ModelSelector, DEFAULT_MODEL } from "./model-selector"
-import { useChat } from "@/hooks/use-chat"
+import { DudaWelcome } from "./duda-welcome"
+import { FollowUpSuggestions } from "./follow-up-suggestions"
 import { Skeleton } from "@/components/ui/skeleton"
+import type { useChat } from "@/hooks/use-chat"
 
 interface ChatContainerProps {
-  conversationId?: string
+  chat: ReturnType<typeof useChat>
 }
 
-export function ChatContainer({ conversationId }: ChatContainerProps) {
+export function ChatContainer({ chat }: ChatContainerProps) {
   const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL)
-  const { messages, isLoading, error, sendMessage } = useChat({
-    conversationId,
-    model: selectedModel,
-  })
+  const { messages, isLoading, error, sendMessage, suggestions } = chat
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -39,39 +37,7 @@ export function ChatContainer({ conversationId }: ChatContainerProps) {
       </div>
       <ScrollArea className="flex-1 pr-4" ref={scrollRef}>
         {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center p-8">
-            <div className="p-4 bg-muted rounded-full mb-4">
-              <MessageCircle className="h-8 w-8 text-muted-foreground" />
-            </div>
-            <h3 className="text-lg font-semibold mb-2">
-              Bem-vindo ao Assistente ImpostoFacil
-            </h3>
-            <p className="text-muted-foreground max-w-md">
-              Tire suas duvidas sobre a reforma tributaria brasileira, IBS, CBS,
-              Imposto Seletivo e muito mais. Estou aqui para ajudar!
-            </p>
-            <div className="grid gap-2 mt-6 text-sm">
-              <p className="text-muted-foreground">Experimente perguntar:</p>
-              <button
-                onClick={() => sendMessage("O que e o IBS e como ele vai funcionar?")}
-                className="text-left px-4 py-2 rounded-lg border hover:bg-muted transition-colors"
-              >
-                O que e o IBS e como ele vai funcionar?
-              </button>
-              <button
-                onClick={() => sendMessage("Qual o cronograma de transicao da reforma tributaria?")}
-                className="text-left px-4 py-2 rounded-lg border hover:bg-muted transition-colors"
-              >
-                Qual o cronograma de transicao da reforma tributaria?
-              </button>
-              <button
-                onClick={() => sendMessage("Como minha empresa sera afetada pela reforma?")}
-                className="text-left px-4 py-2 rounded-lg border hover:bg-muted transition-colors"
-              >
-                Como minha empresa sera afetada pela reforma?
-              </button>
-            </div>
-          </div>
+          <DudaWelcome onSendMessage={sendMessage} />
         ) : (
           <div className="space-y-0">
             {messages.map((message) => (
@@ -89,6 +55,12 @@ export function ChatContainer({ conversationId }: ChatContainerProps) {
           </div>
         )}
       </ScrollArea>
+
+      <FollowUpSuggestions
+        suggestions={suggestions}
+        onSelect={sendMessage}
+        isLoading={isLoading}
+      />
 
       {error && (
         <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md mb-4">

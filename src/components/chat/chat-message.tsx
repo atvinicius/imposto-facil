@@ -1,17 +1,25 @@
 import Link from "next/link"
-import { User, Bot, ExternalLink } from "lucide-react"
+import { User, ExternalLink } from "lucide-react"
 import ReactMarkdown from "react-markdown"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import { getCategoryConfig } from "@/lib/chat/category-colors"
+import { DudaAvatar } from "./duda-avatar"
 import type { Message } from "@/hooks/use-chat"
 
 interface ChatMessageProps {
   message: Message
 }
 
+// Strip [SUGESTOES]...[/SUGESTOES] blocks during rendering (handles streaming edge case)
+function stripSuggestions(content: string): string {
+  return content.replace(/\[SUGESTOES\][\s\S]*?(\[\/SUGESTOES\]|$)/, "").trim()
+}
+
 export function ChatMessage({ message }: ChatMessageProps) {
   const isUser = message.role === "user"
+  const displayContent = isUser ? message.content : stripSuggestions(message.content)
 
   return (
     <div
@@ -20,11 +28,15 @@ export function ChatMessage({ message }: ChatMessageProps) {
         isUser ? "flex-row-reverse" : "flex-row"
       )}
     >
-      <Avatar className="h-8 w-8 shrink-0">
-        <AvatarFallback className={cn(isUser ? "bg-primary" : "bg-muted")}>
-          {isUser ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
-        </AvatarFallback>
-      </Avatar>
+      {isUser ? (
+        <Avatar className="h-8 w-8 shrink-0">
+          <AvatarFallback className="bg-primary">
+            <User className="h-4 w-4" />
+          </AvatarFallback>
+        </Avatar>
+      ) : (
+        <DudaAvatar size="sm" className="shrink-0" />
+      )}
 
       <div
         className={cn(
@@ -41,7 +53,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
           )}
         >
           {isUser ? (
-            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+            <p className="text-sm whitespace-pre-wrap">{displayContent}</p>
           ) : (
             <div className="prose prose-sm dark:prose-invert max-w-none">
               <ReactMarkdown
@@ -86,28 +98,37 @@ export function ChatMessage({ message }: ChatMessageProps) {
                   ),
                 }}
               >
-                {message.content}
+                {displayContent}
               </ReactMarkdown>
             </div>
           )}
         </div>
 
         {message.sources && message.sources.length > 0 && (
-          <div className="flex flex-wrap gap-1">
-            {message.sources.map((source, index) => (
-              <Link
-                key={index}
-                href={`/conhecimento/${source.category}/${source.path.split("/").pop()?.replace(".mdx", "")}`}
-              >
-                <Badge
-                  variant="outline"
-                  className="text-xs cursor-pointer hover:bg-muted"
+          <div className="flex flex-wrap gap-1 items-center">
+            <span className="text-xs text-muted-foreground mr-1">Fontes:</span>
+            {message.sources.map((source, index) => {
+              const config = getCategoryConfig(source.category)
+              return (
+                <Link
+                  key={index}
+                  href={`/conhecimento/${source.category}/${source.path.split("/").pop()?.replace(".mdx", "")}`}
                 >
-                  <ExternalLink className="h-3 w-3 mr-1" />
-                  {source.title}
-                </Badge>
-              </Link>
-            ))}
+                  <Badge
+                    variant="outline"
+                    className={cn(
+                      "text-xs cursor-pointer",
+                      config.bgClass,
+                      config.textClass,
+                      config.borderClass
+                    )}
+                  >
+                    <ExternalLink className="h-3 w-3 mr-1" />
+                    {source.title}
+                  </Badge>
+                </Link>
+              )
+            })}
           </div>
         )}
       </div>

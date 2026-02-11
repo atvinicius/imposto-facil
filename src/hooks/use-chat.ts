@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useCallback, useRef } from "react"
+import { parseSuggestions } from "@/lib/chat/parse-suggestions"
 
 export interface Message {
   id: string
@@ -13,14 +14,20 @@ export interface UseChatOptions {
   conversationId?: string
   model?: string
   onError?: (error: Error) => void
+  onConversationCreated?: (id: string) => void
 }
 
 export function useChat(options: UseChatOptions = {}) {
-  const { conversationId, model, onError } = options
+  const { model, onError, onConversationCreated } = options
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
+  const [suggestions, setSuggestions] = useState<string[]>([])
+  const [activeConversationId, setActiveConversationId] = useState<string | undefined>(
+    options.conversationId
+  )
   const abortControllerRef = useRef<AbortController | null>(null)
+  const creatingConversationRef = useRef(false)
 
   const sendMessage = useCallback(
     async (content: string) => {
@@ -35,6 +42,31 @@ export function useChat(options: UseChatOptions = {}) {
       setMessages((prev) => [...prev, userMessage])
       setIsLoading(true)
       setError(null)
+      setSuggestions([])
+
+      // Auto-create conversation on first message
+      let convId = activeConversationId
+      if (!convId && !creatingConversationRef.current) {
+        creatingConversationRef.current = true
+        try {
+          const title = content.trim().slice(0, 80)
+          const res = await fetch("/api/conversations", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title }),
+          })
+          if (res.ok) {
+            const conv = await res.json()
+            convId = conv.id
+            setActiveConversationId(conv.id)
+            onConversationCreated?.(conv.id)
+          }
+        } catch {
+          // Continue without conversation persistence
+        } finally {
+          creatingConversationRef.current = false
+        }
+      }
 
       const assistantMessage: Message = {
         id: crypto.randomUUID(),
@@ -57,7 +89,7 @@ export function useChat(options: UseChatOptions = {}) {
               role: m.role,
               content: m.content,
             })),
-            conversationId,
+            conversationId: convId,
             model,
           }),
           signal: abortControllerRef.current.signal,
@@ -122,6 +154,20 @@ export function useChat(options: UseChatOptions = {}) {
             return newMessages
           })
         }
+
+        // Parse suggestions from the final message
+        setMessages((prev) => {
+          const newMessages = [...prev]
+          const lastMessage = newMessages[newMessages.length - 1]
+          if (lastMessage.role === "assistant" && lastMessage.content) {
+            const { cleanContent, suggestions: parsed } = parseSuggestions(lastMessage.content)
+            lastMessage.content = cleanContent
+            if (parsed.length > 0) {
+              setSuggestions(parsed)
+            }
+          }
+          return newMessages
+        })
       } catch (err) {
         if (err instanceof Error && err.name === "AbortError") {
           return
@@ -137,15 +183,53 @@ export function useChat(options: UseChatOptions = {}) {
         abortControllerRef.current = null
       }
     },
-    [messages, conversationId, model, isLoading, onError]
+    [messages, activeConversationId, model, isLoading, onError, onConversationCreated]
   )
 
   const stop = useCallback(() => {
     abortControllerRef.current?.abort()
   }, [])
 
-  const clearMessages = useCallback(() => {
+  const loadConversation = useCallback(async (id: string) => {
+    try {
+      const res = await fetch(`/api/conversations/${id}`)
+      if (!res.ok) throw new Error("Erro ao carregar conversa")
+      const data = await res.json()
+
+      const loadedMessages: Message[] = (data.messages || []).map(
+        (m: { id: string; role: "user" | "assistant"; content: string; sources?: Message["sources"] }) => ({
+          id: m.id,
+          role: m.role,
+          content: m.content,
+          sources: m.sources,
+        })
+      )
+
+      setMessages(loadedMessages)
+      setActiveConversationId(id)
+      setSuggestions([])
+      setError(null)
+
+      // Parse suggestions from the last assistant message
+      const lastAssistant = [...loadedMessages].reverse().find((m) => m.role === "assistant")
+      if (lastAssistant) {
+        const { cleanContent, suggestions: parsed } = parseSuggestions(lastAssistant.content)
+        if (parsed.length > 0) {
+          lastAssistant.content = cleanContent
+          setSuggestions(parsed)
+        }
+      }
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error("Erro desconhecido")
+      setError(error)
+      onError?.(error)
+    }
+  }, [onError])
+
+  const startNewConversation = useCallback(() => {
     setMessages([])
+    setActiveConversationId(undefined)
+    setSuggestions([])
     setError(null)
   }, [])
 
@@ -156,6 +240,9 @@ export function useChat(options: UseChatOptions = {}) {
     error,
     sendMessage,
     stop,
-    clearMessages,
+    activeConversationId,
+    loadConversation,
+    startNewConversation,
+    suggestions,
   }
 }

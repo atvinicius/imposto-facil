@@ -6,6 +6,7 @@ import Link from "next/link"
 import {
   CheckCircle,
   CreditCard,
+  Loader2,
   Sparkles,
   Tag,
 } from "lucide-react"
@@ -47,6 +48,8 @@ export default function CheckoutPage() {
       track("checkout_viewed")
     }
   }, [track])
+  const [stripeLoading, setStripeLoading] = useState(false)
+  const [stripeError, setStripeError] = useState<string | null>(null)
 
   async function handlePromoCode() {
     if (!promoCode.trim()) return
@@ -65,6 +68,29 @@ export default function CheckoutPage() {
       setTimeout(() => {
         router.push("/diagnostico?unlocked=true")
       }, 1500)
+    }
+  }
+
+  async function handleStripeCheckout() {
+    setStripeLoading(true)
+    setStripeError(null)
+
+    try {
+      const response = await fetch("/api/stripe/checkout", { method: "POST" })
+      const data = await response.json()
+
+      if (!response.ok) {
+        setStripeError(data.error || "Erro ao iniciar pagamento")
+        setStripeLoading(false)
+        return
+      }
+
+      if (data.url) {
+        window.location.href = data.url
+      }
+    } catch {
+      setStripeError("Erro de conexão. Tente novamente.")
+      setStripeLoading(false)
     }
   }
 
@@ -135,11 +161,23 @@ export default function CheckoutPage() {
               ))}
             </ul>
 
-            {/* Stripe button (simulated) */}
-            <Button className="w-full" size="lg" disabled>
-              <CreditCard className="h-4 w-4 mr-2" />
-              Pagar com cartão — em breve
+            {/* Stripe checkout */}
+            <Button
+              className="w-full"
+              size="lg"
+              onClick={handleStripeCheckout}
+              disabled={stripeLoading}
+            >
+              {stripeLoading ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <CreditCard className="h-4 w-4 mr-2" />
+              )}
+              {stripeLoading ? "Redirecionando..." : "Pagar R$29 com cartão"}
             </Button>
+            {stripeError && (
+              <p className="text-sm text-destructive text-center">{stripeError}</p>
+            )}
 
             {/* Promo code */}
             <div className="border-t pt-4">
