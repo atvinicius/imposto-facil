@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import {
@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { redeemPromoCode } from "./actions"
+import { useAnalytics } from "@/lib/analytics/track"
 
 const FEATURES = [
   "Todos os alertas com explicações detalhadas",
@@ -38,6 +39,15 @@ export default function CheckoutPage() {
   const [promoError, setPromoError] = useState<string | null>(null)
   const [promoLoading, setPromoLoading] = useState(false)
   const [promoSuccess, setPromoSuccess] = useState(false)
+  const { track } = useAnalytics()
+  const trackedRef = useRef(false)
+
+  useEffect(() => {
+    if (!trackedRef.current) {
+      trackedRef.current = true
+      track("checkout_viewed")
+    }
+  }, [track])
   const [stripeLoading, setStripeLoading] = useState(false)
   const [stripeError, setStripeError] = useState<string | null>(null)
 
@@ -54,6 +64,7 @@ export default function CheckoutPage() {
       setPromoLoading(false)
     } else {
       setPromoSuccess(true)
+      track("diagnostic_purchased", { method: "promo_code" })
       setTimeout(() => {
         router.push("/diagnostico?unlocked=true")
       }, 1500)

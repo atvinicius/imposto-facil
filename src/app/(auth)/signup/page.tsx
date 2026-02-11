@@ -1,6 +1,6 @@
 "use client"
 
-import { Suspense, useState } from "react"
+import { Suspense, useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import {
@@ -27,11 +27,21 @@ import {
 import { signup } from "../actions"
 import { GoogleButton } from "@/components/auth/google-button"
 import { getStoredSimulatorData, NIVEL_RISCO_LABELS } from "@/lib/simulator"
+import { useAnalytics } from "@/lib/analytics/track"
 
 function SimulatorSignupFlow() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
+  const { track } = useAnalytics()
+  const trackedStartRef = useRef(false)
+
+  useEffect(() => {
+    if (!trackedStartRef.current) {
+      trackedStartRef.current = true
+      track("signup_started", { from: "simulador" })
+    }
+  }, [track])
 
   const simulatorData = typeof window !== "undefined"
     ? getStoredSimulatorData()
@@ -56,6 +66,7 @@ function SimulatorSignupFlow() {
         setError(result.error)
       } else if (result?.success) {
         setSuccess(true)
+        track("signup_completed", { from: "simulador" })
       } else {
         setError("Ocorreu um erro inesperado. Tente novamente.")
       }
@@ -254,6 +265,15 @@ function StandardSignupForm() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
+  const { track } = useAnalytics()
+  const trackedStartRef = useRef(false)
+
+  useEffect(() => {
+    if (!trackedStartRef.current) {
+      trackedStartRef.current = true
+      track("signup_started", { from: "standard" })
+    }
+  }, [track])
 
   async function handleSubmit(formData: FormData) {
     setLoading(true)
@@ -280,6 +300,7 @@ function StandardSignupForm() {
         setError(result.error)
       } else if (result?.success) {
         setSuccess(true)
+        track("signup_completed", { from: "standard" })
       } else {
         setError("Ocorreu um erro inesperado. Tente novamente.")
       }

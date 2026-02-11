@@ -45,5 +45,18 @@ export default async function DiagnosticoPage({ searchParams }: DiagnosticoPageP
 
   const isPaid = !!(profile.diagnostico_purchased_at || profile.subscription_tier === "diagnostico" || profile.subscription_tier === "pro")
 
-  return <DiagnosticoReport result={result} input={input} isPaid={isPaid} justUnlocked={justUnlocked} />
+  const checklistProgress = (profile.checklist_progress as { completed: string[]; updated_at: string | null } | null) ?? {
+    completed: [],
+    updated_at: null,
+  }
+
+  return (
+    <DiagnosticoReport
+      result={result}
+      input={input}
+      isPaid={isPaid}
+      justUnlocked={justUnlocked}
+      checklistProgress={checklistProgress}
+    />
+  )
 }

@@ -10,6 +10,7 @@ import {
   ShieldCheck,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { NewsletterSection } from "@/components/landing/newsletter-section"
 
 const FAQ_ITEMS = [
   {
@@ -34,9 +35,38 @@ const FAQ_ITEMS = [
   },
 ]
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      name: "ImpostoFácil",
+      url: "https://impostofacil.com.br",
+      description:
+        "Simulador gratuito + diagnóstico tributário personalizado para empresas brasileiras se prepararem para a reforma tributária (EC 132/2023).",
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web",
+      offers: [
+        { "@type": "Offer", price: "0", priceCurrency: "BRL", name: "Diagnóstico Básico" },
+        { "@type": "Offer", price: "29", priceCurrency: "BRL", name: "Diagnóstico Completo" },
+      ],
+    },
+    {
+      "@type": "Organization",
+      name: "ImpostoFácil",
+      url: "https://impostofacil.com.br",
+      description: "Plataforma de orientação sobre a reforma tributária brasileira.",
+    },
+  ],
+}
+
 export default function LandingPage() {
   return (
     <div className="landing-root relative min-h-screen overflow-x-clip">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="landing-backdrop" aria-hidden />
       <div className="landing-grid" aria-hidden />
 
@@ -90,7 +120,7 @@ export default function LandingPage() {
               </span>
 
               <div className="space-y-5">
-                <h1 className="max-w-3xl text-4xl font-semibold leading-tight tracking-tight text-slate-950 sm:text-5xl lg:text-[3.5rem]">
+                <h1 className="max-w-3xl text-3xl font-semibold leading-tight tracking-tight text-slate-950 sm:text-5xl lg:text-[3.5rem]">
                   Descubra em 2 minutos quanto a reforma tributária vai custar para sua empresa
                 </h1>
                 <p className="max-w-2xl text-base leading-7 text-slate-700 sm:text-lg">
@@ -98,14 +128,14 @@ export default function LandingPage() {
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3">
-                <Button size="lg" asChild>
+              <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+                <Button size="lg" asChild className="w-full sm:w-auto">
                   <Link href="/simulador">
                     Simular impacto agora
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" asChild>
+                <Button size="lg" variant="outline" asChild className="w-full sm:w-auto">
                   <Link href="/login">Já tenho conta</Link>
                 </Button>
               </div>
@@ -114,7 +144,7 @@ export default function LandingPage() {
             </div>
 
             {/* Diagnostic preview mockup */}
-            <div className="landing-reveal landing-reveal-delay-1 rounded-3xl border border-slate-200/80 bg-white/90 p-6 shadow-[0_20px_70px_-40px_rgba(6,24,44,0.6)] backdrop-blur">
+            <div className="landing-reveal landing-reveal-delay-1 hidden md:block rounded-3xl border border-slate-200/80 bg-white/90 p-6 shadow-[0_20px_70px_-40px_rgba(6,24,44,0.6)] backdrop-blur">
               <div className="mb-4 flex items-center justify-between">
                 <p className="text-sm font-medium text-slate-700">Diagnóstico Tributário</p>
                 <span className="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700">
@@ -452,6 +482,9 @@ export default function LandingPage() {
             ))}
           </div>
         </section>
+
+        {/* Newsletter */}
+        <NewsletterSection />
 
         {/* Final CTA */}
         <section className="container mx-auto px-4 pb-20">

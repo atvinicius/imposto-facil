@@ -3,7 +3,6 @@ import {
   ArrowRight,
   Bell,
   BookOpen,
-  Building2,
   Calculator,
   ClipboardCheck,
   Clock,
@@ -16,13 +15,13 @@ import {
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { getUser, getUserProfile } from "@/lib/supabase/server"
 import { categories, getArticlesByCategory } from "@/lib/content"
+import { calculateReadinessScore } from "@/lib/readiness/score"
+import { ReadinessScoreCard } from "./readiness-score"
 
 export default async function DashboardPage() {
   const user = await getUser()
@@ -47,7 +46,7 @@ export default async function DashboardPage() {
   const hasSimulatorData = Boolean(
     profile?.setor && profile?.faturamento && profile?.uf
   )
-  const hasDiagnostic = Boolean(profile?.diagnostico_purchased_at)
+  const readinessScore = profile ? calculateReadinessScore(profile) : null
 
   const tools = [
     {
@@ -125,83 +124,8 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      {/* Status cards */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardDescription className="text-xs font-medium uppercase tracking-wider">
-              Perfil
-            </CardDescription>
-            <User className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-lg font-semibold">
-              {profileCompleted ? "Completo" : "Pendente"}
-            </p>
-            {!profileCompleted && (
-              <Link
-                href="/perfil"
-                className="text-xs text-primary hover:underline"
-              >
-                Completar perfil
-              </Link>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardDescription className="text-xs font-medium uppercase tracking-wider">
-              Diagnóstico
-            </CardDescription>
-            <ClipboardCheck className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-lg font-semibold">
-              {hasDiagnostic
-                ? "Completo"
-                : hasSimulatorData
-                  ? "Disponível"
-                  : "Não gerado"}
-            </p>
-            {!hasDiagnostic && hasSimulatorData && (
-              <Link
-                href="/diagnostico"
-                className="text-xs text-primary hover:underline"
-              >
-                Ver diagnóstico
-              </Link>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardDescription className="text-xs font-medium uppercase tracking-wider">
-              Regime
-            </CardDescription>
-            <Building2 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="truncate text-lg font-semibold">
-              {profile?.regime_tributario || "Não informado"}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardDescription className="text-xs font-medium uppercase tracking-wider">
-              Artigos
-            </CardDescription>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-lg font-semibold">{totalArticles}</p>
-            <p className="text-xs text-muted-foreground">disponíveis</p>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Readiness Score */}
+      {readinessScore && <ReadinessScoreCard score={readinessScore} />}
 
       {/* Alert banners */}
       {hasSimulatorData && (
@@ -265,16 +189,16 @@ export default async function DashboardPage() {
             return (
               <Link key={tool.href} href={tool.href} className="group">
                 <Card className="h-full transition-colors hover:border-foreground/20">
-                  <CardContent className="flex items-start gap-4 p-5">
+                  <CardContent className="flex items-start gap-4 p-4 sm:p-5">
                     <div className={`shrink-0 rounded-lg p-2.5 ${tool.bg}`}>
                       <Icon className={`h-5 w-5 ${tool.color}`} />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h3 className="font-medium">{tool.title}</h3>
-                      <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                      <h3 className="text-sm font-medium sm:text-base">{tool.title}</h3>
+                      <p className="mt-1 line-clamp-2 text-xs text-muted-foreground sm:text-sm">
                         {tool.description}
                       </p>
-                      <span className="mt-2 inline-flex items-center text-sm font-medium text-primary group-hover:underline">
+                      <span className="mt-2 inline-flex items-center text-xs font-medium text-primary group-hover:underline sm:text-sm">
                         {tool.cta}
                         <ArrowRight className="ml-1 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                       </span>

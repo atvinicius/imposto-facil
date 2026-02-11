@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import Link from "next/link"
 import { ArrowLeft, ArrowRight, Calculator, AlertTriangle, CheckCircle, Clock, Lock, TrendingUp, BarChart3 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -19,6 +19,7 @@ import {
   type Setor,
   type FaixaFaturamento,
 } from "@/lib/simulator"
+import { useAnalytics } from "@/lib/analytics/track"
 
 // Options for the quiz
 const REGIME_OPTIONS: { value: RegimeTributario; label: string; description: string }[] = [
@@ -62,6 +63,8 @@ export default function SimuladorPage() {
   const [input, setInput] = useState<Partial<SimuladorInput>>({})
   const [result, setResult] = useState<SimuladorResult | null>(null)
   const [teaser, setTeaser] = useState<SimuladorTeaser | null>(null)
+  const { track } = useAnalytics()
+  const trackedRef = useRef(false)
 
   const handleNext = () => {
     if (step === 4 && isStepComplete(4)) {
@@ -71,6 +74,16 @@ export default function SimuladorPage() {
       setResult(simulationResult)
       setTeaser(simulationTeaser)
       saveSimulatorData(fullInput, simulationResult, simulationTeaser)
+      if (!trackedRef.current) {
+        trackedRef.current = true
+        track("simulator_completed", {
+          regime: fullInput.regime,
+          setor: fullInput.setor,
+          faturamento: fullInput.faturamento,
+          uf: fullInput.uf,
+          risco: simulationResult.nivelRisco,
+        })
+      }
       setStep("result")
     } else if (typeof step === "number" && step < 4) {
       setStep((step + 1) as Step)
@@ -255,16 +268,17 @@ export default function SimuladorPage() {
                 )}
 
                 {/* Navigation */}
-                <div className="flex justify-between mt-6 pt-6 border-t">
+                <div className="flex flex-col-reverse gap-3 mt-6 pt-6 border-t sm:flex-row sm:justify-between">
                   <Button
                     variant="outline"
                     onClick={handleBack}
                     disabled={step === 1}
+                    className="w-full sm:w-auto"
                   >
                     <ArrowLeft className="h-4 w-4 mr-2" />
                     Voltar
                   </Button>
-                  <Button onClick={handleNext} disabled={!canProceed}>
+                  <Button onClick={handleNext} disabled={!canProceed} className="w-full sm:w-auto">
                     {step === 4 ? "Ver resultado" : "Próximo"}
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
