@@ -37,6 +37,7 @@ export default function ResetPasswordPage() {
   }
 
   return (
+    <div className="max-w-md mx-auto w-full">
     <Card>
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl">Recuperar senha</CardTitle>
@@ -81,5 +82,6 @@ export default function ResetPasswordPage() {
         </CardFooter>
       </form>
     </Card>
+    </div>
   )
 }

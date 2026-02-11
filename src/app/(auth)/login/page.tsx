@@ -132,8 +132,10 @@ function LoginSkeleton() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<LoginSkeleton />}>
-      <LoginForm />
-    </Suspense>
+    <div className="max-w-md mx-auto w-full">
+      <Suspense fallback={<LoginSkeleton />}>
+        <LoginForm />
+      </Suspense>
+    </div>
   )
 }

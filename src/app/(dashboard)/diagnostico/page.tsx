@@ -4,7 +4,13 @@ import type { SimuladorInput, SimuladorResult, FaixaFaturamento, RegimeTributari
 import { DiagnosticoClient } from "./diagnostico-client"
 import { DiagnosticoReport } from "./diagnostico-report"
 
-export default async function DiagnosticoPage() {
+interface DiagnosticoPageProps {
+  searchParams: Promise<{ unlocked?: string }>
+}
+
+export default async function DiagnosticoPage({ searchParams }: DiagnosticoPageProps) {
+  const params = await searchParams
+  const justUnlocked = params.unlocked === "true"
   const profile = await getUserProfile()
 
   // Check if profile has enough data to generate a diagnostic
@@ -39,5 +45,5 @@ export default async function DiagnosticoPage() {
 
   const isPaid = !!(profile.diagnostico_purchased_at || profile.subscription_tier === "diagnostico" || profile.subscription_tier === "pro")
 
-  return <DiagnosticoReport result={result} input={input} isPaid={isPaid} />
+  return <DiagnosticoReport result={result} input={input} isPaid={isPaid} justUnlocked={justUnlocked} />
 }

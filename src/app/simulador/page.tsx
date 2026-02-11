@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { ArrowLeft, ArrowRight, Calculator, AlertTriangle, CheckCircle, Clock, Lock } from "lucide-react"
+import { ArrowLeft, ArrowRight, Calculator, AlertTriangle, CheckCircle, Clock, Lock, TrendingUp, BarChart3 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
@@ -384,24 +384,97 @@ export default function SimuladorPage() {
                       </li>
                     ))}
                   </ul>
-                  
-                  {/* Gated content teaser */}
-                  <div className="mt-4 p-4 bg-muted/50 rounded-lg border border-dashed">
-                    <p className="text-sm font-medium mb-2 flex items-center gap-2">
-                      <Lock className="h-4 w-4" />
-                      No relatório completo você recebe:
-                    </p>
-                    <ul className="text-sm text-muted-foreground space-y-1">
-                      <li>✓ Checklist completo de adequação ({result.gatedContent.checklistCompleto.length} itens)</li>
-                      <li>✓ {result.gatedContent.analiseDetalhada}</li>
-                      {result.gatedContent.comparativoRegimes && (
-                        <li>✓ Comparativo: vale mudar de regime tributário?</li>
-                      )}
-                      <li>✓ Alertas automáticos sobre novas regulamentações</li>
-                    </ul>
+                  <p className="text-sm text-muted-foreground mt-3 flex items-center gap-1">
+                    <Lock className="h-4 w-4" />
+                    +{result.acoesRecomendadas.length - 2 + result.gatedContent.checklistCompleto.length} ações no relatório completo
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Year-by-year projection teaser */}
+              <Card className="overflow-hidden">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <TrendingUp className="h-5 w-5 text-primary" />
+                    Projeção Ano a Ano
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {result.gatedContent.projecaoAnual.slice(0, 2).map((proj) => (
+                    <div key={proj.ano} className="flex items-center gap-4 p-3 bg-muted/30 rounded-lg">
+                      <span className="font-mono font-bold text-sm w-12">{proj.ano}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm truncate">{proj.descricao}</p>
+                      </div>
+                      <div className={`text-sm font-medium shrink-0 ${proj.diferencaVsAtual > 0 ? "text-red-600" : "text-green-600"}`}>
+                        {proj.diferencaVsAtual > 0 ? "+" : ""}R$ {Math.abs(proj.diferencaVsAtual).toLocaleString("pt-BR")}
+                      </div>
+                    </div>
+                  ))}
+                  {/* Blurred rows */}
+                  <div className="relative">
+                    <div className="space-y-3 select-none" style={{ filter: "blur(5px)" }}>
+                      {result.gatedContent.projecaoAnual.slice(2, 4).map((proj) => (
+                        <div key={proj.ano} className="flex items-center gap-4 p-3 bg-muted/30 rounded-lg">
+                          <span className="font-mono font-bold text-sm w-12">{proj.ano}</span>
+                          <div className="flex-1">
+                            <p className="text-sm">{proj.descricao}</p>
+                          </div>
+                          <span className="text-sm font-medium">R$ ---</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground bg-background/80 px-4 py-2 rounded-full border">
+                        <Lock className="h-4 w-4" />
+                        +{result.gatedContent.projecaoAnual.length - 2} anos no diagnóstico
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Regime analysis teaser */}
+              {result.gatedContent.analiseRegime && (
+                <Card className="overflow-hidden">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <BarChart3 className="h-5 w-5 text-violet-500" />
+                      Análise de Regime Tributário
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="relative">
+                      <div className="select-none" style={{ filter: "blur(5px)" }}>
+                        <div className="grid grid-cols-2 gap-3 mb-3">
+                          <div className="p-3 bg-muted/30 rounded-lg">
+                            <p className="text-xs text-muted-foreground">Regime atual</p>
+                            <p className="font-medium">{result.gatedContent.analiseRegime.regimeAtual}</p>
+                          </div>
+                          <div className="p-3 bg-green-50 dark:bg-green-950/20 rounded-lg">
+                            <p className="text-xs text-muted-foreground">Sugestão</p>
+                            <p className="font-medium">{result.gatedContent.analiseRegime.regimeSugerido || "Manter atual"}</p>
+                          </div>
+                        </div>
+                        {result.gatedContent.analiseRegime.economiaEstimada && (
+                          <div className="p-3 bg-green-50 dark:bg-green-950/20 rounded-lg text-center">
+                            <p className="text-sm text-muted-foreground">Economia estimada</p>
+                            <p className="text-xl font-bold text-green-600">
+                              R$ {result.gatedContent.analiseRegime.economiaEstimada.toLocaleString("pt-BR")}/ano
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground bg-background/80 px-4 py-2 rounded-full border">
+                          <Lock className="h-4 w-4" />
+                          Desbloqueie por R$29
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Final CTA */}
               <Card className="bg-primary text-primary-foreground">

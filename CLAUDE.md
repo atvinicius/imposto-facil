@@ -105,7 +105,7 @@ Simulator users skip the 4-step onboarding wizard — their profile is auto-fill
   - Action recommendations
   - **Gated content**: 15-20 item checklist, year-by-year projection (2026-2033), regime comparison analysis
 - `src/lib/simulator/storage.ts` — localStorage bridge (`saveSimulatorData`, `getStoredSimulatorData`, `clearStoredSimulatorData`, `simulatorInputToProfile`)
-- `src/app/simulador/page.tsx` — 4-step public quiz, persists results to localStorage, CTAs route to `/signup?from=simulador`
+- `src/app/simulador/page.tsx` — 4-step public quiz, persists results to localStorage, CTAs route to `/signup?from=simulador`. Results page shows blurred year-by-year projection preview and regime analysis teaser to drive signups.
 
 ### Diagnostic Report System (`/diagnostico`)
 Protected route (requires auth, does NOT require onboarding completion).
@@ -120,9 +120,26 @@ Protected route (requires auth, does NOT require onboarding completion).
   5. Regime Comparison (PAID) — full analysis gated
   6. Year-by-Year Projection (PAID) — 2026-2033 projection gated
   7. PDF Export (PAID) — button locked
-  8. Upgrade CTA — waitlist email input (Stripe integration in Phase 2)
+  8. Upgrade CTA — links to `/checkout`, shows alert count + action count
 - `src/app/(dashboard)/diagnostico/actions.ts` — `saveSimulatorDataToProfile()` server action
 - `src/components/ui/gated-section.tsx` — Reusable `<GatedSection locked={boolean}>` component: renders real content with `blur(5px)` + lock icon overlay when locked
+
+### Checkout & Payment Flow (`/checkout`)
+Protected route. Simulates Stripe paywall with promo code bypass (Stripe integration pending for Phase 2).
+
+- `src/app/(dashboard)/checkout/page.tsx` — Client component: side-by-side Free vs Paid tier comparison, disabled Stripe button ("em breve"), promo code input with validation
+- `src/app/(dashboard)/checkout/actions.ts` — `redeemPromoCode()` server action: validates against `VALID_PROMO_CODES` map (currently: "amigos"), updates `subscription_tier` + `diagnostico_purchased_at` in profile
+- On success: redirects to `/diagnostico?unlocked=true` which shows a success banner
+- Diagnostico page reads `?unlocked=true` searchParam and passes `justUnlocked` prop to the report component
+
+### Signup Flow
+Two variants based on `?from=simulador` search param:
+
+1. **Simulator flow** (`/signup?from=simulador`): Two-column layout. Left dark panel shows progress indicator (step 5/5), risk badge + impact summary from localStorage, list of what they'll unlock. Right panel has a compact 3-field form (name, email, password — no confirm), "Desbloquear diagnóstico" CTA, and Google OAuth.
+
+2. **Standard flow** (`/signup`): Traditional centered Card layout with name, email, password + confirm password.
+
+Auth layout (`src/app/(auth)/layout.tsx`) uses `max-w-4xl` container; each page constrains its own width.
 
 ### Landing Page Architecture
 The public landing page (`src/app/page.tsx`) is a conversion-focused single-file page with inline data. Sections:
@@ -136,12 +153,12 @@ The public landing page (`src/app/page.tsx`) is a conversion-focused single-file
 
 Landing page styles are in `src/app/globals.css` (`.landing-root`, `.landing-backdrop`, `.landing-grid`, `.landing-reveal` animations).
 
-### Monetization Tiers (Phase 2: Stripe)
+### Monetization Tiers
 - **Free**: Simulator + basic diagnostic (3 alerts, 2 actions, timeline)
-- **Diagnóstico Completo (R$29 one-time)**: All alerts, full checklist, year-by-year projection, regime analysis, PDF export
-- **Pro (R$19/month)**: Unlimited AI chat, updated diagnostics, priority models
+- **Diagnóstico Completo (R$29 one-time)**: All alerts, full checklist, year-by-year projection, regime analysis, PDF export — currently unlockable via promo code "amigos" at `/checkout`
+- **Pro (R$19/month)**: Unlimited AI chat, updated diagnostics, priority models — coming later
 
-Database columns ready: `diagnostico_purchased_at`, `subscription_tier`, `stripe_customer_id` in `user_profiles`.
+Database columns ready: `diagnostico_purchased_at`, `subscription_tier`, `stripe_customer_id` in `user_profiles`. Stripe integration is Phase 2.
 
 ## Database Schema
 
