@@ -22,11 +22,24 @@ export type FaixaFaturamento =
   | "4.8m_78m"     // Médio: R$4.8M - R$78M
   | "acima_78m"    // Grande: acima de R$78M
 
+export type TipoCustoPrincipal = "materiais" | "servicos" | "folha" | "misto"
+
+export interface EnhancedProfile {
+  fatorR?: number          // 0-100: payroll/revenue ratio
+  pctB2B?: number          // 0-100: % of sales to other businesses
+  tipoCusto?: TipoCustoPrincipal
+  pctInterestadual?: number // 0-100: % interstate sales
+  temIncentivoICMS?: "sim" | "nao" | "nao_sei"
+  numFuncionarios?: string  // bracket
+  exportaServicos?: boolean
+}
+
 export interface SimuladorInput {
   regime: RegimeTributario
   setor: Setor
   faturamento: FaixaFaturamento
   uf: string
+  enhanced?: EnhancedProfile
 }
 
 export interface SimuladorResult {
@@ -60,6 +73,15 @@ export interface SimuladorResult {
     fontes: string[]
     limitacoes: string[]
     ultimaAtualizacao: string
+  }
+
+  // Confidence score (0-100) based on data completeness
+  confiancaPerfil: number
+
+  // Split payment cash flow impact (if payment mix data provided)
+  splitPaymentImpacto?: {
+    perdaFloatMensal: number  // R$ lost working capital per month
+    pctEletronico: number     // % of sales affected by split payment
   }
 
   // Seção gated (só mostra após signup/pagamento)
