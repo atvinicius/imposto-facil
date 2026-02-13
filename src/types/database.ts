@@ -27,6 +27,24 @@ export type Database = {
           subscription_tier: string
           stripe_customer_id: string | null
           checklist_progress: Json | null
+          // Deep personalization (migration 00005)
+          fator_r_estimado: number | null
+          pct_b2b: number | null
+          tipo_custo_principal: string | null
+          pct_interestadual: number | null
+          tem_incentivo_icms: string | null
+          num_funcionarios: string | null
+          exporta_servicos: boolean | null
+          mix_pix: number | null
+          mix_cartao: number | null
+          mix_boleto: number | null
+          mix_dinheiro: number | null
+          fornecedores_regime: string | null
+          tem_contratos_lp: boolean | null
+          importa_bens: boolean | null
+          imovel_proprio: boolean | null
+          faturamento_exato: number | null
+          cnae_principal: string | null
           created_at: string
           updated_at: string
         }
@@ -47,6 +65,23 @@ export type Database = {
           subscription_tier?: string
           stripe_customer_id?: string | null
           checklist_progress?: Json | null
+          fator_r_estimado?: number | null
+          pct_b2b?: number | null
+          tipo_custo_principal?: string | null
+          pct_interestadual?: number | null
+          tem_incentivo_icms?: string | null
+          num_funcionarios?: string | null
+          exporta_servicos?: boolean | null
+          mix_pix?: number | null
+          mix_cartao?: number | null
+          mix_boleto?: number | null
+          mix_dinheiro?: number | null
+          fornecedores_regime?: string | null
+          tem_contratos_lp?: boolean | null
+          importa_bens?: boolean | null
+          imovel_proprio?: boolean | null
+          faturamento_exato?: number | null
+          cnae_principal?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -67,6 +102,23 @@ export type Database = {
           subscription_tier?: string
           stripe_customer_id?: string | null
           checklist_progress?: Json | null
+          fator_r_estimado?: number | null
+          pct_b2b?: number | null
+          tipo_custo_principal?: string | null
+          pct_interestadual?: number | null
+          tem_incentivo_icms?: string | null
+          num_funcionarios?: string | null
+          exporta_servicos?: boolean | null
+          mix_pix?: number | null
+          mix_cartao?: number | null
+          mix_boleto?: number | null
+          mix_dinheiro?: number | null
+          fornecedores_regime?: string | null
+          tem_contratos_lp?: boolean | null
+          importa_bens?: boolean | null
+          imovel_proprio?: boolean | null
+          faturamento_exato?: number | null
+          cnae_principal?: string | null
           created_at?: string
           updated_at?: string
         }

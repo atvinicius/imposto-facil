@@ -18,6 +18,40 @@ import {
   determineConfidence,
 } from "./tax-data"
 
+/**
+ * Compute a dynamic regime adjustment factor using enhanced profile data.
+ * Falls back to the static AJUSTE_REGIME when enhanced data is unavailable.
+ */
+function computeAjuste(input: SimuladorInput): number {
+  const base = AJUSTE_REGIME[input.regime].value
+  const e = input.enhanced
+  if (!e) return base
+
+  // Use cost structure to refine the credit potential
+  if (e.tipoCusto || e.fatorR !== undefined) {
+    const payroll = e.fatorR ?? (e.tipoCusto === "folha" ? 70 : e.tipoCusto === "servicos" ? 40 : e.tipoCusto === "materiais" ? 15 : 35)
+    // Under IBS/CBS, credits come from everything EXCEPT payroll.
+    // creditPotential = 1 - (payroll share that generates no credit)
+    const creditPotential = 1 - (payroll / 100)
+
+    if (input.regime === "lucro_presumido") {
+      // LP currently pays cumulative PIS/Cofins (3.65%). Under reform, moves to full
+      // rate but gets credits on non-payroll costs. Higher payroll = less credit = worse.
+      return 0.6 + (0.5 * (1 - creditPotential)) // range: 0.6 (low payroll) to 1.1 (high payroll)
+    }
+    if (input.regime === "lucro_real") {
+      // LR already has non-cumulative. Reform expands credit base.
+      return 0.55 + (0.35 * (1 - creditPotential)) // range: 0.55 to 0.9
+    }
+    if (input.regime === "simples") {
+      // Simples impact is mostly indirect (B2B competitiveness)
+      return base
+    }
+  }
+
+  return base
+}
+
 function calcularImpacto(input: SimuladorInput): {
   diferencaMin: number
   diferencaMax: number
@@ -27,7 +61,7 @@ function calcularImpacto(input: SimuladorInput): {
   const faturamento = FATURAMENTO_MEDIO[input.faturamento].value
   const cargaAtual = CARGA_ATUAL[input.regime][input.setor].value
   const cargaNova = CARGA_NOVA[input.setor].value
-  const ajuste = AJUSTE_REGIME[input.regime].value
+  const ajuste = computeAjuste(input)
 
   // Carga atual em R$
   const impostoAtualMin = faturamento * (cargaAtual.min / 100)
@@ -72,8 +106,78 @@ function determinarNivelRisco(
   return "baixo"
 }
 
+/**
+ * Calculates a 0–100 confidence score based on how many profile fields are filled.
+ * More data → more accurate simulation → higher confidence shown to user.
+ */
+function calcularConfiancaPerfil(input: SimuladorInput): number {
+  let score = 0
+
+  // Base fields (always collected)
+  if (input.regime !== "nao_sei") score += 20
+  if (input.setor !== "outro") score += 15
+  score += 15 // faturamento is always present
+  if (input.uf) score += 10
+
+  // Enhanced profile fields (progressive profiling)
+  const e = input.enhanced
+  if (e) {
+    if (e.fatorR !== undefined) score += 15
+    if (e.pctB2B !== undefined) score += 10
+    if (e.tipoCusto) score += 10
+    if (e.pctInterestadual !== undefined) score += 5
+    if (e.temIncentivoICMS && e.temIncentivoICMS !== "nao_sei") score += 3
+    if (e.numFuncionarios) score += 2
+    if (e.exportaServicos !== undefined) score += 2
+  }
+
+  return Math.min(score, 100)
+}
+
+/**
+ * Estimates split payment cash flow impact based on payment mix data.
+ * Split payment (starting 2027) automatically withholds IBS/CBS at payment settlement.
+ */
+function calcularSplitPaymentImpacto(
+  input: SimuladorInput,
+  faturamentoBase: number,
+): SimuladorResult["splitPaymentImpacto"] {
+  // Default electronic payment assumptions by sector if no mix data
+  const defaultPctEletronico: Partial<Record<Setor, number>> = {
+    comercio: 75,
+    tecnologia: 90,
+    saude: 60,
+    servicos: 65,
+    educacao: 55,
+    financeiro: 95,
+    industria: 80,
+    construcao: 40,
+    agronegocio: 35,
+  }
+
+  const pctEletronico = defaultPctEletronico[input.setor] ?? 60
+
+  // Estimate monthly revenue affected by split payment
+  const faturamentoMensal = faturamentoBase / 12
+  const revenueAfetada = faturamentoMensal * (pctEletronico / 100)
+
+  // Average IBS+CBS rate (~26.5%). Split payment withholds this at transaction time
+  // instead of allowing the business to hold it until month-end apuração.
+  // Assume average float loss of ~15 days of working capital.
+  const aliquotaMedia = 0.265
+  const diasFloat = 15
+  const taxaDiaria = 0.0004 // ~CDI/252 (approximate)
+  const perdaFloatMensal = Math.round(revenueAfetada * aliquotaMedia * diasFloat * taxaDiaria)
+
+  return {
+    perdaFloatMensal,
+    pctEletronico,
+  }
+}
+
 function gerarAlertas(input: SimuladorInput, percentual: number): string[] {
   const alertas: string[] = []
+  const e = input.enhanced
 
   // Alertas por setor
   if (input.setor === "servicos" && input.regime === "lucro_presumido") {
@@ -87,10 +191,34 @@ function gerarAlertas(input: SimuladorInput, percentual: number): string[] {
   // Alertas por regime
   if (input.regime === "simples") {
     alertas.push("📋 Empresas do Simples podem perder competitividade em vendas B2B (clientes não aproveitam crédito)")
+    // Enhanced: B2B-specific alert for Simples
+    if (e?.pctB2B !== undefined && e.pctB2B > 50) {
+      alertas.push(`🔴 ${e.pctB2B}% das suas vendas são B2B — seus clientes PJ não aproveitam crédito integral. Avalie o Simples Híbrido (opção semestral a partir de set/2026)`)
+    }
   }
 
   if (input.regime === "lucro_presumido" && percentual > 30) {
     alertas.push("🔄 Considere avaliar migração para Lucro Real - pode gerar economia com a reforma")
+  }
+
+  // Enhanced: payroll-heavy alert
+  if (e?.fatorR !== undefined && e.fatorR > 50) {
+    alertas.push(`📊 Folha de pagamento representa ~${e.fatorR}% da receita — folha não gera crédito de IBS/CBS, aumentando sua carga efetiva`)
+  }
+
+  // Enhanced: ICMS incentive confirmation
+  if (e?.temIncentivoICMS === "sim" && input.uf) {
+    alertas.push(`📍 Você confirmou ter incentivo de ICMS em ${input.uf} — esses benefícios serão extintos gradualmente até 2032. Planeje a transição`)
+  }
+
+  // Enhanced: export services benefit
+  if (e?.exportaServicos) {
+    alertas.push("🌍 Exportação de serviços mantém alíquota zero de IBS/CBS — oportunidade de expansão internacional")
+  }
+
+  // Enhanced: interstate operations
+  if (e?.pctInterestadual !== undefined && e.pctInterestadual > 30) {
+    alertas.push(`🚚 ${e.pctInterestadual}% de vendas interestaduais — a mudança para princípio do destino altera a distribuição de arrecadação entre estados`)
   }
 
   // Alertas UF-aware: estados com grandes programas de incentivos fiscais
@@ -222,7 +350,7 @@ function gerarProjecaoAnual(input: SimuladorInput): SimuladorResult["gatedConten
   const cargaAtualMedia = (cargaAtual.min + cargaAtual.max) / 2
   const impostoAtual = faturamento * (cargaAtualMedia / 100)
 
-  const ajuste = AJUSTE_REGIME[input.regime].value
+  const ajuste = computeAjuste(input)
   const cargaNova = CARGA_NOVA[input.setor].value
   const cargaNovaMedia = ((cargaNova.min + cargaNova.max) / 2) * ajuste
 
@@ -265,8 +393,11 @@ function gerarAnaliseRegime(input: SimuladorInput): SimuladorResult["gatedConten
   const cargaReal = CARGA_ATUAL.lucro_real[input.setor].value
   const cargaNova = CARGA_NOVA[input.setor].value
 
-  const custoPresumidoNovo = faturamento * (((cargaNova.min + cargaNova.max) / 2) / 100) * AJUSTE_REGIME.lucro_presumido.value
-  const custoRealNovo = faturamento * (((cargaNova.min + cargaNova.max) / 2) / 100) * AJUSTE_REGIME.lucro_real.value
+  // Use dynamic adjustment if enhanced profile is available
+  const inputLP = { ...input, regime: "lucro_presumido" as RegimeTributario }
+  const inputLR = { ...input, regime: "lucro_real" as RegimeTributario }
+  const custoPresumidoNovo = faturamento * (((cargaNova.min + cargaNova.max) / 2) / 100) * computeAjuste(inputLP)
+  const custoRealNovo = faturamento * (((cargaNova.min + cargaNova.max) / 2) / 100) * computeAjuste(inputLR)
   const economia = Math.round(custoPresumidoNovo - custoRealNovo)
 
   if (input.regime === "lucro_presumido") {
@@ -350,6 +481,8 @@ export function calcularSimulacao(input: SimuladorInput): SimuladorResult {
     datasImportantes: gerarDatasImportantes(input),
     acoesRecomendadas: gerarAcoesRecomendadas(input),
     metodologia: gerarMetodologia(input),
+    confiancaPerfil: calcularConfiancaPerfil(input),
+    splitPaymentImpacto: calcularSplitPaymentImpacto(input, impacto.faturamentoBase),
     gatedContent: {
       checklistCompleto: gerarChecklistCompleto(input),
       analiseDetalhada: "Análise completa do impacto por linha de produto/serviço",

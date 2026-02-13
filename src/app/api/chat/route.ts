@@ -41,12 +41,26 @@ export async function POST(request: Request) {
     // Get the last user message for context search
     const lastUserMessage = messages.filter((m: { role: string }) => m.role === "user").pop()
 
-    // Search knowledge base
+    // Map experience level to difficulty for search filtering
+    const difficultyMap: Record<string, string> = {
+      "Iniciante": "basico",
+      "Basico": "basico",
+      "Intermediario": "intermediario",
+      "Avancado": "avancado",
+      "Especialista": "avancado",
+    }
+
+    const searchDifficulty = profile?.nivel_experiencia ? difficultyMap[profile.nivel_experiencia] : undefined
+
+    // Search knowledge base with user profile context
     let knowledgeContext = ""
     let sources: { title: string; category: string; path: string }[] = []
 
     if (lastUserMessage?.content) {
-      const searchResults = await hybridSearch(lastUserMessage.content, { limit: 3 })
+      const searchResults = await hybridSearch(lastUserMessage.content, {
+        limit: 3,
+        ...(searchDifficulty ? { difficulty: searchDifficulty } : {}),
+      })
 
       if (searchResults.length > 0) {
         sources = searchResults.map((r) => ({
@@ -71,7 +85,15 @@ export async function POST(request: Request) {
       if (profile.porte_empresa) contextParts.push(`Porte da empresa: ${profile.porte_empresa}`)
       if (profile.regime_tributario) contextParts.push(`Regime tributario: ${profile.regime_tributario}`)
       if (profile.faturamento) contextParts.push(`Faixa de faturamento: ${profile.faturamento}`)
-      if (profile.nivel_experiencia) contextParts.push(`Nivel de experiencia com tributacao: ${profile.nivel_experiencia}`)
+      if (profile.nivel_experiencia) {
+        contextParts.push(`Nivel de experiencia com tributacao: ${profile.nivel_experiencia}`)
+        // Add tone guidance based on experience level
+        if (profile.nivel_experiencia === "Iniciante" || profile.nivel_experiencia === "Basico") {
+          contextParts.push(`INSTRUCAO: Este usuario tem pouca experiencia com tributacao. Use linguagem simples, evite jargao tecnico, e explique siglas (IBS, CBS, etc.) quando mencionadas pela primeira vez.`)
+        } else if (profile.nivel_experiencia === "Avancado" || profile.nivel_experiencia === "Especialista") {
+          contextParts.push(`INSTRUCAO: Este usuario tem experiencia avancada com tributacao. Pode usar terminologia tecnica livremente e focar em detalhes operacionais e estrategicos.`)
+        }
+      }
       if (profile.interesses && profile.interesses.length > 0) contextParts.push(`Interesses: ${profile.interesses.join(", ")}`)
       if (profile.simulator_result) {
         const sim = profile.simulator_result

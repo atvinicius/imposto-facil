@@ -1,0 +1,398 @@
+---
+title: Adaptacao de NF-e e Sistemas para a Reforma Tributaria
+description: Guia completo sobre as mudancas na nota fiscal eletronica, adaptacao de ERP, POS e e-commerce, o ano-teste de 2026, o Comite Gestor do IBS e o cronograma de adequacao tecnica.
+category: transicao
+tags: [nf-e, nota fiscal, sistemas, erp, pdv, e-commerce, xml, ibs, cbs, comite gestor, lc 227, adaptacao, 2026]
+publishedAt: 2025-01-20
+lastUpdated: 2026-02-12
+lastVerified: 2026-02-12
+status: published
+difficulty: intermediario
+searchKeywords: [nfe reforma tributaria, nota fiscal ibs cbs, xml nfe novos campos, erp reforma, pdv reforma tributaria, e-commerce reforma, comite gestor ibs, lc 227 2026, sistema nfe atualizar, adaptacao sistema reforma]
+commonQuestions:
+  - O que muda na nota fiscal com a reforma?
+  - Quais novos campos da NF-e sao obrigatorios em 2026?
+  - Preciso trocar meu ERP por causa da reforma?
+  - O que e o Comite Gestor do IBS?
+  - Quanto custa adaptar sistemas para a reforma?
+  - O que acontece se eu nao atualizar a nota fiscal em 2026?
+  - O que a LC 227/2026 mudou?
+relatedArticles:
+  - transicao/preparacao-2026
+  - transicao/cronograma
+  - faq/split-payment
+  - faq/split-payment-operacional
+  - ibs/introducao
+  - cbs/introducao
+sources:
+  - name: "Lei Complementar 214/2025"
+    url: "https://www.planalto.gov.br/ccivil_03/leis/lcp/Lcp214.htm"
+    dateAccessed: "2026-02-12"
+  - name: "Lei Complementar 227/2026"
+    url: "https://www.planalto.gov.br/ccivil_03/leis/lcp/Lcp227.htm"
+    dateAccessed: "2026-02-12"
+  - name: "Emenda Constitucional 132/2023"
+    url: "https://www.planalto.gov.br/ccivil_03/constituicao/emendas/emc/emc132.htm"
+    dateAccessed: "2026-02-12"
+    articles: ["art. 156-B"]
+  - name: "Portal da Nota Fiscal Eletronica"
+    url: "https://www.nfe.fazenda.gov.br/"
+    dateAccessed: "2026-02-12"
+  - name: "Ministerio da Fazenda - Reforma Tributaria"
+    url: "https://www.gov.br/fazenda/pt-br/assuntos/reforma-tributaria"
+    dateAccessed: "2026-02-12"
+---
+
+# Adaptacao de NF-e e Sistemas para a Reforma Tributaria
+
+A reforma tributaria nao muda apenas as aliquotas e os tributos — ela exige uma **transformacao tecnica** na forma como sua empresa emite notas fiscais, calcula impostos e se comunica com o fisco. A partir de **2026**, novos campos sao obrigatorios na NF-e, e sistemas de gestao (ERP, POS, e-commerce) precisam estar adaptados.
+
+Este guia cobre todas as mudancas tecnicas que voce precisa entender e implementar.
+
+## Novos campos obrigatorios na NF-e a partir de 2026
+
+### O que muda no documento fiscal
+
+A nota fiscal eletronica (NF-e, NFC-e e NFS-e) passa a incluir campos especificos para os novos tributos. Mesmo em 2026, com aliquotas de teste (IBS 0,1% + CBS 0,9%), esses campos sao **obrigatorios**.
+
+| Campo novo | Descricao | Obrigatorio em |
+|-----------|-----------|----------------|
+| Valor do IBS | Valor em reais do IBS incidente sobre a operacao | 2026 |
+| Aliquota do IBS | Percentual do IBS aplicado (0,1% em 2026) | 2026 |
+| Valor da CBS | Valor em reais da CBS incidente sobre a operacao | 2026 |
+| Aliquota da CBS | Percentual da CBS aplicada (0,9% em 2026) | 2026 |
+| Codigo do IBS estadual | Parcela do IBS destinada ao Estado de destino | 2026 |
+| Codigo do IBS municipal | Parcela do IBS destinada ao Municipio de destino | 2026 |
+| Base de calculo IBS/CBS | Valor sobre o qual incidem os novos tributos | 2026 |
+| Chave de vinculacao split payment | Identificador para o mecanismo de split payment | 2027 (estimativa) |
+
+### Exemplo de como ficara a NF-e
+
+**Hoje (2025):**
+
+```
+Produto: Servico de consultoria
+Valor: R$ 10.000,00
+ISS (5%): R$ 500,00
+PIS (0,65%): R$ 65,00
+Cofins (3%): R$ 300,00
+Total impostos destacados: R$ 865,00
+```
+
+**A partir de 2026 (campos adicionais):**
+
+```
+Produto: Servico de consultoria
+Valor: R$ 10.000,00
+ISS (5%): R$ 500,00          ← Mantido integralmente
+PIS (0,65%): R$ 65,00        ← Mantido integralmente
+Cofins (3%): R$ 300,00       ← Mantido integralmente
+IBS (0,1%): R$ 10,00         ← NOVO
+  - Parcela estadual: R$ 6,00
+  - Parcela municipal: R$ 4,00
+CBS (0,9%): R$ 90,00         ← NOVO
+Total impostos destacados: R$ 965,00
+```
+
+> **Importante:** Em 2026, os tributos antigos (ISS, PIS, Cofins, ICMS) continuam sendo cobrados **integralmente**. Os novos campos de IBS e CBS sao **adicionais**. A carga tributaria total em 2026 sobe marginalmente (+ 1%).
+
+### Mudancas no XML da NF-e
+
+Para desenvolvedores e equipes de TI, as principais alteracoes no schema XML:
+
+| Elemento XML | Grupo | Descricao |
+|-------------|-------|-----------|
+| `<IBS>` | Novo grupo no item | Contem aliquota, valor e desdobramento estadual/municipal |
+| `<CBS>` | Novo grupo no item | Contem aliquota e valor da CBS federal |
+| `<vIBS>` | Dentro de `<IBS>` | Valor do IBS em reais |
+| `<pIBS>` | Dentro de `<IBS>` | Aliquota do IBS em percentual |
+| `<vIBSUF>` | Dentro de `<IBS>` | Parcela do IBS destinada ao Estado |
+| `<vIBSMun>` | Dentro de `<IBS>` | Parcela do IBS destinada ao Municipio |
+| `<vCBS>` | Dentro de `<CBS>` | Valor da CBS em reais |
+| `<pCBS>` | Dentro de `<CBS>` | Aliquota da CBS em percentual |
+| `<vBCIBSCBS>` | Total | Base de calculo unificada |
+
+> **Nota tecnica:** O schema XML oficial sera publicado pelo ENCAT (Encontro Nacional de Coordenadores e Administradores Tributarios Estaduais) e estara disponivel no [Portal da NF-e](https://www.nfe.fazenda.gov.br/). Acompanhe as notas tecnicas para ter acesso ao XSD atualizado.
+
+### O DANFE tambem muda
+
+O DANFE (Documento Auxiliar da Nota Fiscal Eletronica) — aquele documento impresso que acompanha a mercadoria — tambem precisara exibir os novos tributos:
+
+- Linha adicional para IBS (valor e aliquota)
+- Linha adicional para CBS (valor e aliquota)
+- Desdobramento do IBS em parcela estadual e municipal
+- Total de tributos atualizado incluindo IBS e CBS
+
+## Adaptacao por tipo de sistema
+
+### 1. ERP (Sistema de Gestao Empresarial)
+
+O ERP e o sistema mais critico, pois e dele que partem as notas fiscais e a apuracao tributaria.
+
+**O que precisa mudar:**
+
+| Funcao do ERP | Adaptacao necessaria |
+|--------------|---------------------|
+| Cadastro de tributos | Incluir IBS e CBS como novos tributos, com aliquotas por UF e municipio |
+| Calculo tributario | Novo motor de calculo para IBS/CBS em paralelo aos tributos atuais |
+| Emissao de NF-e | Novo schema XML com campos de IBS/CBS |
+| Escrituracao fiscal | Novo livro digital (EFD) com apuracao de IBS/CBS |
+| Apuracao de creditos | Modulo de controle de creditos de IBS/CBS sobre entradas |
+| Conciliacao bancaria | Reconhecer valores liquidos recebidos via split payment |
+| Relatorios | Demonstrativos com IBS/CBS destacados |
+
+**Perguntas para fazer ao seu fornecedor de ERP:**
+
+1. Voces ja tem versao com suporte a IBS e CBS?
+2. Qual o cronograma de entrega da atualizacao?
+3. O custo esta incluido no contrato de manutencao?
+4. Sera necessario trocar de versao ou e uma atualizacao incremental?
+5. Havera ambiente de testes antes de ir para producao?
+6. Voces ja estao integrados com o sistema do Comite Gestor do IBS?
+
+### 2. POS/PDV (Ponto de Venda)
+
+Sistemas de frente de caixa usados no varejo e servicos precisam de atualizacao.
+
+**O que precisa mudar:**
+
+| Funcao do PDV | Adaptacao necessaria |
+|--------------|---------------------|
+| Emissao de NFC-e | Novos campos de IBS/CBS no cupom fiscal eletronico |
+| Impressao do cupom | Exibicao de IBS e CBS ao consumidor |
+| Calculo em tempo real | Motor de calculo rapido para IBS/CBS na frente de caixa |
+| Integracao com maquininha | Preparacao para split payment automatico |
+| Fechamento de caixa | Conciliacao com valores liquidos (pos-split) |
+
+**Impacto por tipo de varejo:**
+
+| Tipo de negocio | Complexidade de adaptacao | Motivo |
+|----------------|--------------------------|--------|
+| Loja fisica com PDV proprio | **Media** | Atualizacao de software + impressora |
+| Franquia com sistema centralizado | **Baixa** | Franqueador cuida da atualizacao |
+| Autonomo com maquininha | **Baixa** | Adquirente atualiza automaticamente |
+| E-commerce com integracao | **Media-Alta** | Depende da plataforma e do gateway |
+
+### 3. Plataformas de E-commerce
+
+Lojas virtuais tem desafios especificos por envolverem vendas interestaduais e multiplos meios de pagamento.
+
+**O que precisa mudar:**
+
+| Funcao | Adaptacao necessaria |
+|--------|---------------------|
+| Calculo de impostos no checkout | Incluir IBS e CBS no calculo do preco final |
+| Emissao de NF-e/NFC-e | Integracao com sistema de emissao atualizado |
+| Exibicao de impostos | Transparencia tributaria ao consumidor (exigencia legal) |
+| Gateway de pagamento | Preparacao para split payment automatico |
+| Marketplace | Regras de responsabilidade tributaria entre vendedor e plataforma |
+
+**Plataformas populares e status de adaptacao:**
+
+| Plataforma | O que verificar |
+|-----------|----------------|
+| VTEX | Consultar cronograma de atualizacao do Tax Engine |
+| Shopify (Brasil) | Verificar se parceiros de NF-e ja suportam novos campos |
+| WooCommerce | Atualizar plugin de emissao de NF-e (Nota Carioca, TinyERP, etc.) |
+| Magento | Verificar extensao de calculo tributario |
+| Nuvemshop | Consultar suporte sobre atualizacao para IBS/CBS |
+| iFood/Rappi (marketplace) | Plataforma e responsavel pelo calculo — verificar se ja esta adequada |
+
+### 4. Sistemas de Emissao de NFS-e (servicos)
+
+Empresas prestadoras de servicos que emitem NFS-e (nota fiscal de servicos eletronica) tambem precisam adaptar:
+
+| Funcao | Adaptacao |
+|--------|-----------|
+| Emissao de NFS-e | Incluir campos de IBS e CBS alem do ISS |
+| Calculo tributario | IBS/CBS sobre servicos em paralelo ao ISS |
+| Retencao na fonte | Novas regras de retencao de IBS/CBS em servicos |
+| Portal da prefeitura | Verificar se o municipio ja atualizou o sistema de NFS-e |
+
+## O ano-teste de 2026: o que sua empresa deve fazer
+
+Em 2026, as aliquotas de IBS (0,1%) e CBS (0,9%) sao de teste, mas as obrigacoes sao **reais**. Use este ano para validar sistemas sem grandes riscos financeiros.
+
+### O que e obrigatorio em 2026
+
+| Obrigacao | Detalhe | Penalidade por descumprimento |
+|-----------|---------|-------------------------------|
+| Destaque de IBS/CBS na NF-e | Campos novos no XML e DANFE | Rejeicao da nota pela SEFAZ |
+| Apuracao de IBS/CBS | Calculo e declaracao mensal | Multa por omissao de declaracao |
+| Recolhimento de IBS/CBS | Pagamento efetivo dos 1% sobre operacoes | Multa + juros |
+| Split payment (quando aplicavel) | Teste do mecanismo em operacoes eletronicas | Nao aplicavel em 2026 (testes) |
+
+### Como usar 2026 a seu favor
+
+O ano-teste e uma oportunidade de **aprender sem grandes consequencias financeiras** (o impacto e de apenas 1% sobre o faturamento):
+
+1. **Teste a emissao de NF-e**: Emita notas com os novos campos e verifique se passam na validacao da SEFAZ
+2. **Valide o calculo tributario**: Confirme que o ERP calcula IBS e CBS corretamente em todos os cenarios
+3. **Treine a equipe**: O volume financeiro e baixo, mas o processo e o mesmo que sera usado em 2027+
+4. **Identifique falhas**: Descubra problemas de sistema, integracao e processo enquanto o impacto financeiro e minimo
+5. **Teste a conciliacao**: Verifique se os extratos bancarios e a conciliacao refletem os valores liquidos corretamente
+6. **Simule creditos**: Comece a rastrear creditos de IBS/CBS sobre compras para treinar o processo de compensacao
+
+> **Dica pratica:** Crie um checklist mensal nos primeiros meses de 2026 para verificar se todas as notas foram emitidas com os campos corretos e se a apuracao esta batendo. Corrigir problemas em janeiro e muito mais facil do que em dezembro.
+
+## LC 227/2026 - Comite Gestor do IBS
+
+Em **13 de janeiro de 2026**, foi publicada a Lei Complementar 227/2026, que criou oficialmente o **Comite Gestor do IBS** — o orgao responsavel pela administracao do IBS em ambito nacional.
+
+### O que e o Comite Gestor do IBS
+
+| Aspecto | Detalhe |
+|---------|---------|
+| **O que e** | Orgao intergovernamental que administra o IBS (tributo que substitui ICMS e ISS) |
+| **Quem compoe** | Representantes dos 26 Estados, Distrito Federal e dos 5.570 Municipios |
+| **Base legal** | LC 227/2026, regulamentando o art. 156-B da Constituicao (EC 132/2023) |
+| **Sede** | Brasilia/DF |
+| **Inicio das atividades** | 1o semestre de 2026 |
+
+### Atribuicoes do Comite Gestor
+
+O Comite Gestor e responsavel por:
+
+1. **Regulamentacao operacional do IBS**: Definir regras de apuracao, creditos e obrigacoes acessorias
+2. **Sistemas de arrecadacao**: Desenvolver e manter o sistema de cobranca do IBS
+3. **Portal do contribuinte**: Criar portal para cadastro, consultas e declaracoes relacionadas ao IBS
+4. **Distribuicao de receitas**: Definir como o IBS arrecadado sera distribuido entre Estados e Municipios (principio do destino)
+5. **Fiscalizacao**: Coordenar a fiscalizacao do IBS entre os entes federativos
+6. **Contencioso administrativo**: Estabelecer regras para disputas administrativas sobre IBS
+7. **Aliquotas de referencia**: Propor as aliquotas de referencia do IBS
+
+### O que muda para sua empresa
+
+| Acao | Quando | Detalhe |
+|------|--------|---------|
+| Cadastro no portal do IBS | Quando abrir (previsto para 2026) | Registro obrigatorio para contribuintes do IBS |
+| Consulta de aliquotas | Disponivel no portal | Aliquotas por UF e municipio de destino |
+| Declaracao do IBS | A partir de 2026 | Declaracao periodica separada da CBS (Receita Federal) |
+| Creditos de IBS | A partir de 2026 | Controle e compensacao pelo sistema do Comite Gestor |
+
+> **Atencao:** Fique atento ao lancamento do portal do Comite Gestor do IBS. Assim que disponivel, cadastre sua empresa imediatamente. O cadastro sera necessario para emitir NF-e com IBS, apurar creditos e cumprir obrigacoes acessorias.
+
+## Cronograma de mudancas em sistemas
+
+| Periodo | Mudanca principal | Impacto em sistemas |
+|---------|------------------|-------------------|
+| **2026 (ano-teste)** | IBS 0,1% + CBS 0,9% obrigatorios na NF-e | Atualizacao de schema XML, calculo, impressao |
+| **2027** | CBS em aliquota plena substitui PIS/Cofins | Remocao de PIS/Cofins do calculo, CBS plena |
+| **2028** | Consolidacao dos sistemas | Ajustes finos, estabilizacao |
+| **2029** | IBS comeca a substituir ICMS/ISS (10% ao ano) | Calculo progressivo: IBS sobe, ICMS/ISS descem |
+| **2030** | IBS substitui 20% do ICMS/ISS | Atualizacao de aliquotas nos parametros |
+| **2031** | IBS substitui 30% do ICMS/ISS | Idem |
+| **2032** | IBS substitui 40% do ICMS/ISS | Idem |
+| **2033** | Extincao total de ICMS, ISS, PIS, Cofins | Remocao dos tributos antigos do sistema |
+
+### Marcos criticos para TI
+
+| Marco | Data | O que fazer |
+|-------|------|-------------|
+| Schema XML novo da NF-e disponivel | 2o semestre 2025 | Baixar e validar no ERP |
+| Portal do Comite Gestor do IBS | 1o semestre 2026 | Cadastrar a empresa |
+| Inicio da cobranca efetiva | 01/01/2026 | Sistemas 100% operacionais |
+| CBS em aliquota plena | 01/01/2027 | Segundo grande marco de sistema |
+| Split payment em producao | 2027-2028 | Integracao com intermediarios financeiros |
+
+## Estimativas de custo de adaptacao
+
+### Microempresa (ME) - Faturamento ate R$ 360 mil/ano
+
+| Item | Custo estimado |
+|------|---------------|
+| Atualizacao de ERP (se em contrato de manutencao) | Incluido no contrato ou R$ 500-2.000 |
+| Atualizacao de ERP (se sem contrato) | R$ 2.000-5.000 |
+| Treinamento de equipe (1-2 pessoas) | R$ 500-1.500 |
+| Contador (adaptacao de parametros) | Incluido nos honorarios ou R$ 500-1.000 |
+| **Total estimado** | **R$ 1.000-5.000** |
+
+### Empresa de Pequeno Porte (EPP) - Faturamento ate R$ 4,8 milhoes/ano
+
+| Item | Custo estimado |
+|------|---------------|
+| Atualizacao de ERP | R$ 3.000-15.000 |
+| Atualizacao de POS/PDV | R$ 1.000-5.000 |
+| Integracao com e-commerce | R$ 2.000-8.000 |
+| Treinamento de equipe (3-5 pessoas) | R$ 2.000-5.000 |
+| Consultoria tributaria | R$ 3.000-10.000 |
+| **Total estimado** | **R$ 5.000-30.000** |
+
+### Media empresa - Faturamento de R$ 4,8 a R$ 78 milhoes/ano
+
+| Item | Custo estimado |
+|------|---------------|
+| Atualizacao de ERP (projeto) | R$ 20.000-100.000 |
+| Atualizacao de PDV (multiplas lojas) | R$ 5.000-30.000 |
+| Integracao de sistemas | R$ 10.000-50.000 |
+| Treinamento de equipe (10+ pessoas) | R$ 5.000-20.000 |
+| Consultoria tributaria e juridica | R$ 10.000-50.000 |
+| **Total estimado** | **R$ 50.000-250.000** |
+
+> **Nota:** Esses custos sao estimativas baseadas em valores de mercado e podem variar significativamente dependendo do ERP utilizado, da complexidade da operacao e da regiao. Solicite orcamentos formais aos seus fornecedores.
+
+## Dicas para escolher ERP pronto para a reforma
+
+Se voce esta avaliando trocar de sistema de gestao, considere:
+
+### Criterios obrigatorios
+
+1. **Suporte a IBS e CBS**: O ERP ja calcula os novos tributos em paralelo aos atuais?
+2. **Schema XML atualizado**: O sistema emite NF-e com os novos campos obrigatorios?
+3. **Modulo de creditos**: Controla creditos de IBS/CBS sobre entradas?
+4. **Split payment**: Preparado para conciliacao de valores liquidos?
+5. **Atualizacao contratual**: A adequacao a reforma esta coberta pelo contrato de manutencao?
+
+### Criterios desejaveis
+
+1. **Simulador de impacto integrado**: Permite comparar carga tributaria antes e depois
+2. **Migracao de dados**: Facilita a importacao de dados do sistema anterior
+3. **Suporte tecnico durante a transicao**: Equipe dedicada para o periodo de adaptacao
+4. **Historico de atualizacoes fiscais**: O fornecedor ja entregou outras mudancas fiscais no prazo (SPED, eSocial, etc.)?
+
+## Checklist tecnico de preparacao
+
+### Para a equipe de TI
+
+- [ ] Baixar o schema XML atualizado da NF-e no Portal da NF-e
+- [ ] Atualizar o motor de emissao de NF-e para incluir campos de IBS e CBS
+- [ ] Validar o XML gerado no ambiente de homologacao da SEFAZ
+- [ ] Testar a impressao do DANFE com os novos campos
+- [ ] Configurar aliquotas de IBS por Estado e Municipio de destino
+- [ ] Configurar aliquota de CBS federal
+- [ ] Implementar calculo de creditos de IBS/CBS sobre notas de entrada
+- [ ] Atualizar conciliacao bancaria para reconhecer valores liquidos
+- [ ] Testar integracao com adquirentes de cartao (split payment)
+- [ ] Configurar relatorios gerenciais com IBS/CBS destacados
+
+### Para a equipe fiscal/contabil
+
+- [ ] Criar novos codigos contabeis para IBS e CBS
+- [ ] Configurar livros fiscais digitais com apuracao de IBS e CBS
+- [ ] Cadastrar a empresa no portal do Comite Gestor do IBS (quando disponivel)
+- [ ] Definir procedimento de apuracao mensal de creditos
+- [ ] Treinar a equipe no novo fluxo de calculo e declaracao
+
+### Para a equipe comercial
+
+- [ ] Atualizar tabelas de precos para incluir IBS/CBS na formacao do preco
+- [ ] Preparar comunicacao para clientes sobre as mudancas na NF-e
+- [ ] Revisar contratos com clausula tributaria para prever novos tributos
+
+## Fontes oficiais
+
+- [LC 214/2025 - Regulamentacao geral](https://www.planalto.gov.br/ccivil_03/leis/lcp/Lcp214.htm)
+- [LC 227/2026 - Comite Gestor do IBS](https://www.planalto.gov.br/ccivil_03/leis/lcp/Lcp227.htm)
+- [EC 132/2023 - Art. 156-B](https://www.planalto.gov.br/ccivil_03/constituicao/emendas/emc/emc132.htm)
+- [Portal da NF-e](https://www.nfe.fazenda.gov.br/)
+- [Ministerio da Fazenda - Reforma Tributaria](https://www.gov.br/fazenda/pt-br/assuntos/reforma-tributaria)
+
+## Proximos passos
+
+Para continuar a adaptacao tecnica da sua empresa:
+
+- Consulte o checklist geral de preparacao para 2026
+- Entenda o cronograma completo da transicao
+- Leia sobre o split payment e seu impacto operacional
+- Faca uma simulacao personalizada no [Simulador de Impacto](/simulador)
+- Gere seu diagnostico tributario para ver alertas especificos do seu negocio
