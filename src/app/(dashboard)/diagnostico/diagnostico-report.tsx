@@ -345,14 +345,12 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
         </CardContent>
       </Card>
 
-      {/* PDF Export (PAID ONLY) */}
+      {/* PDF Export & Share (PAID ONLY) */}
       <Card>
-        <CardContent className="p-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div>
-              <p className="font-medium">Exportar PDF</p>
-              <p className="text-sm text-muted-foreground">Compartilhe com seu contador</p>
-            </div>
+        <CardContent className="p-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-medium">Exportar e Compartilhar</p>
+            <p className="text-sm text-muted-foreground">Baixe o PDF ou envie direto pelo WhatsApp para seu contador</p>
           </div>
           <PdfDownloadButton isPaid={isPaid} />
         </CardContent>
