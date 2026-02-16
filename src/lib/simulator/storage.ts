@@ -77,6 +77,10 @@ export function simulatorInputToProfile(input: SimuladorInput): {
   porte_empresa: string
   regime_tributario: string
   faturamento: string
+  faturamento_exato?: number
+  fator_r_estimado?: number
+  tipo_custo_principal?: string
+  pct_b2b?: number
 } {
   return {
     uf: input.uf,
@@ -84,5 +88,9 @@ export function simulatorInputToProfile(input: SimuladorInput): {
     porte_empresa: FATURAMENTO_TO_PORTE[input.faturamento],
     regime_tributario: REGIME_MAP[input.regime] || "",
     faturamento: input.faturamento,
+    ...(input.faturamentoExato ? { faturamento_exato: input.faturamentoExato } : {}),
+    ...(input.fatorR !== undefined ? { fator_r_estimado: input.fatorR } : {}),
+    ...(input.tipoCusto ? { tipo_custo_principal: input.tipoCusto } : {}),
+    ...(input.pctB2B !== undefined ? { pct_b2b: input.pctB2B } : {}),
   }
 }

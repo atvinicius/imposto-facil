@@ -16,7 +16,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { login, loginWithMagicLink } from "../actions"
+import { loginWithMagicLink } from "../actions"
 import { GoogleButton } from "@/components/auth/google-button"
 
 function LoginForm() {
@@ -25,14 +25,14 @@ function LoginForm() {
   const callbackError = searchParams.get("error")
   const [error, setError] = useState<string | null>(
     callbackError === "auth_callback_error" || callbackError === "verification_error"
-      ? "O link expirou ou é inválido. Solicite um novo link abaixo ou entre com senha."
+      ? "O link expirou ou é inválido. Solicite um novo link abaixo."
       : null
   )
   const [loading, setLoading] = useState(false)
   const [magicLinkSent, setMagicLinkSent] = useState(false)
   const [sentEmail, setSentEmail] = useState("")
 
-  async function handleMagicLink(formData: FormData) {
+  async function handleSubmit(formData: FormData) {
     setLoading(true)
     setError(null)
 
@@ -60,27 +60,15 @@ function LoginForm() {
     }
   }
 
-  async function handlePasswordLogin(formData: FormData) {
-    setLoading(true)
-    setError(null)
-
-    const result = await login(formData)
-
-    if (result?.error) {
-      setError(result.error)
-      setLoading(false)
-    }
-  }
-
   return (
     <Card>
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl">Entrar</CardTitle>
         <CardDescription>
-          Acesse sua conta com um link por email ou com senha
+          Acesse sua conta com um link por email
         </CardDescription>
       </CardHeader>
-      <form>
+      <form action={handleSubmit}>
         <CardContent className="space-y-4">
           {error && (
             <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">
@@ -113,12 +101,7 @@ function LoginForm() {
           </div>
 
           <div className="space-y-2">
-            <Button
-              type="submit"
-              formAction={handleMagicLink}
-              className="w-full"
-              disabled={loading}
-            >
+            <Button type="submit" className="w-full" disabled={loading}>
               {loading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -135,43 +118,6 @@ function LoginForm() {
               Enviaremos um link para entrar sem senha
             </p>
           </div>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">ou entre com senha</span>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password">Senha</Label>
-              <Link
-                href="/reset-password"
-                className="text-sm text-muted-foreground hover:text-primary"
-              >
-                Esqueceu a senha?
-              </Link>
-            </div>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-            />
-          </div>
-          <input type="hidden" name="redirect" value={redirectTo} />
-          <Button
-            type="submit"
-            formAction={handlePasswordLogin}
-            variant="outline"
-            className="w-full"
-            disabled={loading}
-          >
-            {loading ? "Entrando..." : "Entrar com senha"}
-          </Button>
         </CardContent>
         <CardFooter className="flex flex-col gap-4">
           <div className="relative w-full">

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState, useTransition } from "react"
+import { useEffect, useRef } from "react"
 import Link from "next/link"
 import {
   AlertTriangle,
@@ -18,11 +18,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { GatedSection } from "@/components/ui/gated-section"
 import { PdfDownloadButton } from "@/components/pdf-download-button"
 import { MethodologyCard } from "@/components/ui/methodology-card"
-import type { SimuladorInput, SimuladorResult, TipoCustoPrincipal } from "@/lib/simulator"
+import type { SimuladorInput, SimuladorResult } from "@/lib/simulator"
 import { NIVEL_RISCO_LABELS, gerarTeaser } from "@/lib/simulator"
 import { useAnalytics } from "@/lib/analytics/track"
 import { ChecklistItem } from "./checklist-item"
-import { toggleChecklistItem, saveEnhancedProfile } from "./actions"
+import { toggleChecklistItem } from "./actions"
 
 export interface ChecklistProgress {
   completed: string[]
@@ -64,6 +64,13 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
     return `${index}-${text.substring(0, 20).replace(/\s+/g, "_")}`
   }
 
+  const confidenceLabel =
+    result.confiancaPerfil >= 70 ? "Alta" : result.confiancaPerfil >= 40 ? "Média" : "Baixa"
+  const confidenceColor =
+    result.confiancaPerfil >= 70 ? "text-green-600 border-green-300" :
+    result.confiancaPerfil >= 40 ? "text-amber-600 border-amber-300" :
+    "text-red-600 border-red-300"
+
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
       {/* Success banner */}
@@ -88,9 +95,14 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
         <p className="text-muted-foreground">
           Análise personalizada do impacto da reforma tributária na sua empresa
         </p>
-        <Badge className={`text-base px-4 py-1.5 ${riscoInfo.color}`}>
-          Nível de Risco: {riscoInfo.label}
-        </Badge>
+        <div className="flex items-center justify-center gap-3">
+          <Badge className={`text-base px-4 py-1.5 ${riscoInfo.color}`}>
+            Nível de Risco: {riscoInfo.label}
+          </Badge>
+          <Badge variant="outline" className={confidenceColor}>
+            Precisão: {result.confiancaPerfil}% — {confidenceLabel}
+          </Badge>
+        </div>
       </div>
 
       {/* Impact Summary (FREE) */}
@@ -125,12 +137,6 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
           </p>
         </CardContent>
       </Card>
-
-      {/* Confidence Meter + Progressive Profiling */}
-      <ConfidenceCard
-        confianca={result.confiancaPerfil}
-        enhanced={input.enhanced}
-      />
 
       {/* Methodology */}
       <MethodologyCard metodologia={result.metodologia} />
@@ -370,15 +376,15 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
                 </div>
               </div>
               <div className="text-center">
-                <div className="text-sm text-muted-foreground">Vendas afetadas (eletronicas)</div>
+                <div className="text-sm text-muted-foreground">Vendas afetadas (eletrônicas)</div>
                 <div className="text-xl font-bold">
                   {result.splitPaymentImpacto.pctEletronico}%
                 </div>
               </div>
             </div>
             <p className="text-sm text-muted-foreground">
-              A partir de 2027, o split payment retira automaticamente o IBS/CBS no momento do pagamento eletronico.
-              Sua empresa perde o uso temporario desses recursos como capital de giro.
+              A partir de 2027, o split payment retira automaticamente o IBS/CBS no momento do pagamento eletrônico.
+              Sua empresa perde o uso temporário desses recursos como capital de giro.
             </p>
           </CardContent>
         </Card>
@@ -410,169 +416,5 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
         </Card>
       )}
     </div>
-  )
-}
-
-// ---------------------------------------------------------------------------
-// Confidence Meter + Progressive Profiling Card
-// ---------------------------------------------------------------------------
-
-const CUSTO_OPTIONS: { value: TipoCustoPrincipal; label: string }[] = [
-  { value: "materiais", label: "Materiais / Insumos" },
-  { value: "servicos", label: "Servicos terceirizados" },
-  { value: "folha", label: "Folha de pagamento" },
-  { value: "misto", label: "Misto / Equilibrado" },
-]
-
-function ConfidenceCard({
-  confianca,
-  enhanced,
-}: {
-  confianca: number
-  enhanced?: SimuladorInput["enhanced"]
-}) {
-  const [isPending, startTransition] = useTransition()
-  const [saved, setSaved] = useState(false)
-  const [fatorR, setFatorR] = useState<number>(enhanced?.fatorR ?? 30)
-  const [pctB2B, setPctB2B] = useState<number>(enhanced?.pctB2B ?? 50)
-  const [tipoCusto, setTipoCusto] = useState<TipoCustoPrincipal>(enhanced?.tipoCusto ?? "misto")
-
-  const alreadyFilled = !!(enhanced?.fatorR !== undefined || enhanced?.pctB2B !== undefined || enhanced?.tipoCusto)
-
-  function handleSave() {
-    startTransition(async () => {
-      const result = await saveEnhancedProfile({
-        fatorR,
-        pctB2B,
-        tipoCusto,
-      })
-      if (!result.error) {
-        setSaved(true)
-      }
-    })
-  }
-
-  const barColor =
-    confianca >= 70 ? "bg-green-500" : confianca >= 40 ? "bg-amber-500" : "bg-red-500"
-  const label =
-    confianca >= 70 ? "Alta" : confianca >= 40 ? "Media" : "Baixa"
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <BarChart3 className="h-5 w-5 text-primary" />
-          Precisao do Diagnostico
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Confidence meter */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Confianca da simulacao</span>
-            <span className="font-medium">{confianca}% — {label}</span>
-          </div>
-          <div className="h-2.5 rounded-full bg-muted overflow-hidden">
-            <div
-              className={`h-full rounded-full transition-all ${barColor}`}
-              style={{ width: `${confianca}%` }}
-            />
-          </div>
-          {confianca < 70 && !alreadyFilled && (
-            <p className="text-xs text-muted-foreground">
-              Responda as perguntas abaixo para aumentar a precisao da sua simulacao.
-            </p>
-          )}
-        </div>
-
-        {/* Progressive profiling form */}
-        {!alreadyFilled && !saved && (
-          <div className="border-t pt-4 space-y-4">
-            <p className="text-sm font-medium">Refine seu diagnostico</p>
-
-            {/* Fator R — payroll/revenue */}
-            <div className="space-y-1.5">
-              <label className="text-sm text-muted-foreground">
-                Qual % da receita vai para folha de pagamento?
-              </label>
-              <div className="flex items-center gap-3">
-                <input
-                  type="range"
-                  min={0}
-                  max={100}
-                  step={5}
-                  value={fatorR}
-                  onChange={(e) => setFatorR(Number(e.target.value))}
-                  className="flex-1 accent-primary"
-                />
-                <span className="text-sm font-mono w-10 text-right">{fatorR}%</span>
-              </div>
-            </div>
-
-            {/* B2B % */}
-            <div className="space-y-1.5">
-              <label className="text-sm text-muted-foreground">
-                Qual % das vendas e para outras empresas (B2B)?
-              </label>
-              <div className="flex items-center gap-3">
-                <input
-                  type="range"
-                  min={0}
-                  max={100}
-                  step={5}
-                  value={pctB2B}
-                  onChange={(e) => setPctB2B(Number(e.target.value))}
-                  className="flex-1 accent-primary"
-                />
-                <span className="text-sm font-mono w-10 text-right">{pctB2B}%</span>
-              </div>
-            </div>
-
-            {/* Cost type */}
-            <div className="space-y-1.5">
-              <label className="text-sm text-muted-foreground">
-                Qual seu principal tipo de custo?
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                {CUSTO_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => setTipoCusto(opt.value)}
-                    className={`text-sm px-3 py-2 rounded-md border transition-colors ${
-                      tipoCusto === opt.value
-                        ? "border-primary bg-primary/10 text-primary font-medium"
-                        : "border-border hover:border-primary/50"
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <Button
-              onClick={handleSave}
-              disabled={isPending}
-              className="w-full"
-            >
-              {isPending ? "Salvando..." : "Atualizar diagnostico"}
-            </Button>
-          </div>
-        )}
-
-        {/* Success state */}
-        {(alreadyFilled || saved) && (
-          <div className="border-t pt-3 flex items-center gap-2 text-sm text-green-600">
-            <CheckCircle className="h-4 w-4" />
-            <span>
-              {saved
-                ? "Perfil atualizado! A pagina sera recarregada com dados mais precisos."
-                : "Dados do perfil avancado aplicados a esta simulacao."}
-            </span>
-          </div>
-        )}
-      </CardContent>
-    </Card>
   )
 }

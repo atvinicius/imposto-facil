@@ -8,7 +8,6 @@ import {
   ArrowRight,
   CheckCircle,
   Clock,
-  KeyRound,
   Loader2,
   Lock,
   Mail,
@@ -26,7 +25,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { signup, signupWithMagicLink } from "../actions"
+import { signupWithMagicLink } from "../actions"
 import { GoogleButton } from "@/components/auth/google-button"
 import { getStoredSimulatorData, NIVEL_RISCO_LABELS } from "@/lib/simulator"
 import { useAnalytics } from "@/lib/analytics/track"
@@ -36,7 +35,6 @@ function SimulatorSignupFlow() {
   const [success, setSuccess] = useState(false)
   const [sentEmail, setSentEmail] = useState("")
   const [loading, setLoading] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
   const { track } = useAnalytics()
   const trackedStartRef = useRef(false)
 
@@ -51,7 +49,7 @@ function SimulatorSignupFlow() {
     ? getStoredSimulatorData()
     : null
 
-  async function handleMagicLink(formData: FormData) {
+  async function handleSubmit(formData: FormData) {
     setLoading(true)
     setError(null)
 
@@ -78,56 +76,12 @@ function SimulatorSignupFlow() {
       } else if (result?.success) {
         setSentEmail(email)
         setSuccess(true)
-        track("signup_completed", { from: "simulador", method: "magiclink" })
+        track("signup_completed", { from: "simulador" })
       } else {
         setError("Ocorreu um erro inesperado. Tente novamente.")
       }
     } catch {
       setError("Erro ao enviar link. Verifique sua conexão e tente novamente.")
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  async function handlePasswordSignup(formData: FormData) {
-    setLoading(true)
-    setError(null)
-
-    const nome = formData.get("nome") as string
-    const email = formData.get("email") as string
-    const password = formData.get("password") as string
-
-    if (!nome?.trim()) {
-      setError("Informe seu nome")
-      setLoading(false)
-      return
-    }
-    if (!email?.trim()) {
-      setError("Informe seu email")
-      setLoading(false)
-      return
-    }
-    if (!password || password.length < 6) {
-      setError("A senha deve ter pelo menos 6 caracteres")
-      setLoading(false)
-      return
-    }
-
-    formData.set("from", "simulador")
-
-    try {
-      const result = await signup(formData)
-      if (result?.error) {
-        setError(result.error)
-      } else if (result?.success) {
-        setSentEmail(email)
-        setSuccess(true)
-        track("signup_completed", { from: "simulador", method: "password" })
-      } else {
-        setError("Ocorreu um erro inesperado. Tente novamente.")
-      }
-    } catch {
-      setError("Erro ao criar conta. Verifique sua conexão e tente novamente.")
     } finally {
       setLoading(false)
     }
@@ -156,28 +110,24 @@ function SimulatorSignupFlow() {
   }
 
   return (
-    <div className="grid gap-0 md:grid-cols-5 md:min-h-[560px] overflow-hidden rounded-xl border shadow-lg">
+    <div className="grid gap-0 md:grid-cols-5 md:min-h-[480px] overflow-hidden rounded-xl border shadow-lg">
       {/* Left panel — dark, shows simulator context */}
       <div className="md:col-span-2 bg-gradient-to-br from-slate-950 to-slate-900 text-white p-6 md:p-8 flex flex-col justify-between">
         <div className="space-y-6">
-          {/* Progress indicator */}
           <div className="space-y-2">
             <div className="flex items-center gap-1.5">
               {[1, 2, 3, 4, 5].map((s) => (
                 <div
                   key={s}
                   className={`h-1.5 flex-1 rounded-full transition-all ${
-                    s < 5
-                      ? "bg-white/60"
-                      : "bg-white animate-pulse"
+                    s < 5 ? "bg-white/60" : "bg-white animate-pulse"
                   }`}
                 />
               ))}
             </div>
-            <p className="text-xs text-slate-400">Etapa 5 de 5 — Criar conta</p>
+            <p className="text-xs text-slate-400">Último passo — Criar conta</p>
           </div>
 
-          {/* Risk & Impact */}
           {simulatorData && riscoInfo ? (
             <div className="space-y-4">
               <Badge className={`${riscoInfo.color} text-sm`}>
@@ -199,7 +149,6 @@ function SimulatorSignupFlow() {
             </div>
           )}
 
-          {/* What they'll unlock */}
           <div className="space-y-3 pt-2 border-t border-white/10">
             <p className="text-xs uppercase tracking-wider text-slate-400 font-medium">
               Ao criar sua conta você recebe
@@ -239,7 +188,7 @@ function SimulatorSignupFlow() {
           </p>
         </div>
 
-        <form className="space-y-5">
+        <form action={handleSubmit} className="space-y-5">
           {error && (
             <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">
               {error}
@@ -271,13 +220,7 @@ function SimulatorSignupFlow() {
           </div>
 
           <div className="space-y-2">
-            <Button
-              type="submit"
-              formAction={handleMagicLink}
-              className="w-full"
-              size="lg"
-              disabled={loading}
-            >
+            <Button type="submit" className="w-full" size="lg" disabled={loading}>
               {loading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -294,48 +237,6 @@ function SimulatorSignupFlow() {
               Enviaremos um link de acesso para seu email
             </p>
           </div>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">ou</span>
-            </div>
-          </div>
-
-          {showPassword ? (
-            <div className="space-y-3">
-              <div className="space-y-2">
-                <Label htmlFor="password">Senha</Label>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  placeholder="Mínimo 6 caracteres"
-                  autoComplete="new-password"
-                />
-              </div>
-              <Button
-                type="submit"
-                formAction={handlePasswordSignup}
-                variant="outline"
-                className="w-full"
-                disabled={loading}
-              >
-                <KeyRound className="h-4 w-4 mr-2" />
-                {loading ? "Criando conta..." : "Criar conta com senha"}
-              </Button>
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setShowPassword(true)}
-              className="w-full text-sm text-muted-foreground hover:text-primary transition-colors"
-            >
-              Prefiro criar com senha
-            </button>
-          )}
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
@@ -365,7 +266,6 @@ function StandardSignupForm() {
   const [success, setSuccess] = useState(false)
   const [sentEmail, setSentEmail] = useState("")
   const [loading, setLoading] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
   const { track } = useAnalytics()
   const trackedStartRef = useRef(false)
 
@@ -376,7 +276,7 @@ function StandardSignupForm() {
     }
   }, [track])
 
-  async function handleMagicLink(formData: FormData) {
+  async function handleSubmit(formData: FormData) {
     setLoading(true)
     setError(null)
 
@@ -401,60 +301,12 @@ function StandardSignupForm() {
       } else if (result?.success) {
         setSentEmail(email)
         setSuccess(true)
-        track("signup_completed", { from: "standard", method: "magiclink" })
+        track("signup_completed", { from: "standard" })
       } else {
         setError("Ocorreu um erro inesperado. Tente novamente.")
       }
     } catch {
       setError("Erro ao enviar link. Verifique sua conexão e tente novamente.")
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  async function handlePasswordSignup(formData: FormData) {
-    setLoading(true)
-    setError(null)
-
-    const nome = formData.get("nome") as string
-    const email = formData.get("email") as string
-    const password = formData.get("password") as string
-    const confirmPassword = formData.get("confirmPassword") as string
-
-    if (!nome?.trim()) {
-      setError("Informe seu nome")
-      setLoading(false)
-      return
-    }
-    if (!email?.trim()) {
-      setError("Informe seu email")
-      setLoading(false)
-      return
-    }
-    if (password !== confirmPassword) {
-      setError("As senhas não coincidem")
-      setLoading(false)
-      return
-    }
-    if (!password || password.length < 6) {
-      setError("A senha deve ter pelo menos 6 caracteres")
-      setLoading(false)
-      return
-    }
-
-    try {
-      const result = await signup(formData)
-      if (result?.error) {
-        setError(result.error)
-      } else if (result?.success) {
-        setSentEmail(email)
-        setSuccess(true)
-        track("signup_completed", { from: "standard", method: "password" })
-      } else {
-        setError("Ocorreu um erro inesperado. Tente novamente.")
-      }
-    } catch {
-      setError("Erro ao criar conta. Verifique sua conexão e tente novamente.")
     } finally {
       setLoading(false)
     }
@@ -491,7 +343,7 @@ function StandardSignupForm() {
             Preencha os dados abaixo para criar sua conta
           </p>
         </CardHeader>
-        <form>
+        <form action={handleSubmit}>
           <CardContent className="space-y-4">
             {error && (
               <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">
@@ -506,14 +358,8 @@ function StandardSignupForm() {
               <Label htmlFor="email">Email</Label>
               <Input id="email" name="email" type="email" placeholder="seu@email.com" autoComplete="email" />
             </div>
-
             <div className="space-y-2">
-              <Button
-                type="submit"
-                formAction={handleMagicLink}
-                className="w-full"
-                disabled={loading}
-              >
+              <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -525,46 +371,6 @@ function StandardSignupForm() {
                 Enviaremos um link de acesso para seu email
               </p>
             </div>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">ou</span>
-              </div>
-            </div>
-
-            {showPassword ? (
-              <div className="space-y-3">
-                <div className="space-y-2">
-                  <Label htmlFor="password">Senha</Label>
-                  <Input id="password" name="password" type="password" placeholder="Mínimo 6 caracteres" autoComplete="new-password" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirmar senha</Label>
-                  <Input id="confirmPassword" name="confirmPassword" type="password" autoComplete="new-password" />
-                </div>
-                <Button
-                  type="submit"
-                  formAction={handlePasswordSignup}
-                  variant="outline"
-                  className="w-full"
-                  disabled={loading}
-                >
-                  <KeyRound className="h-4 w-4 mr-2" />
-                  {loading ? "Criando conta..." : "Criar conta com senha"}
-                </Button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setShowPassword(true)}
-                className="w-full text-sm text-muted-foreground hover:text-primary transition-colors"
-              >
-                Prefiro criar com senha
-              </button>
-            )}
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
             <div className="relative w-full">

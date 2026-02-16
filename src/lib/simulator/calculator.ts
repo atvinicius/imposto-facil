@@ -19,36 +19,50 @@ import {
 } from "./tax-data"
 
 /**
- * Compute a dynamic regime adjustment factor using enhanced profile data.
- * Falls back to the static AJUSTE_REGIME when enhanced data is unavailable.
+ * Resolve payroll ratio from the various places it can live on the input.
+ * Priority: top-level fatorR > enhanced.fatorR > inferred from tipoCusto.
+ */
+function resolvePayroll(input: SimuladorInput): number | undefined {
+  if (input.fatorR !== undefined) return input.fatorR
+  if (input.enhanced?.fatorR !== undefined) return input.enhanced.fatorR
+  const custo = input.tipoCusto ?? input.enhanced?.tipoCusto
+  if (custo) {
+    return custo === "folha" ? 70 : custo === "servicos" ? 40 : custo === "materiais" ? 15 : 35
+  }
+  return undefined
+}
+
+/**
+ * Resolve B2B percentage from top-level or enhanced fields.
+ */
+function resolveB2B(input: SimuladorInput): number | undefined {
+  if (input.pctB2B !== undefined) return input.pctB2B
+  if (input.enhanced?.pctB2B !== undefined) return input.enhanced.pctB2B
+  if (input.perfilClientes === "b2b") return 85
+  if (input.perfilClientes === "b2c") return 15
+  if (input.perfilClientes === "misto") return 50
+  return undefined
+}
+
+/**
+ * Compute a dynamic regime adjustment factor using profile data.
+ * Falls back to the static AJUSTE_REGIME when data is unavailable.
  */
 function computeAjuste(input: SimuladorInput): number {
   const base = AJUSTE_REGIME[input.regime].value
-  const e = input.enhanced
-  if (!e) return base
+  const payroll = resolvePayroll(input)
+  if (payroll === undefined) return base
 
-  // Use cost structure to refine the credit potential
-  if (e.tipoCusto || e.fatorR !== undefined) {
-    const payroll = e.fatorR ?? (e.tipoCusto === "folha" ? 70 : e.tipoCusto === "servicos" ? 40 : e.tipoCusto === "materiais" ? 15 : 35)
-    // Under IBS/CBS, credits come from everything EXCEPT payroll.
-    // creditPotential = 1 - (payroll share that generates no credit)
-    const creditPotential = 1 - (payroll / 100)
+  // Under IBS/CBS, credits come from everything EXCEPT payroll.
+  const creditPotential = 1 - (payroll / 100)
 
-    if (input.regime === "lucro_presumido") {
-      // LP currently pays cumulative PIS/Cofins (3.65%). Under reform, moves to full
-      // rate but gets credits on non-payroll costs. Higher payroll = less credit = worse.
-      return 0.6 + (0.5 * (1 - creditPotential)) // range: 0.6 (low payroll) to 1.1 (high payroll)
-    }
-    if (input.regime === "lucro_real") {
-      // LR already has non-cumulative. Reform expands credit base.
-      return 0.55 + (0.35 * (1 - creditPotential)) // range: 0.55 to 0.9
-    }
-    if (input.regime === "simples") {
-      // Simples impact is mostly indirect (B2B competitiveness)
-      return base
-    }
+  if (input.regime === "lucro_presumido") {
+    return 0.6 + (0.5 * (1 - creditPotential))
   }
-
+  if (input.regime === "lucro_real") {
+    return 0.55 + (0.35 * (1 - creditPotential))
+  }
+  // Simples impact is mostly indirect (B2B competitiveness)
   return base
 }
 
@@ -58,7 +72,8 @@ function calcularImpacto(input: SimuladorInput): {
   percentualMedio: number
   faturamentoBase: number
 } {
-  const faturamento = FATURAMENTO_MEDIO[input.faturamento].value
+  // Use exact revenue when provided, fall back to bracket midpoint
+  const faturamento = input.faturamentoExato ?? FATURAMENTO_MEDIO[input.faturamento].value
   const cargaAtual = CARGA_ATUAL[input.regime][input.setor].value
   const cargaNova = CARGA_NOVA[input.setor].value
   const ajuste = computeAjuste(input)
@@ -116,15 +131,20 @@ function calcularConfiancaPerfil(input: SimuladorInput): number {
   // Base fields (always collected)
   if (input.regime !== "nao_sei") score += 20
   if (input.setor !== "outro") score += 15
-  score += 15 // faturamento is always present
+  score += 15 // faturamento bracket is always present
   if (input.uf) score += 10
 
-  // Enhanced profile fields (progressive profiling)
+  // Exact revenue is more precise than bracket
+  if (input.faturamentoExato) score += 5
+
+  // Top-level fields (collected in expanded simulator)
+  if (resolvePayroll(input) !== undefined) score += 15
+  if (resolveB2B(input) !== undefined) score += 10
+  if (input.tipoCusto ?? input.enhanced?.tipoCusto) score += 10
+
+  // Extra enhanced fields
   const e = input.enhanced
   if (e) {
-    if (e.fatorR !== undefined) score += 15
-    if (e.pctB2B !== undefined) score += 10
-    if (e.tipoCusto) score += 10
     if (e.pctInterestadual !== undefined) score += 5
     if (e.temIncentivoICMS && e.temIncentivoICMS !== "nao_sei") score += 3
     if (e.numFuncionarios) score += 2
@@ -177,7 +197,8 @@ function calcularSplitPaymentImpacto(
 
 function gerarAlertas(input: SimuladorInput, percentual: number): string[] {
   const alertas: string[] = []
-  const e = input.enhanced
+  const payroll = resolvePayroll(input)
+  const b2b = resolveB2B(input)
 
   // Alertas por setor
   if (input.setor === "servicos" && input.regime === "lucro_presumido") {
@@ -191,9 +212,8 @@ function gerarAlertas(input: SimuladorInput, percentual: number): string[] {
   // Alertas por regime
   if (input.regime === "simples") {
     alertas.push("📋 Empresas do Simples podem perder competitividade em vendas B2B (clientes não aproveitam crédito)")
-    // Enhanced: B2B-specific alert for Simples
-    if (e?.pctB2B !== undefined && e.pctB2B > 50) {
-      alertas.push(`🔴 ${e.pctB2B}% das suas vendas são B2B — seus clientes PJ não aproveitam crédito integral. Avalie o Simples Híbrido (opção semestral a partir de set/2026)`)
+    if (b2b !== undefined && b2b > 50) {
+      alertas.push(`🔴 ${b2b}% das suas vendas são B2B — seus clientes PJ não aproveitam crédito integral. Avalie o Simples Híbrido (opção semestral a partir de set/2026)`)
     }
   }
 
@@ -201,24 +221,26 @@ function gerarAlertas(input: SimuladorInput, percentual: number): string[] {
     alertas.push("🔄 Considere avaliar migração para Lucro Real - pode gerar economia com a reforma")
   }
 
-  // Enhanced: payroll-heavy alert
-  if (e?.fatorR !== undefined && e.fatorR > 50) {
-    alertas.push(`📊 Folha de pagamento representa ~${e.fatorR}% da receita — folha não gera crédito de IBS/CBS, aumentando sua carga efetiva`)
+  // Payroll-heavy alert
+  if (payroll !== undefined && payroll > 50) {
+    alertas.push(`📊 Folha de pagamento representa ~${payroll}% da receita — folha não gera crédito de IBS/CBS, aumentando sua carga efetiva`)
   }
 
-  // Enhanced: ICMS incentive confirmation
-  if (e?.temIncentivoICMS === "sim" && input.uf) {
+  // ICMS incentive confirmation (from enhanced legacy fields)
+  const temIncentivo = input.enhanced?.temIncentivoICMS
+  if (temIncentivo === "sim" && input.uf) {
     alertas.push(`📍 Você confirmou ter incentivo de ICMS em ${input.uf} — esses benefícios serão extintos gradualmente até 2032. Planeje a transição`)
   }
 
-  // Enhanced: export services benefit
-  if (e?.exportaServicos) {
+  // Export services benefit
+  if (input.enhanced?.exportaServicos) {
     alertas.push("🌍 Exportação de serviços mantém alíquota zero de IBS/CBS — oportunidade de expansão internacional")
   }
 
-  // Enhanced: interstate operations
-  if (e?.pctInterestadual !== undefined && e.pctInterestadual > 30) {
-    alertas.push(`🚚 ${e.pctInterestadual}% de vendas interestaduais — a mudança para princípio do destino altera a distribuição de arrecadação entre estados`)
+  // Interstate operations
+  const pctInter = input.enhanced?.pctInterestadual
+  if (pctInter !== undefined && pctInter > 30) {
+    alertas.push(`🚚 ${pctInter}% de vendas interestaduais — a mudança para princípio do destino altera a distribuição de arrecadação entre estados`)
   }
 
   // Alertas UF-aware: estados com grandes programas de incentivos fiscais
@@ -345,7 +367,7 @@ function gerarChecklistCompleto(input: SimuladorInput): string[] {
 }
 
 function gerarProjecaoAnual(input: SimuladorInput): SimuladorResult["gatedContent"]["projecaoAnual"] {
-  const faturamento = FATURAMENTO_MEDIO[input.faturamento].value
+  const faturamento = input.faturamentoExato ?? FATURAMENTO_MEDIO[input.faturamento].value
   const cargaAtual = CARGA_ATUAL[input.regime][input.setor].value
   const cargaAtualMedia = (cargaAtual.min + cargaAtual.max) / 2
   const impostoAtual = faturamento * (cargaAtualMedia / 100)
@@ -388,12 +410,12 @@ function gerarAnaliseRegime(input: SimuladorInput): SimuladorResult["gatedConten
     }
   }
 
-  const faturamento = FATURAMENTO_MEDIO[input.faturamento].value
+  const faturamento = input.faturamentoExato ?? FATURAMENTO_MEDIO[input.faturamento].value
   const cargaPresumido = CARGA_ATUAL.lucro_presumido[input.setor].value
   const cargaReal = CARGA_ATUAL.lucro_real[input.setor].value
   const cargaNova = CARGA_NOVA[input.setor].value
 
-  // Use dynamic adjustment if enhanced profile is available
+  // Use dynamic adjustment based on payroll/cost structure
   const inputLP = { ...input, regime: "lucro_presumido" as RegimeTributario }
   const inputLR = { ...input, regime: "lucro_real" as RegimeTributario }
   const custoPresumidoNovo = faturamento * (((cargaNova.min + cargaNova.max) / 2) / 100) * computeAjuste(inputLP)
@@ -444,17 +466,30 @@ function gerarAnaliseRegime(input: SimuladorInput): SimuladorResult["gatedConten
 
 function gerarMetodologia(input: SimuladorInput): SimuladorResult["metodologia"] {
   const fontes = collectSources(input.regime, input.setor, input.faturamento, input.uf)
-  const limitacoes = collectLimitacoes(input.regime, input.setor)
+  let limitacoes = collectLimitacoes(input.regime, input.setor)
   const confianca = determineConfidence(input.regime, input.setor)
+
+  // If exact revenue was provided, remove the "uses bracket averages" limitation
+  if (input.faturamentoExato) {
+    limitacoes = limitacoes.filter(l => !l.includes("faixa de faturamento") && !l.includes("ponto médio"))
+  }
 
   const resumoPartes: string[] = [
     "Estimativa baseada em alíquotas da legislação vigente (LC 123/2006, Lei 10.637/2002, Lei 10.833/2003)",
     "e projeções oficiais do Ministério da Fazenda para IBS+CBS (~26,5%).",
   ]
 
+  if (input.faturamentoExato) {
+    resumoPartes.push(`Cálculo com faturamento exato de R$ ${input.faturamentoExato.toLocaleString("pt-BR")}/ano.`)
+  }
+
   const cargaNova = CARGA_NOVA[input.setor]
   if (cargaNova.value.reducao) {
     resumoPartes.push(`Setor com alíquota reduzida conforme LC 214/2025.`)
+  }
+
+  if (resolvePayroll(input) !== undefined) {
+    resumoPartes.push("Ajuste dinâmico aplicado com base na estrutura de custos e folha de pagamento.")
   }
 
   return {

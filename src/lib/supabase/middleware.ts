@@ -50,7 +50,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Auth routes (redirect to dashboard if already logged in)
-  const authPaths = ["/login", "/signup", "/reset-password"]
+  const authPaths = ["/login", "/signup"]
   const isAuthPath = authPaths.some((path) =>
     request.nextUrl.pathname.startsWith(path)
   )

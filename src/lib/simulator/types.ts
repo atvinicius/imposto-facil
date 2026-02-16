@@ -1,21 +1,21 @@
 // Simulator Types
 
 export type RegimeTributario = "simples" | "lucro_presumido" | "lucro_real" | "nao_sei"
-export type Setor = 
-  | "comercio" 
-  | "industria" 
-  | "servicos" 
-  | "agronegocio" 
-  | "tecnologia" 
-  | "saude" 
-  | "educacao" 
-  | "construcao" 
-  | "financeiro" 
+export type Setor =
+  | "comercio"
+  | "industria"
+  | "servicos"
+  | "agronegocio"
+  | "tecnologia"
+  | "saude"
+  | "educacao"
+  | "construcao"
+  | "financeiro"
   | "outro"
 
 export type PorteEmpresa = "MEI" | "ME" | "EPP" | "MEDIO" | "GRANDE"
 
-export type FaixaFaturamento = 
+export type FaixaFaturamento =
   | "ate_81k"      // MEI: até R$81.000/ano
   | "81k_360k"     // ME: R$81.000 - R$360.000
   | "360k_4.8m"    // EPP: R$360.000 - R$4.8M
@@ -23,6 +23,8 @@ export type FaixaFaturamento =
   | "acima_78m"    // Grande: acima de R$78M
 
 export type TipoCustoPrincipal = "materiais" | "servicos" | "folha" | "misto"
+
+export type PerfilClientes = "b2b" | "b2c" | "misto"
 
 export interface EnhancedProfile {
   fatorR?: number          // 0-100: payroll/revenue ratio
@@ -39,7 +41,13 @@ export interface SimuladorInput {
   setor: Setor
   faturamento: FaixaFaturamento
   uf: string
-  enhanced?: EnhancedProfile
+  // New fields collected upfront in the expanded simulator
+  faturamentoExato?: number       // exact annual revenue in R$
+  fatorR?: number                 // 0-100: payroll/revenue ratio
+  tipoCusto?: TipoCustoPrincipal
+  perfilClientes?: PerfilClientes // b2b, b2c, or misto
+  pctB2B?: number                 // 0-100: derived from perfilClientes
+  enhanced?: EnhancedProfile      // legacy progressive profiling (kept for compatibility)
 }
 
 export interface SimuladorResult {
@@ -49,23 +57,23 @@ export interface SimuladorResult {
     max: number
     percentual: number // positivo = paga mais, negativo = paga menos
   }
-  
+
   // Nível de risco/urgência
   nivelRisco: "baixo" | "medio" | "alto" | "critico"
-  
+
   // Principais alertas
   alertas: string[]
-  
+
   // Datas importantes personalizadas
   datasImportantes: {
     data: string
     descricao: string
     urgencia: "info" | "warning" | "danger"
   }[]
-  
+
   // Ações recomendadas (teaser - só mostra 2, resto fica gated)
   acoesRecomendadas: string[]
-  
+
   // Metodologia e fontes da simulação
   metodologia: {
     resumo: string
