@@ -8,8 +8,10 @@ import {
   ArrowRight,
   CheckCircle,
   Clock,
+  KeyRound,
   Loader2,
   Lock,
+  Mail,
   Shield,
   TrendingUp,
 } from "lucide-react"
@@ -24,7 +26,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { signup } from "../actions"
+import { signup, signupWithMagicLink } from "../actions"
 import { GoogleButton } from "@/components/auth/google-button"
 import { getStoredSimulatorData, NIVEL_RISCO_LABELS } from "@/lib/simulator"
 import { useAnalytics } from "@/lib/analytics/track"
@@ -32,7 +34,9 @@ import { useAnalytics } from "@/lib/analytics/track"
 function SimulatorSignupFlow() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [sentEmail, setSentEmail] = useState("")
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const { track } = useAnalytics()
   const trackedStartRef = useRef(false)
 
@@ -47,12 +51,63 @@ function SimulatorSignupFlow() {
     ? getStoredSimulatorData()
     : null
 
-  async function handleSubmit(formData: FormData) {
+  async function handleMagicLink(formData: FormData) {
     setLoading(true)
     setError(null)
 
+    const nome = formData.get("nome") as string
+    const email = formData.get("email") as string
+
+    if (!nome?.trim()) {
+      setError("Informe seu nome")
+      setLoading(false)
+      return
+    }
+    if (!email?.trim()) {
+      setError("Informe seu email")
+      setLoading(false)
+      return
+    }
+
+    formData.set("from", "simulador")
+
+    try {
+      const result = await signupWithMagicLink(formData)
+      if (result?.error) {
+        setError(result.error)
+      } else if (result?.success) {
+        setSentEmail(email)
+        setSuccess(true)
+        track("signup_completed", { from: "simulador", method: "magiclink" })
+      } else {
+        setError("Ocorreu um erro inesperado. Tente novamente.")
+      }
+    } catch {
+      setError("Erro ao enviar link. Verifique sua conexão e tente novamente.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handlePasswordSignup(formData: FormData) {
+    setLoading(true)
+    setError(null)
+
+    const nome = formData.get("nome") as string
+    const email = formData.get("email") as string
     const password = formData.get("password") as string
-    if (password.length < 6) {
+
+    if (!nome?.trim()) {
+      setError("Informe seu nome")
+      setLoading(false)
+      return
+    }
+    if (!email?.trim()) {
+      setError("Informe seu email")
+      setLoading(false)
+      return
+    }
+    if (!password || password.length < 6) {
       setError("A senha deve ter pelo menos 6 caracteres")
       setLoading(false)
       return
@@ -65,8 +120,9 @@ function SimulatorSignupFlow() {
       if (result?.error) {
         setError(result.error)
       } else if (result?.success) {
+        setSentEmail(email)
         setSuccess(true)
-        track("signup_completed", { from: "simulador" })
+        track("signup_completed", { from: "simulador", method: "password" })
       } else {
         setError("Ocorreu um erro inesperado. Tente novamente.")
       }
@@ -85,12 +141,15 @@ function SimulatorSignupFlow() {
     return (
       <div className="max-w-lg mx-auto py-12 text-center space-y-4">
         <div className="mx-auto w-fit rounded-full bg-green-100 dark:bg-green-950/30 p-4">
-          <CheckCircle className="h-8 w-8 text-green-600" />
+          <Mail className="h-8 w-8 text-green-600" />
         </div>
-        <h1 className="text-2xl font-bold">Quase lá!</h1>
+        <h1 className="text-2xl font-bold">Verifique seu email</h1>
         <p className="text-muted-foreground">
-          Enviamos um link de confirmação para seu email. Clique no link para
-          ativar sua conta e ver seu diagnóstico tributário completo.
+          Enviamos um link de acesso para <strong>{sentEmail}</strong>.
+          Clique no link para entrar e ver seu diagnóstico tributário completo.
+        </p>
+        <p className="text-sm text-muted-foreground">
+          Não recebeu? Verifique sua caixa de spam ou lixo eletrônico.
         </p>
       </div>
     )
@@ -180,7 +239,7 @@ function SimulatorSignupFlow() {
           </p>
         </div>
 
-        <form action={handleSubmit} className="space-y-5">
+        <form className="space-y-5">
           {error && (
             <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">
               {error}
@@ -195,7 +254,6 @@ function SimulatorSignupFlow() {
                 name="nome"
                 type="text"
                 placeholder="Seu nome"
-                required
                 autoComplete="name"
                 autoFocus
               />
@@ -207,36 +265,77 @@ function SimulatorSignupFlow() {
                 name="email"
                 type="email"
                 placeholder="seu@email.com"
-                required
                 autoComplete="email"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="Mínimo 6 caracteres"
-                required
-                autoComplete="new-password"
               />
             </div>
           </div>
 
-          <Button type="submit" className="w-full" size="lg" disabled={loading}>
-            {loading ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Criando sua conta...
-              </>
-            ) : (
-              <>
-                Desbloquear diagnóstico
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </>
-            )}
-          </Button>
+          <div className="space-y-2">
+            <Button
+              type="submit"
+              formAction={handleMagicLink}
+              className="w-full"
+              size="lg"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Enviando...
+                </>
+              ) : (
+                <>
+                  Desbloquear diagnóstico
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </>
+              )}
+            </Button>
+            <p className="text-center text-xs text-muted-foreground">
+              Enviaremos um link de acesso para seu email
+            </p>
+          </div>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">ou</span>
+            </div>
+          </div>
+
+          {showPassword ? (
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <Label htmlFor="password">Senha</Label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  placeholder="Mínimo 6 caracteres"
+                  autoComplete="new-password"
+                />
+              </div>
+              <Button
+                type="submit"
+                formAction={handlePasswordSignup}
+                variant="outline"
+                className="w-full"
+                disabled={loading}
+              >
+                <KeyRound className="h-4 w-4 mr-2" />
+                {loading ? "Criando conta..." : "Criar conta com senha"}
+              </Button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowPassword(true)}
+              className="w-full text-sm text-muted-foreground hover:text-primary transition-colors"
+            >
+              Prefiro criar com senha
+            </button>
+          )}
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
@@ -264,7 +363,9 @@ function SimulatorSignupFlow() {
 function StandardSignupForm() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [sentEmail, setSentEmail] = useState("")
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const { track } = useAnalytics()
   const trackedStartRef = useRef(false)
 
@@ -275,20 +376,67 @@ function StandardSignupForm() {
     }
   }, [track])
 
-  async function handleSubmit(formData: FormData) {
+  async function handleMagicLink(formData: FormData) {
     setLoading(true)
     setError(null)
 
+    const nome = formData.get("nome") as string
+    const email = formData.get("email") as string
+
+    if (!nome?.trim()) {
+      setError("Informe seu nome")
+      setLoading(false)
+      return
+    }
+    if (!email?.trim()) {
+      setError("Informe seu email")
+      setLoading(false)
+      return
+    }
+
+    try {
+      const result = await signupWithMagicLink(formData)
+      if (result?.error) {
+        setError(result.error)
+      } else if (result?.success) {
+        setSentEmail(email)
+        setSuccess(true)
+        track("signup_completed", { from: "standard", method: "magiclink" })
+      } else {
+        setError("Ocorreu um erro inesperado. Tente novamente.")
+      }
+    } catch {
+      setError("Erro ao enviar link. Verifique sua conexão e tente novamente.")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handlePasswordSignup(formData: FormData) {
+    setLoading(true)
+    setError(null)
+
+    const nome = formData.get("nome") as string
+    const email = formData.get("email") as string
     const password = formData.get("password") as string
     const confirmPassword = formData.get("confirmPassword") as string
 
+    if (!nome?.trim()) {
+      setError("Informe seu nome")
+      setLoading(false)
+      return
+    }
+    if (!email?.trim()) {
+      setError("Informe seu email")
+      setLoading(false)
+      return
+    }
     if (password !== confirmPassword) {
       setError("As senhas não coincidem")
       setLoading(false)
       return
     }
-
-    if (password.length < 6) {
+    if (!password || password.length < 6) {
       setError("A senha deve ter pelo menos 6 caracteres")
       setLoading(false)
       return
@@ -299,8 +447,9 @@ function StandardSignupForm() {
       if (result?.error) {
         setError(result.error)
       } else if (result?.success) {
+        setSentEmail(email)
         setSuccess(true)
-        track("signup_completed", { from: "standard" })
+        track("signup_completed", { from: "standard", method: "password" })
       } else {
         setError("Ocorreu um erro inesperado. Tente novamente.")
       }
@@ -309,6 +458,28 @@ function StandardSignupForm() {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (success) {
+    return (
+      <div className="max-w-md mx-auto w-full">
+        <Card>
+          <CardContent className="pt-6 text-center space-y-4">
+            <div className="mx-auto w-fit rounded-full bg-green-100 dark:bg-green-950/30 p-4">
+              <Mail className="h-8 w-8 text-green-600" />
+            </div>
+            <h2 className="text-xl font-bold">Verifique seu email</h2>
+            <p className="text-muted-foreground text-sm">
+              Enviamos um link de acesso para <strong>{sentEmail}</strong>.
+              Clique no link para entrar e começar a usar o ImpostoFácil.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Não recebeu? Verifique sua caixa de spam ou lixo eletrônico.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (
@@ -320,48 +491,82 @@ function StandardSignupForm() {
             Preencha os dados abaixo para criar sua conta
           </p>
         </CardHeader>
-        <form action={handleSubmit}>
+        <form>
           <CardContent className="space-y-4">
             {error && (
               <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">
                 {error}
               </div>
             )}
-            {success && (
-              <div className="bg-green-500/10 text-green-600 text-sm p-3 rounded-md space-y-2">
-                <p className="font-medium">Quase lá!</p>
-                <p>
-                  Enviamos um link de confirmação para seu email. Clique no link
-                  para ativar sua conta e começar a usar o ImpostoFácil.
-                </p>
-              </div>
-            )}
             <div className="space-y-2">
               <Label htmlFor="nome">Nome</Label>
-              <Input id="nome" name="nome" type="text" placeholder="Seu nome" required autoComplete="name" />
+              <Input id="nome" name="nome" type="text" placeholder="Seu nome" autoComplete="name" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" name="email" type="email" placeholder="seu@email.com" required autoComplete="email" />
+              <Input id="email" name="email" type="email" placeholder="seu@email.com" autoComplete="email" />
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
-              <Input id="password" name="password" type="password" required autoComplete="new-password" />
+              <Button
+                type="submit"
+                formAction={handleMagicLink}
+                className="w-full"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Enviando...
+                  </>
+                ) : "Criar conta"}
+              </Button>
+              <p className="text-center text-xs text-muted-foreground">
+                Enviaremos um link de acesso para seu email
+              </p>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirmar senha</Label>
-              <Input id="confirmPassword" name="confirmPassword" type="password" required autoComplete="new-password" />
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">ou</span>
+              </div>
             </div>
+
+            {showPassword ? (
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <Label htmlFor="password">Senha</Label>
+                  <Input id="password" name="password" type="password" placeholder="Mínimo 6 caracteres" autoComplete="new-password" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirmar senha</Label>
+                  <Input id="confirmPassword" name="confirmPassword" type="password" autoComplete="new-password" />
+                </div>
+                <Button
+                  type="submit"
+                  formAction={handlePasswordSignup}
+                  variant="outline"
+                  className="w-full"
+                  disabled={loading}
+                >
+                  <KeyRound className="h-4 w-4 mr-2" />
+                  {loading ? "Criando conta..." : "Criar conta com senha"}
+                </Button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowPassword(true)}
+                className="w-full text-sm text-muted-foreground hover:text-primary transition-colors"
+              >
+                Prefiro criar com senha
+              </button>
+            )}
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
-            <Button type="submit" className="w-full" disabled={loading || !!success}>
-              {loading ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Criando sua conta...
-                </>
-              ) : "Criar conta"}
-            </Button>
             <div className="relative w-full">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t" />

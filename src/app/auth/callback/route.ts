@@ -15,19 +15,23 @@ export async function GET(request: Request) {
 
   const supabase = await createClient()
 
+  function buildRedirect(path: string) {
+    const forwardedHost = request.headers.get("x-forwarded-host")
+    const isLocalEnv = process.env.NODE_ENV === "development"
+    if (isLocalEnv) {
+      return NextResponse.redirect(`${origin}${path}`)
+    } else if (forwardedHost) {
+      return NextResponse.redirect(`https://${forwardedHost}${path}`)
+    } else {
+      return NextResponse.redirect(`${origin}${path}`)
+    }
+  }
+
   // PKCE flow: exchange code for session
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
-      const forwardedHost = request.headers.get("x-forwarded-host")
-      const isLocalEnv = process.env.NODE_ENV === "development"
-      if (isLocalEnv) {
-        return NextResponse.redirect(`${origin}${next}`)
-      } else if (forwardedHost) {
-        return NextResponse.redirect(`https://${forwardedHost}${next}`)
-      } else {
-        return NextResponse.redirect(`${origin}${next}`)
-      }
+      return buildRedirect(next)
     }
   }
 
@@ -35,17 +39,14 @@ export async function GET(request: Request) {
   if (token_hash && type) {
     const { error } = await supabase.auth.verifyOtp({ type, token_hash })
     if (!error) {
-      const forwardedHost = request.headers.get("x-forwarded-host")
-      const isLocalEnv = process.env.NODE_ENV === "development"
-      if (isLocalEnv) {
-        return NextResponse.redirect(`${origin}${next}`)
-      } else if (forwardedHost) {
-        return NextResponse.redirect(`https://${forwardedHost}${next}`)
-      } else {
-        return NextResponse.redirect(`${origin}${next}`)
-      }
+      return buildRedirect(next)
     }
   }
 
-  return NextResponse.redirect(`${origin}/login?error=auth_callback_error`)
+  // Preserve the intended redirect so the user can still get there after re-authenticating
+  const errorRedirect = next !== "/dashboard"
+    ? `/login?error=auth_callback_error&redirect=${encodeURIComponent(next)}`
+    : `/login?error=auth_callback_error`
+
+  return buildRedirect(errorRedirect)
 }
