@@ -77,7 +77,7 @@ export async function POST() {
       metadata: {
         supabase_user_id: user.id,
       },
-      success_url: `${baseUrl}diagnostico?unlocked=true`,
+      success_url: `${baseUrl}diagnostico?unlocked=true&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}checkout`,
     })
 

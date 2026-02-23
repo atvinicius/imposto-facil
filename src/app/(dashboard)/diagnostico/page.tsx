@@ -1,22 +1,68 @@
-import { getUserProfile } from "@/lib/supabase/server"
+import { getUserProfile, getUser } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
+import { createStripeClient } from "@/lib/stripe/client"
 import { calcularSimulacao } from "@/lib/simulator"
 import type { SimuladorInput, SimuladorResult, FaixaFaturamento, RegimeTributario, Setor, TipoCustoPrincipal } from "@/lib/simulator"
 import { DiagnosticoClient } from "./diagnostico-client"
 import { DiagnosticoReport } from "./diagnostico-report"
 
 interface DiagnosticoPageProps {
-  searchParams: Promise<{ unlocked?: string }>
+  searchParams: Promise<{ unlocked?: string; session_id?: string }>
+}
+
+/**
+ * Verify a Stripe checkout session and grant access if paid.
+ * This handles the race condition where the user is redirected back
+ * before the Stripe webhook has fired.
+ */
+async function verifyStripeSession(sessionId: string, userId: string): Promise<boolean> {
+  try {
+    const stripe = createStripeClient()
+    const session = await stripe.checkout.sessions.retrieve(sessionId)
+
+    if (
+      session.payment_status === "paid" &&
+      session.metadata?.supabase_user_id === userId
+    ) {
+      const supabase = createAdminClient()
+      await supabase
+        .from("user_profiles")
+        .update({
+          subscription_tier: "diagnostico",
+          diagnostico_purchased_at: new Date().toISOString(),
+          stripe_customer_id: (session.customer as string) || undefined,
+        })
+        .eq("id", userId)
+      return true
+    }
+  } catch (e) {
+    console.error("Failed to verify Stripe session:", e)
+  }
+  return false
 }
 
 export default async function DiagnosticoPage({ searchParams }: DiagnosticoPageProps) {
   const params = await searchParams
   const justUnlocked = params.unlocked === "true"
-  const profile = await getUserProfile()
+  let profile = await getUserProfile()
+
+  // If redirected from Stripe checkout and profile isn't marked as paid yet,
+  // verify the session directly with Stripe to avoid webhook race condition
+  if (params.session_id && profile && !profile.diagnostico_purchased_at) {
+    const user = await getUser()
+    if (user) {
+      const verified = await verifyStripeSession(params.session_id, user.id)
+      if (verified) {
+        // Re-fetch profile with updated payment status
+        profile = await getUserProfile()
+      }
+    }
+  }
 
   // Check if profile has enough data to generate a diagnostic
   const hasSimulatorData = profile?.setor && profile?.faturamento && profile?.uf
 
-  if (!hasSimulatorData) {
+  if (!hasSimulatorData || !profile) {
     // Client component will try to load from localStorage and save to profile
     return <DiagnosticoClient />
   }
