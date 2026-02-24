@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       .from("user_profiles")
       .select("*")
       .eq("id", user.id)
-      .single() as { data: { nome?: string; uf?: string; setor?: string; porte_empresa?: string; regime_tributario?: string; faturamento?: string; nivel_experiencia?: string; interesses?: string[]; simulator_result?: { riskLevel?: string; impactRange?: { min: number; max: number } } } | null }
+      .single() as { data: { nome?: string; uf?: string; setor?: string; porte_empresa?: string; regime_tributario?: string; faturamento?: string; nivel_experiencia?: string; interesses?: string[]; subscription_tier?: string; simulator_result?: import("@/lib/simulator/types").SimuladorResult } | null }
 
     // Get the last user message for context search
     const lastUserMessage = messages.filter((m: { role: string }) => m.role === "user").pop()
@@ -97,8 +97,47 @@ export async function POST(request: Request) {
       if (profile.interesses && profile.interesses.length > 0) contextParts.push(`Interesses: ${profile.interesses.join(", ")}`)
       if (profile.simulator_result) {
         const sim = profile.simulator_result
-        if (sim.riskLevel) contextParts.push(`Nivel de risco (simulador): ${sim.riskLevel}`)
-        if (sim.impactRange) contextParts.push(`Faixa de impacto estimado: R$${sim.impactRange.min} a R$${sim.impactRange.max}`)
+        const isPaid = profile.subscription_tier === "diagnostico" || profile.subscription_tier === "pro"
+
+        const diagParts: string[] = []
+        diagParts.push(`## Dados do Diagnostico do Usuario`)
+        if (sim.nivelRisco) diagParts.push(`- Nivel de risco: ${sim.nivelRisco}`)
+        if (sim.impactoAnual) {
+          diagParts.push(`- Impacto estimado: R$${sim.impactoAnual.min.toLocaleString("pt-BR")} a R$${sim.impactoAnual.max.toLocaleString("pt-BR")}/ano (${sim.impactoAnual.percentual > 0 ? "+" : ""}${sim.impactoAnual.percentual}%)`)
+        }
+        if (sim.confiancaPerfil != null) diagParts.push(`- Confianca do perfil: ${sim.confiancaPerfil}/100`)
+        if (sim.metodologia?.confianca) diagParts.push(`- Confianca da estimativa: ${sim.metodologia.confianca}`)
+        if (sim.alertas?.length > 0) {
+          const alertasVisiveis = sim.alertas.slice(0, 3)
+          diagParts.push(`- Alertas principais: ${alertasVisiveis.join("; ")}`)
+        }
+        if (sim.datasImportantes?.length > 0) {
+          const datas = sim.datasImportantes.map(d => `${d.data}: ${d.descricao}`).join("; ")
+          diagParts.push(`- Proximas datas: ${datas}`)
+        }
+        if (sim.acoesRecomendadas?.length > 0) {
+          const acoes = sim.acoesRecomendadas.slice(0, 2)
+          diagParts.push(`- Acoes recomendadas: ${acoes.join("; ")}`)
+        }
+        if (sim.splitPaymentImpacto) {
+          diagParts.push(`- Split payment: perda de float R$${sim.splitPaymentImpacto.perdaFloatMensal.toLocaleString("pt-BR")}/mes (${sim.splitPaymentImpacto.pctEletronico}% vendas eletronicas)`)
+        }
+
+        if (isPaid && sim.gatedContent) {
+          if (sim.gatedContent.analiseRegime) {
+            const ar = sim.gatedContent.analiseRegime
+            diagParts.push(`- Analise de regime: atual=${ar.regimeAtual}, sugerido=${ar.regimeSugerido ?? "manter"}, justificativa: ${ar.justificativa}`)
+          }
+          if (sim.gatedContent.projecaoAnual?.length > 0) {
+            const projecao = sim.gatedContent.projecaoAnual.map(p => `${p.ano}: R$${p.cargaEstimada.toLocaleString("pt-BR")} (${p.diferencaVsAtual > 0 ? "+" : ""}${p.diferencaVsAtual}%)`).join("; ")
+            diagParts.push(`- Projecao anual: ${projecao}`)
+          }
+          diagParts.push(`- Usuario com diagnostico completo (pago)`)
+        } else {
+          diagParts.push(`- Usuario com diagnostico gratuito (seções avancadas bloqueadas)`)
+        }
+
+        contextParts.push(diagParts.join("\n"))
       }
       if (contextParts.length > 0) {
         userContext = contextParts.join("\n")
