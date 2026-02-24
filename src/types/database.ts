@@ -309,6 +309,56 @@ export type Database = {
         }
         Relationships: []
       }
+      feedback: {
+        Row: {
+          id: string
+          user_id: string | null
+          session_id: string
+          prompt_id: string
+          feedback_type: string
+          rating: number | null
+          selected_options: string[] | null
+          comment: string | null
+          page_url: string | null
+          metadata: Json
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          session_id: string
+          prompt_id: string
+          feedback_type: string
+          rating?: number | null
+          selected_options?: string[] | null
+          comment?: string | null
+          page_url?: string | null
+          metadata?: Json
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          session_id?: string
+          prompt_id?: string
+          feedback_type?: string
+          rating?: number | null
+          selected_options?: string[] | null
+          comment?: string | null
+          page_url?: string | null
+          metadata?: Json
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never

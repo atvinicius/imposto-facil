@@ -16,6 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { redeemPromoCode } from "./actions"
 import { useAnalytics } from "@/lib/analytics/track"
+import { FeedbackPrompt } from "@/components/feedback/feedback-prompt"
 
 const FEATURES = [
   "Todos os alertas com explicações detalhadas",
@@ -227,6 +228,25 @@ export default function CheckoutPage() {
           </Link>
         </Button>
       </div>
+
+      <FeedbackPrompt
+        promptId="checkout_objection"
+        feedbackType="pre_purchase"
+        title="Algo te impedindo de desbloquear?"
+        subtitle="Sua resposta nos ajuda a melhorar o produto."
+        mode="options"
+        options={[
+          { value: "preco", label: "Preço alto" },
+          { value: "nao_entendi", label: "Não entendi o que inclui" },
+          { value: "quero_ver_mais", label: "Quero ver mais antes" },
+          { value: "contador", label: "Vou consultar meu contador" },
+          { value: "nao_confio", label: "Não confio nos resultados" },
+        ]}
+        allowComment
+        commentPlaceholder="Quer nos contar mais? (opcional)"
+        delayMs={15000}
+        metadata={{ page: "checkout" }}
+      />
     </div>
   )
 }

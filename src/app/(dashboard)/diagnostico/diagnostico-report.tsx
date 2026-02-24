@@ -23,6 +23,7 @@ import { NIVEL_RISCO_LABELS, gerarTeaser } from "@/lib/simulator"
 import { useAnalytics } from "@/lib/analytics/track"
 import { ChecklistItem } from "./checklist-item"
 import { toggleChecklistItem } from "./actions"
+import { FeedbackPrompt } from "@/components/feedback/feedback-prompt"
 
 export interface ChecklistProgress {
   completed: string[]
@@ -390,28 +391,79 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
 
       {/* Upgrade CTA */}
       {!isPaid && (
-        <Card className="bg-gradient-to-r from-slate-900 to-slate-800 text-white border-0">
-          <CardContent className="p-8 text-center space-y-4">
-            <h3 className="text-2xl font-bold">
-              Seu diagnóstico tem {result.alertas.length} alertas e{" "}
-              {result.gatedContent.checklistCompleto.length} ações
-            </h3>
-            <p className="text-slate-300 max-w-lg mx-auto">
-              Desbloqueie o relatório completo com análise de regime, projeção ano a ano, checklist de adequação e exportação em PDF.
-            </p>
-            <div className="flex flex-col items-stretch gap-3 pt-2 sm:flex-row sm:items-center sm:justify-center">
-              <Button asChild size="lg" className="w-full bg-white text-slate-900 hover:bg-slate-100 sm:w-auto">
-                <Link href="/checkout">
-                  Desbloquear por R$49
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Link>
-              </Button>
-            </div>
-            <p className="text-xs text-slate-400">
-              Pagamento único. Sem assinatura. Acesso permanente.
-            </p>
-          </CardContent>
-        </Card>
+        <>
+          <Card className="bg-gradient-to-r from-slate-900 to-slate-800 text-white border-0">
+            <CardContent className="p-8 text-center space-y-4">
+              <h3 className="text-2xl font-bold">
+                Seu diagnóstico tem {result.alertas.length} alertas e{" "}
+                {result.gatedContent.checklistCompleto.length} ações
+              </h3>
+              <p className="text-slate-300 max-w-lg mx-auto">
+                Desbloqueie o relatório completo com análise de regime, projeção ano a ano, checklist de adequação e exportação em PDF.
+              </p>
+              <div className="flex flex-col items-stretch gap-3 pt-2 sm:flex-row sm:items-center sm:justify-center">
+                <Button asChild size="lg" className="w-full bg-white text-slate-900 hover:bg-slate-100 sm:w-auto">
+                  <Link href="/checkout">
+                    Desbloquear por R$49
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Link>
+                </Button>
+              </div>
+              <p className="text-xs text-slate-400">
+                Pagamento único. Sem assinatura. Acesso permanente.
+              </p>
+            </CardContent>
+          </Card>
+
+          <FeedbackPrompt
+            promptId="diagnostic_free_objection"
+            feedbackType="pre_purchase"
+            title="O que falta para você desbloquear?"
+            subtitle="Sua opinião nos ajuda a melhorar."
+            mode="options"
+            options={[
+              { value: "mais_detalhes", label: "Preciso ver mais detalhes" },
+              { value: "preco", label: "O preço não cabe agora" },
+              { value: "contador", label: "Já tenho um contador" },
+              { value: "utilidade", label: "Não sei se vai ser útil" },
+            ]}
+            allowComment
+            commentPlaceholder="Quer nos contar mais? (opcional)"
+            delayMs={20000}
+            metadata={{ page: "diagnostico", risco: result.nivelRisco, setor: input.setor }}
+          />
+        </>
+      )}
+
+      {/* Post-purchase satisfaction */}
+      {isPaid && (
+        <FeedbackPrompt
+          promptId="diagnostic_satisfaction"
+          feedbackType="post_purchase"
+          title="O diagnóstico te ajudou?"
+          subtitle="Uma nota rápida nos ajuda a melhorar."
+          mode="rating_comment"
+          lowRatingFollowUp={{
+            question: "O que podemos melhorar?",
+            options: [
+              { value: "info_rasa", label: "Informações superficiais" },
+              { value: "confuso", label: "Difícil de entender" },
+              { value: "dados_errados", label: "Dados não parecem certos" },
+              { value: "pouca_orientacao", label: "Faltou orientação prática" },
+            ],
+          }}
+          highRatingFollowUp={{
+            question: "O que mais te ajudou?",
+            options: [
+              { value: "alertas", label: "Alertas e recomendações" },
+              { value: "projecao", label: "Projeção ano a ano" },
+              { value: "checklist", label: "Checklist de adequação" },
+              { value: "regime", label: "Análise de regime" },
+              { value: "pdf", label: "Exportação em PDF" },
+            ],
+          }}
+          metadata={{ page: "diagnostico", risco: result.nivelRisco, setor: input.setor }}
+        />
       )}
     </div>
   )
