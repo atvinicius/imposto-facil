@@ -35,6 +35,9 @@ function SimulatorSignupFlow() {
   const [success, setSuccess] = useState(false)
   const [sentEmail, setSentEmail] = useState("")
   const [loading, setLoading] = useState(false)
+  const [sentNome, setSentNome] = useState("")
+  const [resendCountdown, setResendCountdown] = useState(0)
+  const [resending, setResending] = useState(false)
   const { track } = useAnalytics()
   const trackedStartRef = useRef(false)
 
@@ -44,6 +47,20 @@ function SimulatorSignupFlow() {
       track("signup_started", { from: "simulador" })
     }
   }, [track])
+
+  useEffect(() => {
+    if (resendCountdown <= 0) return
+    const timer = setInterval(() => {
+      setResendCountdown((c) => {
+        if (c <= 1) {
+          clearInterval(timer)
+          return 0
+        }
+        return c - 1
+      })
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [resendCountdown])
 
   const simulatorData = typeof window !== "undefined"
     ? getStoredSimulatorData()
@@ -75,7 +92,10 @@ function SimulatorSignupFlow() {
         setError(result.error)
       } else if (result?.success) {
         setSentEmail(email)
+        setSentNome(nome)
         setSuccess(true)
+        setResendCountdown(60)
+        localStorage.setItem("impostofacil_pending_email", email)
         track("signup_completed", { from: "simulador" })
       } else {
         setError("Ocorreu um erro inesperado. Tente novamente.")
@@ -87,24 +107,78 @@ function SimulatorSignupFlow() {
     }
   }
 
+  async function handleResend() {
+    setResending(true)
+    try {
+      const formData = new FormData()
+      formData.set("nome", sentNome)
+      formData.set("email", sentEmail)
+      formData.set("from", "simulador")
+      const result = await signupWithMagicLink(formData)
+      if (result?.success) {
+        setResendCountdown(60)
+      } else {
+        setResendCountdown(60)
+      }
+    } catch {
+      // silently fail
+    } finally {
+      setResending(false)
+    }
+  }
+
   const riscoInfo = simulatorData
     ? NIVEL_RISCO_LABELS[simulatorData.teaser.nivelRisco]
     : null
 
   if (success) {
     return (
-      <div className="max-w-lg mx-auto py-12 text-center space-y-4">
+      <div className="max-w-lg mx-auto py-12 text-center space-y-6">
         <div className="mx-auto w-fit rounded-full bg-green-100 dark:bg-green-950/30 p-4">
           <Mail className="h-8 w-8 text-green-600" />
         </div>
-        <h1 className="text-2xl font-bold">Verifique seu email</h1>
-        <p className="text-muted-foreground">
-          Enviamos um link de acesso para <strong>{sentEmail}</strong>.
-          Clique no link para entrar e ver seu diagnóstico tributário completo.
-        </p>
-        <p className="text-sm text-muted-foreground">
-          Não recebeu? Verifique sua caixa de spam ou lixo eletrônico.
-        </p>
+        <div className="space-y-2">
+          <h1 className="text-2xl font-bold">Verifique seu email</h1>
+          <p className="text-muted-foreground">
+            Enviamos um link de acesso para <strong>{sentEmail}</strong>.
+            Clique no link para entrar e ver seu diagnóstico tributário completo.
+          </p>
+        </div>
+        <ul className="text-sm text-muted-foreground text-left max-w-sm mx-auto space-y-2">
+          <li className="flex items-start gap-2">
+            <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+            <span>Verifique a caixa de entrada de <strong>{sentEmail}</strong></span>
+          </li>
+          <li className="flex items-start gap-2">
+            <Mail className="h-4 w-4 text-muted-foreground/50 mt-0.5 shrink-0" />
+            <span>Olhe na pasta <strong>Spam</strong> ou <strong>Lixo Eletrônico</strong></span>
+          </li>
+          <li className="flex items-start gap-2">
+            <Mail className="h-4 w-4 text-muted-foreground/50 mt-0.5 shrink-0" />
+            <span>No Gmail, verifique a aba <strong>Promoções</strong></span>
+          </li>
+          <li className="flex items-start gap-2">
+            <Clock className="h-4 w-4 text-muted-foreground/50 mt-0.5 shrink-0" />
+            <span>O link expira em 1 hora</span>
+          </li>
+        </ul>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={resendCountdown > 0 || resending}
+          onClick={handleResend}
+        >
+          {resending ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Reenviando...
+            </>
+          ) : resendCountdown > 0 ? (
+            `Reenviar link (${resendCountdown}s)`
+          ) : (
+            "Reenviar link"
+          )}
+        </Button>
       </div>
     )
   }
@@ -266,6 +340,9 @@ function StandardSignupForm() {
   const [success, setSuccess] = useState(false)
   const [sentEmail, setSentEmail] = useState("")
   const [loading, setLoading] = useState(false)
+  const [sentNome, setSentNome] = useState("")
+  const [resendCountdown, setResendCountdown] = useState(0)
+  const [resending, setResending] = useState(false)
   const { track } = useAnalytics()
   const trackedStartRef = useRef(false)
 
@@ -275,6 +352,39 @@ function StandardSignupForm() {
       track("signup_started", { from: "standard" })
     }
   }, [track])
+
+  useEffect(() => {
+    if (resendCountdown <= 0) return
+    const timer = setInterval(() => {
+      setResendCountdown((c) => {
+        if (c <= 1) {
+          clearInterval(timer)
+          return 0
+        }
+        return c - 1
+      })
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [resendCountdown])
+
+  async function handleResend() {
+    setResending(true)
+    try {
+      const formData = new FormData()
+      formData.set("nome", sentNome)
+      formData.set("email", sentEmail)
+      const result = await signupWithMagicLink(formData)
+      if (result?.success) {
+        setResendCountdown(60)
+      } else {
+        setResendCountdown(60)
+      }
+    } catch {
+      // silently fail
+    } finally {
+      setResending(false)
+    }
+  }
 
   async function handleSubmit(formData: FormData) {
     setLoading(true)
@@ -300,7 +410,10 @@ function StandardSignupForm() {
         setError(result.error)
       } else if (result?.success) {
         setSentEmail(email)
+        setSentNome(nome)
         setSuccess(true)
+        setResendCountdown(60)
+        localStorage.setItem("impostofacil_pending_email", email)
         track("signup_completed", { from: "standard" })
       } else {
         setError("Ocorreu um erro inesperado. Tente novamente.")
@@ -316,18 +429,52 @@ function StandardSignupForm() {
     return (
       <div className="max-w-md mx-auto w-full">
         <Card>
-          <CardContent className="pt-6 text-center space-y-4">
+          <CardContent className="pt-6 text-center space-y-5">
             <div className="mx-auto w-fit rounded-full bg-green-100 dark:bg-green-950/30 p-4">
               <Mail className="h-8 w-8 text-green-600" />
             </div>
-            <h2 className="text-xl font-bold">Verifique seu email</h2>
-            <p className="text-muted-foreground text-sm">
-              Enviamos um link de acesso para <strong>{sentEmail}</strong>.
-              Clique no link para entrar e começar a usar o ImpostoFácil.
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Não recebeu? Verifique sua caixa de spam ou lixo eletrônico.
-            </p>
+            <div className="space-y-2">
+              <h2 className="text-xl font-bold">Verifique seu email</h2>
+              <p className="text-muted-foreground text-sm">
+                Enviamos um link de acesso para <strong>{sentEmail}</strong>.
+                Clique no link para entrar e começar a usar o ImpostoFácil.
+              </p>
+            </div>
+            <ul className="text-sm text-muted-foreground text-left space-y-2">
+              <li className="flex items-start gap-2">
+                <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                <span>Verifique a caixa de entrada de <strong>{sentEmail}</strong></span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Mail className="h-4 w-4 text-muted-foreground/50 mt-0.5 shrink-0" />
+                <span>Olhe na pasta <strong>Spam</strong> ou <strong>Lixo Eletrônico</strong></span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Mail className="h-4 w-4 text-muted-foreground/50 mt-0.5 shrink-0" />
+                <span>No Gmail, verifique a aba <strong>Promoções</strong></span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Clock className="h-4 w-4 text-muted-foreground/50 mt-0.5 shrink-0" />
+                <span>O link expira em 1 hora</span>
+              </li>
+            </ul>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={resendCountdown > 0 || resending}
+              onClick={handleResend}
+            >
+              {resending ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Reenviando...
+                </>
+              ) : resendCountdown > 0 ? (
+                `Reenviar link (${resendCountdown}s)`
+              ) : (
+                "Reenviar link"
+              )}
+            </Button>
           </CardContent>
         </Card>
       </div>

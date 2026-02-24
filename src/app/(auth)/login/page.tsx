@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, Suspense } from "react"
+import { useState, useEffect, Suspense } from "react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
-import { Loader2, Mail } from "lucide-react"
+import { CheckCircle, Clock, Loader2, Mail } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -31,6 +31,49 @@ function LoginForm() {
   const [loading, setLoading] = useState(false)
   const [magicLinkSent, setMagicLinkSent] = useState(false)
   const [sentEmail, setSentEmail] = useState("")
+  const [resendCountdown, setResendCountdown] = useState(0)
+  const [resending, setResending] = useState(false)
+  const [defaultEmail, setDefaultEmail] = useState("")
+
+  useEffect(() => {
+    if (callbackError === "auth_callback_error" || callbackError === "verification_error") {
+      const stored = localStorage.getItem("impostofacil_pending_email")
+      if (stored) setDefaultEmail(stored)
+    }
+  }, [callbackError])
+
+  useEffect(() => {
+    if (resendCountdown <= 0) return
+    const timer = setInterval(() => {
+      setResendCountdown((c) => {
+        if (c <= 1) {
+          clearInterval(timer)
+          return 0
+        }
+        return c - 1
+      })
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [resendCountdown])
+
+  async function handleResend() {
+    setResending(true)
+    try {
+      const formData = new FormData()
+      formData.set("email", sentEmail)
+      formData.set("redirect", redirectTo)
+      const result = await loginWithMagicLink(formData)
+      if (result?.success) {
+        setResendCountdown(60)
+      } else {
+        setResendCountdown(60)
+      }
+    } catch {
+      // silently fail
+    } finally {
+      setResending(false)
+    }
+  }
 
   async function handleSubmit(formData: FormData) {
     setLoading(true)
@@ -52,12 +95,67 @@ function LoginForm() {
       } else if (result?.success) {
         setSentEmail(email)
         setMagicLinkSent(true)
+        setResendCountdown(60)
+        localStorage.setItem("impostofacil_pending_email", email)
       }
     } catch {
       setError("Erro ao enviar link. Tente novamente.")
     } finally {
       setLoading(false)
     }
+  }
+
+  if (magicLinkSent) {
+    return (
+      <Card>
+        <CardContent className="pt-6 text-center space-y-5">
+          <div className="mx-auto w-fit rounded-full bg-green-100 dark:bg-green-950/30 p-4">
+            <Mail className="h-8 w-8 text-green-600" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-xl font-bold">Link enviado!</h2>
+            <p className="text-muted-foreground text-sm">
+              Enviamos um link de acesso para <strong>{sentEmail}</strong>.
+            </p>
+          </div>
+          <ul className="text-sm text-muted-foreground text-left space-y-2">
+            <li className="flex items-start gap-2">
+              <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+              <span>Verifique a caixa de entrada de <strong>{sentEmail}</strong></span>
+            </li>
+            <li className="flex items-start gap-2">
+              <Mail className="h-4 w-4 text-muted-foreground/50 mt-0.5 shrink-0" />
+              <span>Olhe na pasta <strong>Spam</strong> ou <strong>Lixo Eletrônico</strong></span>
+            </li>
+            <li className="flex items-start gap-2">
+              <Mail className="h-4 w-4 text-muted-foreground/50 mt-0.5 shrink-0" />
+              <span>No Gmail, verifique a aba <strong>Promoções</strong></span>
+            </li>
+            <li className="flex items-start gap-2">
+              <Clock className="h-4 w-4 text-muted-foreground/50 mt-0.5 shrink-0" />
+              <span>O link expira em 1 hora</span>
+            </li>
+          </ul>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={resendCountdown > 0 || resending}
+            onClick={handleResend}
+          >
+            {resending ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Reenviando...
+              </>
+            ) : resendCountdown > 0 ? (
+              `Reenviar link (${resendCountdown}s)`
+            ) : (
+              "Reenviar link"
+            )}
+          </Button>
+        </CardContent>
+      </Card>
+    )
   }
 
   return (
@@ -76,25 +174,15 @@ function LoginForm() {
             </div>
           )}
 
-          {magicLinkSent && (
-            <div className="bg-green-500/10 text-green-700 dark:text-green-400 text-sm p-3 rounded-md flex items-start gap-2">
-              <Mail className="h-4 w-4 mt-0.5 shrink-0" />
-              <div>
-                <p className="font-medium">Link enviado!</p>
-                <p className="text-xs mt-1">
-                  Verifique sua caixa de entrada em <strong>{sentEmail}</strong>.
-                </p>
-              </div>
-            </div>
-          )}
-
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
+              key={defaultEmail}
               id="email"
               name="email"
               type="email"
               placeholder="seu@email.com"
+              defaultValue={defaultEmail}
               required
               autoComplete="email"
             />
