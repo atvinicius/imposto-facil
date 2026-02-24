@@ -120,7 +120,19 @@ export async function POST(request: Request) {
           diagParts.push(`- Acoes recomendadas: ${acoes.join("; ")}`)
         }
         if (sim.splitPaymentImpacto) {
-          diagParts.push(`- Split payment: perda de float R$${sim.splitPaymentImpacto.perdaFloatMensal.toLocaleString("pt-BR")}/mes (${sim.splitPaymentImpacto.pctEletronico}% vendas eletronicas)`)
+          diagParts.push(`- Retencao automatica: perda de float R$${sim.splitPaymentImpacto.perdaFloatMensal.toLocaleString("pt-BR")}/mes (${sim.splitPaymentImpacto.pctEletronico}% vendas eletronicas)`)
+        }
+        // Formalization pressure context
+        if (sim.efetividadeTributaria) {
+          const ef = sim.efetividadeTributaria
+          diagParts.push(`- Pressao de cobranca mais rigorosa no setor: ${ef.pressaoFormalizacao}`)
+          diagParts.push(`- Carga efetiva estimada: ${ef.cargaEfetivaAtualPct}% vs carga legal: ${ef.cargaLegalAtualPct}%`)
+          if (ef.impactoFormalizacao > 0) {
+            diagParts.push(`- Custo da cobranca mais rigorosa: R$${ef.impactoFormalizacao.toLocaleString("pt-BR")}/ano`)
+          }
+          if (ef.impactoMudancaAliquota !== 0) {
+            diagParts.push(`- Custo da mudanca de aliquotas: R$${ef.impactoMudancaAliquota.toLocaleString("pt-BR")}/ano`)
+          }
         }
 
         if (isPaid && sim.gatedContent) {

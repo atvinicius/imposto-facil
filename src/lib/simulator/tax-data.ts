@@ -394,6 +394,266 @@ export const CARGA_NOVA: Record<
 }
 
 // ---------------------------------------------------------------------------
+// Fator de efetividade tributária por regime e setor
+// Ratio between what is actually paid vs. statutory rate.
+// See docs/EFFECTIVENESS_METHODOLOGY.md for derivation details.
+// ---------------------------------------------------------------------------
+
+export const FATOR_EFETIVIDADE: Record<
+  RegimeTributario,
+  Record<Setor, CitedValue<{ medio: number; min: number; max: number }>>
+> = {
+  simples: {
+    comercio: {
+      value: { medio: 0.65, min: 0.50, max: 0.80 },
+      source: "Receita Federal, Relatório de Arrecadação do Simples Nacional 2024 + IBGE Pesquisa Anual do Comércio",
+      confidence: "derivada",
+      notes: "Comércio varejista tem alta proporção de vendas em dinheiro e subnotificação de receita. Gap médio de 35%.",
+    },
+    industria: {
+      value: { medio: 0.85, min: 0.75, max: 0.92 },
+      source: "Receita Federal + IBGE PIA (Pesquisa Industrial Anual)",
+      confidence: "derivada",
+      notes: "Cadeia de fornecimento documentada força maior compliance. Pequenas indústrias no Simples ainda têm gaps.",
+    },
+    servicos: {
+      value: { medio: 0.72, min: 0.55, max: 0.85 },
+      source: "Receita Federal + IBGE PNAD Contínua (informalidade no setor de serviços)",
+      confidence: "derivada",
+      notes: "Serviços pessoais e alimentação têm gaps maiores; serviços profissionais têm gaps menores.",
+    },
+    agronegocio: {
+      value: { medio: 0.70, min: 0.55, max: 0.82 },
+      source: "Receita Federal + IBGE Censo Agropecuário",
+      confidence: "derivada",
+      notes: "Pequenos produtores frequentemente operam informalmente. Múltiplas isenções criam complexidade.",
+    },
+    tecnologia: {
+      value: { medio: 0.90, min: 0.82, max: 0.95 },
+      source: "Receita Federal + IBGE PNAD Contínua (setor TI)",
+      confidence: "derivada",
+      notes: "Setor altamente digital com quase todas transações documentadas eletronicamente.",
+    },
+    saude: {
+      value: { medio: 0.80, min: 0.70, max: 0.90 },
+      source: "Receita Federal + ANS (Agência Nacional de Saúde Suplementar)",
+      confidence: "derivada",
+      notes: "Setor regulado com exigências de licenciamento. Profissionais autônomos podem ter gaps maiores.",
+    },
+    educacao: {
+      value: { medio: 0.82, min: 0.72, max: 0.90 },
+      source: "Receita Federal + MEC dados de instituições",
+      confidence: "derivada",
+      notes: "Formalização moderada. Escolas formais vs. cursos livres/tutoria informal.",
+    },
+    construcao: {
+      value: { medio: 0.60, min: 0.45, max: 0.75 },
+      source: "Receita Federal + IBGE PNAD Contínua (construção: >50% informal)",
+      confidence: "derivada",
+      notes: "Maior informalidade entre todos os setores. Pagamentos em dinheiro a subempreiteiros são comuns.",
+    },
+    financeiro: {
+      value: { medio: 0.95, min: 0.90, max: 0.98 },
+      source: "Receita Federal + BACEN (supervisão bancária)",
+      confidence: "estimativa_oficial",
+      notes: "Setor fortemente regulado pelo Banco Central. Compliance quase total.",
+    },
+    outro: {
+      value: { medio: 0.75, min: 0.60, max: 0.88 },
+      source: "Média ponderada entre setores (Receita Federal)",
+      confidence: "derivada",
+      notes: "Estimativa conservadora para setores não classificados.",
+    },
+  },
+  lucro_presumido: {
+    comercio: {
+      value: { medio: 0.70, min: 0.55, max: 0.82 },
+      source: "Receita Federal, Relatório de Arrecadação LP 2024 + IBGE",
+      confidence: "derivada",
+      notes: "Exigências contábeis maiores que Simples, mas economia de caixa ainda significativa.",
+    },
+    industria: {
+      value: { medio: 0.85, min: 0.75, max: 0.92 },
+      source: "Receita Federal + IBGE PIA",
+      confidence: "derivada",
+      notes: "Documentação de cadeia similar ao Simples industrial.",
+    },
+    servicos: {
+      value: { medio: 0.75, min: 0.60, max: 0.85 },
+      source: "Receita Federal + IBGE PNAD Contínua",
+      confidence: "derivada",
+      notes: "ISS municipal com variação entre municípios cria gaps de compliance.",
+    },
+    agronegocio: {
+      value: { medio: 0.72, min: 0.58, max: 0.84 },
+      source: "Receita Federal + IBGE Censo Agropecuário",
+      confidence: "derivada",
+      notes: "Ligeiramente mais formal que Simples pelo porte das empresas.",
+    },
+    tecnologia: {
+      value: { medio: 0.90, min: 0.82, max: 0.95 },
+      source: "Receita Federal + IBGE PNAD Contínua (setor TI)",
+      confidence: "derivada",
+      notes: "Mesma vantagem digital do Simples. Transações quase totalmente rastreáveis.",
+    },
+    saude: {
+      value: { medio: 0.82, min: 0.72, max: 0.90 },
+      source: "Receita Federal + ANS",
+      confidence: "derivada",
+      notes: "Regulação setorial e pagamentos via convênios forçam documentação.",
+    },
+    educacao: {
+      value: { medio: 0.82, min: 0.72, max: 0.90 },
+      source: "Receita Federal + MEC",
+      confidence: "derivada",
+      notes: "Similar ao Simples em dinâmica de formalização.",
+    },
+    construcao: {
+      value: { medio: 0.65, min: 0.50, max: 0.78 },
+      source: "Receita Federal + IBGE PNAD Contínua",
+      confidence: "derivada",
+      notes: "Melhor que Simples mas informalidade ainda alta no setor.",
+    },
+    financeiro: {
+      value: { medio: 0.95, min: 0.90, max: 0.98 },
+      source: "Receita Federal + BACEN",
+      confidence: "estimativa_oficial",
+      notes: "Mesma regulação forte do setor financeiro.",
+    },
+    outro: {
+      value: { medio: 0.78, min: 0.62, max: 0.88 },
+      source: "Média ponderada entre setores (Receita Federal)",
+      confidence: "derivada",
+      notes: "Estimativa para setores não classificados no Lucro Presumido.",
+    },
+  },
+  lucro_real: {
+    comercio: {
+      value: { medio: 0.85, min: 0.75, max: 0.92 },
+      source: "Receita Federal + IBGE Pesquisa Anual do Comércio",
+      confidence: "derivada",
+      notes: "Escrituração completa exigida. Créditos requerem documentação. Compliance alto.",
+    },
+    industria: {
+      value: { medio: 0.90, min: 0.82, max: 0.95 },
+      source: "Receita Federal + IBGE PIA",
+      confidence: "derivada",
+      notes: "Cadeia produtiva documentada + escrituração completa = alto compliance.",
+    },
+    servicos: {
+      value: { medio: 0.85, min: 0.75, max: 0.92 },
+      source: "Receita Federal + IBGE",
+      confidence: "derivada",
+      notes: "Documentação plena exigida. Menos transações em dinheiro neste porte.",
+    },
+    agronegocio: {
+      value: { medio: 0.82, min: 0.72, max: 0.90 },
+      source: "Receita Federal + IBGE Censo Agropecuário",
+      confidence: "derivada",
+      notes: "Grandes operações agro bem documentadas. Créditos presumidos geram compliance.",
+    },
+    tecnologia: {
+      value: { medio: 0.95, min: 0.88, max: 0.98 },
+      source: "Receita Federal + IBGE PNAD Contínua (setor TI)",
+      confidence: "derivada",
+      notes: "Compliance máximo: digital + escrituração plena.",
+    },
+    saude: {
+      value: { medio: 0.90, min: 0.82, max: 0.95 },
+      source: "Receita Federal + ANS",
+      confidence: "derivada",
+      notes: "Regulação + escrituração plena + convênios documentados.",
+    },
+    educacao: {
+      value: { medio: 0.88, min: 0.78, max: 0.93 },
+      source: "Receita Federal + MEC",
+      confidence: "derivada",
+      notes: "Escrituração completa melhora compliance significativamente.",
+    },
+    construcao: {
+      value: { medio: 0.80, min: 0.68, max: 0.88 },
+      source: "Receita Federal + IBGE",
+      confidence: "derivada",
+      notes: "Grandes obras exigem documentação. Subcontratação informal ainda presente.",
+    },
+    financeiro: {
+      value: { medio: 0.98, min: 0.95, max: 1.0 },
+      source: "Receita Federal + BACEN (supervisão contínua)",
+      confidence: "estimativa_oficial",
+      notes: "Compliance praticamente total. Auditoria constante pelo Banco Central.",
+    },
+    outro: {
+      value: { medio: 0.88, min: 0.78, max: 0.93 },
+      source: "Média ponderada entre setores (Receita Federal)",
+      confidence: "derivada",
+      notes: "Estimativa para setores não classificados no Lucro Real.",
+    },
+  },
+  nao_sei: {
+    comercio: {
+      value: { medio: 0.70, min: 0.55, max: 0.85 },
+      source: "Média ponderada entre regimes (Receita Federal)",
+      confidence: "derivada",
+      notes: "Sem regime definido, usa média conservadora entre regimes para comércio.",
+    },
+    industria: {
+      value: { medio: 0.85, min: 0.75, max: 0.92 },
+      source: "Média ponderada entre regimes",
+      confidence: "derivada",
+      notes: "Indústria tem compliance relativamente alto em todos os regimes.",
+    },
+    servicos: {
+      value: { medio: 0.75, min: 0.58, max: 0.88 },
+      source: "Média ponderada entre regimes",
+      confidence: "derivada",
+      notes: "Serviços com variação grande entre regimes.",
+    },
+    agronegocio: {
+      value: { medio: 0.72, min: 0.55, max: 0.85 },
+      source: "Média ponderada entre regimes",
+      confidence: "derivada",
+      notes: "Agronegócio com gaps moderados em todos os regimes.",
+    },
+    tecnologia: {
+      value: { medio: 0.90, min: 0.82, max: 0.95 },
+      source: "Média ponderada entre regimes",
+      confidence: "derivada",
+      notes: "Tecnologia consistentemente alta em compliance.",
+    },
+    saude: {
+      value: { medio: 0.82, min: 0.72, max: 0.92 },
+      source: "Média ponderada entre regimes",
+      confidence: "derivada",
+      notes: "Saúde com compliance moderado-alto.",
+    },
+    educacao: {
+      value: { medio: 0.82, min: 0.72, max: 0.90 },
+      source: "Média ponderada entre regimes",
+      confidence: "derivada",
+      notes: "Educação com formalização moderada.",
+    },
+    construcao: {
+      value: { medio: 0.65, min: 0.48, max: 0.80 },
+      source: "Média ponderada entre regimes",
+      confidence: "derivada",
+      notes: "Construção com informalidade alta em todos os regimes.",
+    },
+    financeiro: {
+      value: { medio: 0.95, min: 0.90, max: 0.98 },
+      source: "Média ponderada entre regimes",
+      confidence: "derivada",
+      notes: "Setor financeiro consistentemente alto em compliance.",
+    },
+    outro: {
+      value: { medio: 0.78, min: 0.62, max: 0.90 },
+      source: "Média geral estimada (Receita Federal)",
+      confidence: "derivada",
+      notes: "Faixa genérica sem regime ou setor definido.",
+    },
+  },
+}
+
+// ---------------------------------------------------------------------------
 // Fator de ajuste por regime tributário
 // ---------------------------------------------------------------------------
 
@@ -586,6 +846,7 @@ export function collectSources(
   sources.add(CARGA_ATUAL[regime][setor].source)
   sources.add(CARGA_NOVA[setor].source)
   sources.add(AJUSTE_REGIME[regime].source)
+  sources.add(FATOR_EFETIVIDADE[regime][setor].source)
   TRANSICAO_TIMELINE.forEach((t) => sources.add(t.source))
   if (uf && UF_INCENTIVOS_FISCAIS[uf]) {
     sources.add(UF_INCENTIVOS_FISCAIS[uf].source)
@@ -601,6 +862,7 @@ export function collectLimitacoes(
     "Alíquotas finais de IBS/CBS ainda não foram definidas pelo Senado Federal",
     "A simulação usa médias por faixa de faturamento, não valores exatos",
     "Créditos tributários dependem da estrutura de custos individual de cada empresa",
+    "A carga tributária 'atual' reflete a média efetiva do setor (dados públicos da Receita Federal), que pode ser menor que a alíquota legal. Empresas 100% formalizadas terão impacto menor que o estimado",
     "Esta simulação não substitui consultoria tributária profissional",
   ]
 

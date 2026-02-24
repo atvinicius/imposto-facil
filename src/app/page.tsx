@@ -29,6 +29,11 @@ const FAQ_ITEMS = [
       "O simulador e o diagnóstico básico são gratuitos. O Diagnóstico Completo (com checklist, projeção ano a ano e análise de regime) está com preço de lançamento de R$49 — pagamento único, sem assinatura. Uma fração do custo de uma consultoria tributária (R$500-2.000+).",
   },
   {
+    question: "O simulador assume que eu pago 100% dos impostos?",
+    answer:
+      "Não. Nosso simulador usa dados da Receita Federal sobre a arrecadação real por setor — a diferença entre o que a lei exige e o que é efetivamente pago. Com a reforma, a cobrança automática de impostos vai diminuir essa diferença. Por isso, muitas empresas terão um impacto maior do que a simples mudança de alíquotas sugere. No diagnóstico, mostramos os dois impactos separados: mudança de alíquota e cobrança mais rigorosa.",
+  },
+  {
     question: "Meus dados são seguros?",
     answer:
       "Sim. Usamos Supabase (infraestrutura PostgreSQL) com autenticação segura. Não compartilhamos seus dados com terceiros. O conteúdo é baseado na EC 132/2023 e LC 214/2025.",

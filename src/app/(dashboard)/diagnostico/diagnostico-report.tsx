@@ -8,6 +8,7 @@ import {
   CheckCircle,
   Clock,
   Lock,
+  ShieldAlert,
   Sparkles,
   TrendingUp,
   BarChart3,
@@ -138,6 +139,93 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
           </p>
         </CardContent>
       </Card>
+
+      {/* Formalization Pressure — "O Custo Oculto" (FREE — strongest conversion driver) */}
+      {result.efetividadeTributaria.impactoFormalizacao > 0 && (
+        <Card className="border border-amber-200 dark:border-amber-900">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ShieldAlert className="h-5 w-5 text-amber-600" />
+              O Custo Oculto da Reforma
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              A reforma não muda apenas as alíquotas — ela muda a forma como os impostos são cobrados.
+              A partir de 2027, o governo vai reter o imposto automaticamente nas transações eletrônicas,
+              antes do dinheiro chegar na sua conta.
+            </p>
+
+            {/* The "reveal" — decomposed impact */}
+            <div className="space-y-2 p-4 bg-muted/50 rounded-lg">
+              <div className="flex items-center justify-between text-sm">
+                <span>Mudança de alíquotas</span>
+                <span className={`font-medium ${result.efetividadeTributaria.impactoMudancaAliquota > 0 ? "text-red-600" : "text-green-600"}`}>
+                  {result.efetividadeTributaria.impactoMudancaAliquota > 0 ? "+" : ""}
+                  R$ {Math.abs(result.efetividadeTributaria.impactoMudancaAliquota).toLocaleString("pt-BR")}/ano
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span>Cobrança mais rigorosa no seu setor</span>
+                <span className="font-medium text-amber-700 dark:text-amber-400">
+                  +R$ {result.efetividadeTributaria.impactoFormalizacao.toLocaleString("pt-BR")}/ano
+                </span>
+              </div>
+              <div className="border-t pt-2 mt-2 flex items-center justify-between font-medium">
+                <span>Impacto real estimado</span>
+                <span className={`text-lg ${result.efetividadeTributaria.impactoTotalEstimado > 0 ? "text-red-600" : "text-green-600"}`}>
+                  {result.efetividadeTributaria.impactoTotalEstimado > 0 ? "+" : ""}
+                  R$ {Math.abs(result.efetividadeTributaria.impactoTotalEstimado).toLocaleString("pt-BR")}/ano
+                </span>
+              </div>
+            </div>
+
+            {/* Sector context — non-judgmental */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 bg-green-50 dark:bg-green-950/20 rounded-lg text-center">
+                <div className="text-xs text-muted-foreground">Carga efetiva hoje</div>
+                <div className="text-lg font-bold text-green-700 dark:text-green-400">
+                  {result.efetividadeTributaria.cargaEfetivaAtualPct}%
+                </div>
+                <div className="text-xs text-muted-foreground">do faturamento</div>
+              </div>
+              <div className="p-3 bg-red-50 dark:bg-red-950/20 rounded-lg text-center">
+                <div className="text-xs text-muted-foreground">Carga exigida por lei</div>
+                <div className="text-lg font-bold text-red-700 dark:text-red-400">
+                  {result.efetividadeTributaria.cargaLegalAtualPct}%
+                </div>
+                <div className="text-xs text-muted-foreground">do faturamento</div>
+              </div>
+            </div>
+
+            {/* Plain-language explanation */}
+            <p className="text-sm">
+              No setor de <strong>{input.setor}</strong>, dados da Receita Federal indicam que
+              a maioria das empresas paga cerca de <strong>{Math.round(result.efetividadeTributaria.fatorEfetividade * 100)}%</strong> do
+              imposto previsto em lei. Com o novo sistema de cobrança automática,
+              essa diferença vai diminuir gradualmente até 2033.
+            </p>
+
+            {/* Pressure badge */}
+            {(result.efetividadeTributaria.pressaoFormalizacao === "alta" ||
+              result.efetividadeTributaria.pressaoFormalizacao === "muito_alta") && (
+              <div className="p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                <p className="text-sm text-amber-800 dark:text-amber-300">
+                  <strong>O que fazer:</strong> Verifique sua situação fiscal no
+                  e-CAC da Receita Federal. Existem programas de regularização com
+                  condições facilitadas — e as melhores condições são antes da reforma entrar em vigor.
+                </p>
+              </div>
+            )}
+
+            {/* Disclaimer */}
+            <p className="text-xs text-muted-foreground">
+              Estimativa baseada em dados públicos sobre a arrecadação efetiva do setor, não em dados
+              individuais da sua empresa. Empresas que já pagam todos os impostos em dia terão impacto menor.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Methodology */}
       <MethodologyCard metodologia={result.metodologia} />
@@ -363,7 +451,7 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <BarChart3 className="h-5 w-5 text-blue-500" />
-              Impacto do Split Payment no Fluxo de Caixa
+              Impacto da Retenção Automática no Fluxo de Caixa
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -382,7 +470,7 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
               </div>
             </div>
             <p className="text-sm text-muted-foreground">
-              A partir de 2027, o split payment retira automaticamente o IBS/CBS no momento do pagamento eletrônico.
+              A partir de 2027, o imposto será retido automaticamente no momento do pagamento eletrônico.
               Sua empresa perde o uso temporário desses recursos como capital de giro.
             </p>
           </CardContent>

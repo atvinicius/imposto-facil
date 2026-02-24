@@ -11,6 +11,7 @@ import {
   CARGA_ATUAL,
   CARGA_NOVA,
   AJUSTE_REGIME,
+  FATOR_EFETIVIDADE,
   TRANSICAO_TIMELINE,
   UF_INCENTIVOS_FISCAIS,
   collectSources,
@@ -66,42 +67,87 @@ function computeAjuste(input: SimuladorInput): number {
   return base
 }
 
-function calcularImpacto(input: SimuladorInput): {
+interface ImpactoResult {
   diferencaMin: number
   diferencaMax: number
   percentualMedio: number
   faturamentoBase: number
-} {
+  efetividade: {
+    fator: number
+    cargaEfetivaPct: number        // what they likely pay today (%)
+    cargaLegalPct: number          // what the law says they should pay (%)
+    impactoAliquota: number        // R$/year impact from rate changes alone
+    impactoFormalizacao: number    // R$/year impact from formalization pressure
+    impactoTotal: number           // combined R$/year
+    pressao: "baixa" | "moderada" | "alta" | "muito_alta"
+  }
+}
+
+function calcularImpacto(input: SimuladorInput): ImpactoResult {
   // Use exact revenue when provided, fall back to bracket midpoint
   const faturamento = input.faturamentoExato ?? FATURAMENTO_MEDIO[input.faturamento].value
-  const cargaAtual = CARGA_ATUAL[input.regime][input.setor].value
+  const cargaLegal = CARGA_ATUAL[input.regime][input.setor].value
   const cargaNova = CARGA_NOVA[input.setor].value
   const ajuste = computeAjuste(input)
+  const efetividade = FATOR_EFETIVIDADE[input.regime][input.setor].value
 
-  // Carga atual em R$
-  const impostoAtualMin = faturamento * (cargaAtual.min / 100)
-  const impostoAtualMax = faturamento * (cargaAtual.max / 100)
-  const impostoAtualMedio = (impostoAtualMin + impostoAtualMax) / 2
+  // Effectiveness factor for this business
+  const fatorEf = efetividade.medio
 
-  // Carga nova em R$ (com ajuste por regime)
+  // Statutory current burden (what the law requires)
+  const impostoLegalMin = faturamento * (cargaLegal.min / 100)
+  const impostoLegalMax = faturamento * (cargaLegal.max / 100)
+  const impostoLegalMedio = (impostoLegalMin + impostoLegalMax) / 2
+
+  // Effective current burden (what they likely pay)
+  const impostoEfetivoMedio = impostoLegalMedio * fatorEf
+
+  // New burden (reform enforces full compliance via split payment)
   const impostoNovoMin = faturamento * (cargaNova.min / 100) * ajuste
   const impostoNovoMax = faturamento * (cargaNova.max / 100) * ajuste
   const impostoNovoMedio = (impostoNovoMin + impostoNovoMax) / 2
 
-  // Diferença (positivo = paga mais)
-  const diferencaMin = impostoNovoMin - impostoAtualMax // Melhor cenário
-  const diferencaMax = impostoNovoMax - impostoAtualMin // Pior cenário
+  // Total impact: (new burden) - (effective current burden)
+  // This captures both rate changes AND formalization pressure
+  const diferencaMin = impostoNovoMin - (impostoLegalMax * fatorEf) // Best case
+  const diferencaMax = impostoNovoMax - (impostoLegalMin * fatorEf) // Worst case
 
-  // Percentual médio de mudança
-  const percentualMedio = impostoAtualMedio > 0
-    ? ((impostoNovoMedio - impostoAtualMedio) / impostoAtualMedio) * 100
+  // Percentual based on effective burden (more meaningful to the user)
+  const percentualMedio = impostoEfetivoMedio > 0
+    ? ((impostoNovoMedio - impostoEfetivoMedio) / impostoEfetivoMedio) * 100
     : 0
+
+  // Decompose: rate change vs formalization
+  // Rate change = what they'd pay under new rates IF they were already fully compliant
+  const impactoAliquota = Math.round(impostoNovoMedio - impostoLegalMedio)
+  // Formalization = the gap between what they actually pay and what the law requires
+  const impactoFormalizacao = Math.round(impostoLegalMedio - impostoEfetivoMedio)
+  const impactoTotal = Math.round(impostoNovoMedio - impostoEfetivoMedio)
+
+  // Formalization pressure classification based on the gap
+  const gapPct = 1 - fatorEf
+  const pressao: ImpactoResult["efetividade"]["pressao"] =
+    gapPct > 0.30 ? "muito_alta" :
+    gapPct > 0.20 ? "alta" :
+    gapPct > 0.10 ? "moderada" :
+    "baixa"
+
+  const cargaLegalMediaPct = (cargaLegal.min + cargaLegal.max) / 2
 
   return {
     diferencaMin: Math.round(diferencaMin),
     diferencaMax: Math.round(diferencaMax),
     percentualMedio: Math.round(percentualMedio),
     faturamentoBase: faturamento,
+    efetividade: {
+      fator: fatorEf,
+      cargaEfetivaPct: Math.round(cargaLegalMediaPct * fatorEf * 10) / 10,
+      cargaLegalPct: Math.round(cargaLegalMediaPct * 10) / 10,
+      impactoAliquota,
+      impactoFormalizacao,
+      impactoTotal,
+      pressao,
+    },
   }
 }
 
@@ -195,10 +241,27 @@ function calcularSplitPaymentImpacto(
   }
 }
 
-function gerarAlertas(input: SimuladorInput, percentual: number): string[] {
+function gerarAlertas(
+  input: SimuladorInput,
+  percentual: number,
+  pressao: ImpactoResult["efetividade"]["pressao"] = "baixa",
+): string[] {
   const alertas: string[] = []
   const payroll = resolvePayroll(input)
   const b2b = resolveB2B(input)
+
+  // Formalization pressure alerts (shown first — most relevant new insight)
+  if (pressao === "muito_alta") {
+    alertas.push(
+      "🔴 No seu setor, a diferença entre o que se paga e o que a lei exige é uma das maiores. " +
+      "A reforma vai cobrar o valor integral automaticamente a partir de 2027 — prepare seu caixa"
+    )
+  } else if (pressao === "alta") {
+    alertas.push(
+      "⚠️ No seu setor, há uma diferença relevante entre a carga tributária cobrada e a efetivamente paga. " +
+      "Com a reforma, essa diferença tende a zero"
+    )
+  }
 
   // Alertas por setor
   if (input.setor === "servicos" && input.regime === "lucro_presumido") {
@@ -249,14 +312,22 @@ function gerarAlertas(input: SimuladorInput, percentual: number): string[] {
     alertas.push(`📍 ${input.uf}: ${ufInfo.value}`)
   }
 
+  // Regularization alert for high-pressure sectors
+  if (pressao === "muito_alta" || pressao === "alta") {
+    alertas.push("📋 Verifique sua situação fiscal no e-CAC da Receita Federal — existem programas de regularização com condições facilitadas antes da reforma entrar em vigor")
+  }
+
   // Alertas gerais de timing
   alertas.push("⏰ 2026 é o ano de teste - aproveite para adaptar seus sistemas sem penalidades severas")
-  alertas.push("💳 Split payment começa em 2027 - prepare seu fluxo de caixa")
+  alertas.push("💳 A partir de 2027, o imposto será retido automaticamente nas transações eletrônicas — prepare seu fluxo de caixa")
 
   return alertas
 }
 
-function gerarDatasImportantes(input: SimuladorInput): SimuladorResult["datasImportantes"] {
+function gerarDatasImportantes(
+  input: SimuladorInput,
+  fatorEfetividade: number = 1,
+): SimuladorResult["datasImportantes"] {
   const datas: SimuladorResult["datasImportantes"] = [
     {
       data: "2026",
@@ -265,7 +336,7 @@ function gerarDatasImportantes(input: SimuladorInput): SimuladorResult["datasImp
     },
     {
       data: "Janeiro 2027",
-      descricao: "CBS entra em vigor definitivamente + Split Payment + Extinção do PIS/Cofins",
+      descricao: "CBS entra em vigor + retenção automática de impostos nas transações eletrônicas + Extinção do PIS/Cofins",
       urgencia: "danger",
     },
     {
@@ -280,6 +351,15 @@ function gerarDatasImportantes(input: SimuladorInput): SimuladorResult["datasImp
     },
   ]
 
+  // Formalization-specific dates for sectors with significant gap
+  if (fatorEfetividade < 0.85) {
+    datas.splice(1, 0, {
+      data: "Até Jun 2026",
+      descricao: "Última janela para regularizar pendências fiscais com condições facilitadas",
+      urgencia: "warning",
+    })
+  }
+
   // Adicionar datas específicas por setor
   if (input.setor === "agronegocio") {
     datas.unshift({
@@ -292,12 +372,21 @@ function gerarDatasImportantes(input: SimuladorInput): SimuladorResult["datasImp
   return datas
 }
 
-function gerarAcoesRecomendadas(input: SimuladorInput): string[] {
+function gerarAcoesRecomendadas(
+  input: SimuladorInput,
+  pressao: ImpactoResult["efetividade"]["pressao"] = "baixa",
+): string[] {
   const acoes: string[] = []
 
   // Ações gerais (sempre mostrar 2 como teaser)
   acoes.push("Atualizar sistema de emissão de notas fiscais para novos campos (IBS, CBS)")
-  acoes.push("Simular fluxo de caixa considerando split payment em 2027")
+  acoes.push("Simular fluxo de caixa considerando a retenção automática de impostos a partir de 2027")
+
+  // Formalization-related actions
+  if (pressao !== "baixa") {
+    acoes.push("Verificar situação fiscal no e-CAC e regularizar eventuais pendências antes da reforma")
+    acoes.push("Avaliar impacto da formalização completa no fluxo de caixa da empresa")
+  }
 
   // Ações específicas (gated)
   acoes.push("Revisar contratos de longo prazo para cláusulas de reajuste tributário")
@@ -319,13 +408,16 @@ function gerarAcoesRecomendadas(input: SimuladorInput): string[] {
   return acoes
 }
 
-function gerarChecklistCompleto(input: SimuladorInput): string[] {
+function gerarChecklistCompleto(
+  input: SimuladorInput,
+  pressao: ImpactoResult["efetividade"]["pressao"] = "baixa",
+): string[] {
   const checklist: string[] = [
     "Atualizar sistema de emissão de NF-e para incluir campos IBS e CBS",
     "Cadastrar empresa no portal do IBS (quando disponível)",
     "Revisar todos os contratos de longo prazo para cláusulas de reajuste tributário",
     "Mapear produtos/serviços e identificar alíquotas diferenciadas aplicáveis",
-    "Simular fluxo de caixa com split payment (retenção automática na liquidação)",
+    "Simular fluxo de caixa com retenção automática de impostos nas transações eletrônicas",
     "Treinar equipe fiscal nas novas obrigações acessórias",
     "Revisar precificação de produtos/serviços com nova carga tributária",
     "Configurar sistema contábil para apuração dual (período de transição)",
@@ -337,6 +429,17 @@ function gerarChecklistCompleto(input: SimuladorInput): string[] {
     "Revisar benefícios fiscais estaduais/municipais que serão extintos",
     "Criar cronograma interno de adequação com marcos trimestrais",
   ]
+
+  // Formalization-specific items for sectors with significant gap
+  if (pressao !== "baixa") {
+    checklist.push("Consultar situação fiscal no e-CAC da Receita Federal e regularizar pendências")
+    checklist.push("Avaliar programas de parcelamento PGFN (condições facilitadas até 2026)")
+    checklist.push("Calcular impacto da formalização completa no capital de giro")
+  }
+  if (pressao === "muito_alta" || pressao === "alta") {
+    checklist.push("Revisar processos internos de emissão de nota fiscal para garantir cobertura total")
+    checklist.push("Planejar transição gradual para operação 100% formalizada antes de 2027")
+  }
 
   if (input.setor === "servicos" || input.setor === "tecnologia") {
     checklist.push("Analisar impacto da não-cumulatividade limitada em serviços (sem crédito de folha)")
@@ -368,9 +471,12 @@ function gerarChecklistCompleto(input: SimuladorInput): string[] {
 
 function gerarProjecaoAnual(input: SimuladorInput): SimuladorResult["gatedContent"]["projecaoAnual"] {
   const faturamento = input.faturamentoExato ?? FATURAMENTO_MEDIO[input.faturamento].value
-  const cargaAtual = CARGA_ATUAL[input.regime][input.setor].value
-  const cargaAtualMedia = (cargaAtual.min + cargaAtual.max) / 2
-  const impostoAtual = faturamento * (cargaAtualMedia / 100)
+  const cargaLegal = CARGA_ATUAL[input.regime][input.setor].value
+  const cargaLegalMedia = (cargaLegal.min + cargaLegal.max) / 2
+  const efetividade = FATOR_EFETIVIDADE[input.regime][input.setor].value.medio
+
+  // Baseline: what they effectively pay today
+  const impostoEfetivoAtual = faturamento * (cargaLegalMedia / 100) * efetividade
 
   const ajuste = computeAjuste(input)
   const cargaNova = CARGA_NOVA[input.setor].value
@@ -379,9 +485,19 @@ function gerarProjecaoAnual(input: SimuladorInput): SimuladorResult["gatedConten
   return TRANSICAO_TIMELINE.map(({ ano, ibsPct, cbsPct, descricao }) => {
     // During transition, blend old and new systems
     const proporcaoNovo = Math.min((ibsPct + cbsPct) / (17.7 + 8.8), 1)
-    const cargaTransicao = cargaAtualMedia * (1 - proporcaoNovo) + cargaNovaMedia * proporcaoNovo
+
+    // Formalization ramps up with the transition:
+    // 2026 (test year): effectiveness stays as-is
+    // 2027+: enforcement begins, effectiveness trends toward 1.0
+    const efetividadeAno = ano <= 2026
+      ? efetividade
+      : Math.min(1, efetividade + (1 - efetividade) * Math.min((ano - 2026) / 6, 1))
+
+    // Current system portion uses ramping effectiveness (formalization pressure grows)
+    const cargaAtualAjustada = cargaLegalMedia * efetividadeAno
+    const cargaTransicao = cargaAtualAjustada * (1 - proporcaoNovo) + cargaNovaMedia * proporcaoNovo
     const impostoEstimado = faturamento * (cargaTransicao / 100)
-    const diferenca = Math.round(impostoEstimado - impostoAtual)
+    const diferenca = Math.round(impostoEstimado - impostoEfetivoAtual)
 
     return {
       ano,
@@ -475,8 +591,9 @@ function gerarMetodologia(input: SimuladorInput): SimuladorResult["metodologia"]
   }
 
   const resumoPartes: string[] = [
-    "Estimativa baseada em alíquotas da legislação vigente (LC 123/2006, Lei 10.637/2002, Lei 10.833/2003)",
-    "e projeções oficiais do Ministério da Fazenda para IBS+CBS (~26,5%).",
+    "Estimativa baseada em alíquotas da legislação vigente (LC 123/2006, Lei 10.637/2002, Lei 10.833/2003),",
+    "projeções oficiais do Ministério da Fazenda para IBS+CBS (~26,5%),",
+    "e dados públicos da Receita Federal sobre a carga efetiva por setor.",
   ]
 
   if (input.faturamentoExato) {
@@ -512,14 +629,23 @@ export function calcularSimulacao(input: SimuladorInput): SimuladorResult {
       percentual: impacto.percentualMedio,
     },
     nivelRisco,
-    alertas: gerarAlertas(input, impacto.percentualMedio),
-    datasImportantes: gerarDatasImportantes(input),
-    acoesRecomendadas: gerarAcoesRecomendadas(input),
+    alertas: gerarAlertas(input, impacto.percentualMedio, impacto.efetividade.pressao),
+    datasImportantes: gerarDatasImportantes(input, impacto.efetividade.fator),
+    acoesRecomendadas: gerarAcoesRecomendadas(input, impacto.efetividade.pressao),
     metodologia: gerarMetodologia(input),
     confiancaPerfil: calcularConfiancaPerfil(input),
     splitPaymentImpacto: calcularSplitPaymentImpacto(input, impacto.faturamentoBase),
+    efetividadeTributaria: {
+      fatorEfetividade: impacto.efetividade.fator,
+      cargaEfetivaAtualPct: impacto.efetividade.cargaEfetivaPct,
+      cargaLegalAtualPct: impacto.efetividade.cargaLegalPct,
+      impactoMudancaAliquota: impacto.efetividade.impactoAliquota,
+      impactoFormalizacao: impacto.efetividade.impactoFormalizacao,
+      impactoTotalEstimado: impacto.efetividade.impactoTotal,
+      pressaoFormalizacao: impacto.efetividade.pressao,
+    },
     gatedContent: {
-      checklistCompleto: gerarChecklistCompleto(input),
+      checklistCompleto: gerarChecklistCompleto(input, impacto.efetividade.pressao),
       analiseDetalhada: "Análise completa do impacto por linha de produto/serviço",
       comparativoRegimes: input.regime !== "simples",
       projecaoAnual: gerarProjecaoAnual(input),
@@ -528,7 +654,7 @@ export function calcularSimulacao(input: SimuladorInput): SimuladorResult {
   }
 }
 
-export function gerarTeaser(result: SimuladorResult, _input: SimuladorInput): SimuladorTeaser {
+export function gerarTeaser(result: SimuladorResult, _input: SimuladorInput): SimuladorTeaser { // eslint-disable-line @typescript-eslint/no-unused-vars
   const impactoTexto = result.impactoAnual.max > 0
     ? `Sua empresa pode pagar até R$ ${Math.abs(result.impactoAnual.max).toLocaleString("pt-BR")} a mais por ano`
     : `Sua empresa pode economizar até R$ ${Math.abs(result.impactoAnual.min).toLocaleString("pt-BR")} por ano`

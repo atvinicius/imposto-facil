@@ -92,6 +92,17 @@ export interface SimuladorResult {
     pctEletronico: number     // % of sales affected by split payment
   }
 
+  // Formalization pressure from tax reform enforcement
+  efetividadeTributaria: {
+    fatorEfetividade: number                              // 0-1, sector avg effectiveness
+    cargaEfetivaAtualPct: number                          // effective % of revenue as tax
+    cargaLegalAtualPct: number                            // statutory % of revenue as tax
+    impactoMudancaAliquota: number                        // R$/year from rate changes only
+    impactoFormalizacao: number                           // R$/year from formalization pressure
+    impactoTotalEstimado: number                          // combined R$/year
+    pressaoFormalizacao: "baixa" | "moderada" | "alta" | "muito_alta"
+  }
+
   // Seção gated (só mostra após signup/pagamento)
   gatedContent: {
     checklistCompleto: string[]
