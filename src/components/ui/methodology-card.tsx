@@ -20,7 +20,7 @@ const CONFIANCA_CONFIG = {
   media: {
     label: "Média",
     icon: Shield,
-    color: "text-yellow-600 bg-yellow-100",
+    color: "text-yellow-800 bg-yellow-100",
   },
   baixa: {
     label: "Baixa",
@@ -114,7 +114,7 @@ function MethodologyDetails({ metodologia }: { metodologia: SimuladorResult["met
         <ul className="space-y-1">
           {metodologia.limitacoes.map((lim, i) => (
             <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
-              <span className="text-amber-500 mt-0.5">•</span>
+              <span className="text-amber-700 mt-0.5">•</span>
               {lim}
             </li>
           ))}

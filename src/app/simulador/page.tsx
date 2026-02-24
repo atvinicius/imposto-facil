@@ -585,7 +585,7 @@ export default function SimuladorPage() {
                     <div className="text-sm text-muted-foreground">Precisão da simulação:</div>
                     <Badge variant="outline" className={
                       result.confiancaPerfil >= 70 ? "text-green-600 border-green-300" :
-                      result.confiancaPerfil >= 40 ? "text-amber-600 border-amber-300" :
+                      result.confiancaPerfil >= 40 ? "text-amber-700 border-amber-400" :
                       "text-red-600 border-red-300"
                     }>
                       {result.confiancaPerfil}% — {result.confiancaPerfil >= 70 ? "Alta" : result.confiancaPerfil >= 40 ? "Média" : "Baixa"}

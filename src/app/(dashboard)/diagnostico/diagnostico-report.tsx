@@ -67,9 +67,9 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
   const confidenceLabel =
     result.confiancaPerfil >= 70 ? "Alta" : result.confiancaPerfil >= 40 ? "Média" : "Baixa"
   const confidenceColor =
-    result.confiancaPerfil >= 70 ? "text-green-600 border-green-300" :
-    result.confiancaPerfil >= 40 ? "text-amber-600 border-amber-300" :
-    "text-red-600 border-red-300"
+    result.confiancaPerfil >= 70 ? "text-green-700 border-green-400" :
+    result.confiancaPerfil >= 40 ? "text-amber-700 border-amber-400" :
+    "text-red-700 border-red-400"
 
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
@@ -145,7 +145,7 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-amber-500" />
+            <AlertTriangle className="h-5 w-5 text-amber-600" />
             Alertas ({result.alertas.length})
           </CardTitle>
         </CardHeader>
@@ -369,7 +369,7 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
             <div className="grid grid-cols-1 gap-4 p-4 bg-muted/30 rounded-lg sm:grid-cols-2">
               <div className="text-center">
                 <div className="text-sm text-muted-foreground">Perda de float mensal estimada</div>
-                <div className="text-xl font-bold text-amber-600">
+                <div className="text-xl font-bold text-amber-700">
                   R$ {result.splitPaymentImpacto.perdaFloatMensal.toLocaleString("pt-BR")}
                 </div>
               </div>

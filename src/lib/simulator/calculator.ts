@@ -553,7 +553,7 @@ export function gerarTeaser(result: SimuladorResult, _input: SimuladorInput): Si
 // Labels para exibição
 export const NIVEL_RISCO_LABELS: Record<SimuladorResult["nivelRisco"], { label: string; color: string }> = {
   baixo: { label: "Baixo", color: "text-green-600 bg-green-100" },
-  medio: { label: "Médio", color: "text-yellow-600 bg-yellow-100" },
+  medio: { label: "Médio", color: "text-yellow-800 bg-yellow-100" },
   alto: { label: "Alto", color: "text-orange-600 bg-orange-100" },
   critico: { label: "Crítico", color: "text-red-600 bg-red-100" },
 }
