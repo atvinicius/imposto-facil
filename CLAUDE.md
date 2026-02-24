@@ -36,7 +36,7 @@ npm run lint      # ESLint with Next.js + TypeScript rules
 - `src/lib/supabase/` - Supabase clients (server.ts for SSR, client.ts for browser, admin.ts for service role)
 - `src/lib/openrouter/` - LLM client with system prompt template
 - `src/lib/embeddings/` - OpenAI embeddings and hybrid search logic
-- `src/content/` - Static MDX articles organized by category (ibs, cbs, is, transicao, glossario, setores, regimes, faq) — 20 articles total
+- `src/content/` - Static MDX articles organized by category (ibs, cbs, is, transicao, glossario, setores, regimes, faq) — 23 articles total
 - `src/hooks/use-chat.ts` - Client-side chat state management with SSE streaming
 - `src/hooks/use-conversations.ts` - Conversation list management
 - `src/lib/simulator/tax-data.ts` - Cited tax data registry with legislative sources
@@ -45,6 +45,8 @@ npm run lint      # ESLint with Next.js + TypeScript rules
 - `src/lib/analytics/` - Event tracking (track.ts for client, track-server.ts for server)
 - `src/lib/readiness/score.ts` - Readiness score calculation for dashboard
 - `src/components/chat/` - Chat UI (container, messages, sidebar, Duda avatar/welcome, follow-up suggestions)
+- `src/components/feedback/` - Inline feedback collection (`FeedbackPrompt` reusable component)
+- `src/app/actions/feedback.ts` - Server action for feedback submission
 - `supabase/migrations/` - SQL migration files for database setup
 
 ### Chat System Architecture
@@ -165,16 +167,26 @@ The public landing page (`src/app/page.tsx`) is a conversion-focused single-file
 2. **Problem amplification** — Three pain cards with real stats
 3. **Product preview** — Diagnostic report feature list + dark mockup
 4. **How it works** — 3 steps: simulate → free report → unlock full report
-5. **Pricing** — 3 tiers: Básico (free), Completo (R$29), Pro (R$19/mês — "Em breve")
+5. **Pricing** — 3 tiers: Básico (free), Completo (R$49), Pro (R$199/mês — "Em breve")
 6. **FAQ** — BotRTC comparison, accountant relationship, pricing, data security
 7. **Final CTA** — "A reforma não espera. Simule agora."
 
 Landing page styles are in `src/app/globals.css` (`.landing-root`, `.landing-backdrop`, `.landing-grid`, `.landing-reveal` animations).
 
+### Feedback Collection System
+Inline `<FeedbackPrompt>` cards at key decision points — non-intrusive, appear after a delay, dismissed via localStorage.
+
+- `src/components/feedback/feedback-prompt.tsx` — Reusable component with three modes: `options` (multi-select pills), `rating` (emoji scale), `rating_comment` (rating + contextual follow-up questions + text)
+- `src/app/actions/feedback.ts` — `submitFeedback()` server action, uses `createAdminClient()`
+- Three placements:
+  1. **Checkout page** (`checkout_objection`, 15s delay) — "What's holding you back?" with 5 objection options
+  2. **Diagnostic free user** (`diagnostic_free_objection`, 20s delay) — "What's missing to unlock?" with 4 options
+  3. **Diagnostic paid user** (`diagnostic_satisfaction`, no delay) — Emoji rating → contextual follow-ups (low: "What to improve?", high: "What helped most?") + free text
+
 ### Monetization Tiers
 - **Free**: Simulator + basic diagnostic (3 alerts, 2 actions, timeline)
-- **Diagnóstico Completo (R$29 one-time)**: All alerts, full checklist, year-by-year projection, regime analysis, PDF export — currently unlockable via promo code "amigos" at `/checkout`
-- **Pro (R$19/month)**: Unlimited AI chat, updated diagnostics, priority models — coming later
+- **Diagnóstico Completo (R$49 one-time)**: All alerts, full checklist, year-by-year projection, regime analysis, PDF export — currently unlockable via promo code "amigos" at `/checkout`
+- **Pro (R$199/month)**: Unlimited AI chat, updated diagnostics, priority models — coming later
 
 Database columns: `diagnostico_purchased_at`, `subscription_tier`, `stripe_customer_id` in `user_profiles`. Stripe Checkout is live.
 
@@ -202,10 +214,11 @@ Database columns: `diagnostico_purchased_at`, `subscription_tier`, `stripe_custo
 ### Other Tables
 - `conversations` - Chat conversation metadata
 - `messages` - Individual chat messages with role and sources
-- `content_chunks` - RAG knowledge base with embeddings (177 chunks from 20 articles)
+- `content_chunks` - RAG knowledge base with embeddings (177 chunks from 23 articles)
 - `analytics_events` - Custom event tracking
 - `newsletter_subscribers` - Email collection
 - `checklist_progress` - Diagnostic checklist completion state per user
+- `feedback` - Structured feedback (prompt_id, rating, selected_options, comment, metadata)
 
 ## Environment Variables
 
@@ -229,6 +242,8 @@ Run migrations in order in Supabase SQL Editor:
 2. `supabase/migrations/00002_enhanced_content_chunks.sql` — Enhanced content chunks for RAG
 3. `supabase/migrations/00003_diagnostico.sql` — Adds diagnostic/monetization columns to `user_profiles`
 4. `supabase/migrations/00004_analytics_checklist_newsletter.sql` — Analytics events, checklist progress, newsletter subscribers
+5. `supabase/migrations/00005_deep_personalization.sql` — Deep personalization columns on `user_profiles`
+6. `supabase/migrations/00006_feedback.sql` — Feedback collection table
 
 ### Knowledge Base Ingestion
 ```bash
