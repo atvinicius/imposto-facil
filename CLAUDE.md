@@ -36,7 +36,7 @@ npm run lint      # ESLint with Next.js + TypeScript rules
 - `src/lib/supabase/` - Supabase clients (server.ts for SSR, client.ts for browser, admin.ts for service role)
 - `src/lib/openrouter/` - LLM client with system prompt template
 - `src/lib/embeddings/` - OpenAI embeddings and hybrid search logic
-- `src/content/` - Static MDX articles organized by category (ibs, cbs, is, transicao, glossario, setores, regimes, faq) — 23 articles total
+- `src/content/` - Static MDX articles organized by category (ibs, cbs, is, transicao, glossario, setores, regimes, faq) — 26 articles total
 - `src/hooks/use-chat.ts` - Client-side chat state management with SSE streaming
 - `src/hooks/use-conversations.ts` - Conversation list management
 - `src/lib/simulator/tax-data.ts` - Cited tax data registry with legislative sources
@@ -51,7 +51,8 @@ npm run lint      # ESLint with Next.js + TypeScript rules
 
 ### Chat System Architecture
 1. **API Route** (`src/app/api/chat/route.ts`): Edge Runtime endpoint that:
-   - Fetches full user profile for personalized context (nome, UF, setor, porte, regime, faturamento, experiencia, interesses, simulator results)
+   - Fetches full user profile for personalized context (nome, UF, setor, porte, regime, faturamento, experiencia, interesses, simulator results, formalization pressure data)
+   - Injects diagnostic data into context: impact, risk, alerts, dates, actions, split payment, formalization pressure (effective vs legal rates, enforcement cost)
    - Performs hybrid search (70% semantic + 30% full-text) on knowledge base
    - Streams responses via Server-Sent Events
    - Persists messages to Supabase
@@ -61,7 +62,7 @@ npm run lint      # ESLint with Next.js + TypeScript rules
 
 3. **Chat UI** (`src/components/chat/`): "Duda" branded assistant with conversation sidebar, follow-up suggestion chips, and category-colored source badges
 
-4. **System Prompt**: Located in `src/lib/openrouter/client.ts` with `{{USER_CONTEXT}}` and `{{KNOWLEDGE_CONTEXT}}` placeholders. Model selection in `src/lib/openrouter/models.ts`
+4. **System Prompt**: Located in `src/lib/openrouter/client.ts` with `{{USER_CONTEXT}}` and `{{KNOWLEDGE_CONTEXT}}` placeholders. Includes compliance reality guidelines (non-judgmental sector-level framing, e-CAC/PGFN guidance, formalization-as-opportunity positioning). Model selection in `src/lib/openrouter/models.ts`
 
 ### Search Implementation
 Hybrid search in `src/lib/embeddings/search.ts` combines:
@@ -111,28 +112,39 @@ LANDING PAGE → SIMULATOR (public, no login) → RESULTS + localStorage persist
 Simulator users skip the 4-step onboarding wizard — their profile is auto-filled from simulator data (`simulatorInputToProfile()` in `src/lib/simulator/storage.ts`).
 
 ### Simulator System
-- `src/lib/simulator/tax-data.ts` — **Cited data registry**: all tax rates wrapped in `CitedValue<T>` with `source` (legislation reference), `confidence` (legislada/estimativa_oficial/derivada), and optional `notes`. Includes `FATURAMENTO_MEDIO`, `CARGA_ATUAL`, `CARGA_NOVA`, `AJUSTE_REGIME`, `TRANSICAO_TIMELINE`, `UF_INCENTIVOS_FISCAIS`
-- `src/lib/simulator/types.ts` — All types (`SimuladorInput`, `SimuladorResult`, `SimuladorTeaser`). Result includes `metodologia` field with confidence level, sources list, limitations, and last-updated date
-- `src/lib/simulator/calculator.ts` — Core calculation engine, imports all data from `tax-data.ts`. Populates methodology metadata per calculation. UF-aware alerts for states with major ICMS incentive programs
+- `src/lib/simulator/tax-data.ts` — **Cited data registry**: all tax rates wrapped in `CitedValue<T>` with `source` (legislation reference), `confidence` (legislada/estimativa_oficial/derivada), and optional `notes`. Includes `FATURAMENTO_MEDIO`, `CARGA_ATUAL`, `CARGA_NOVA`, `AJUSTE_REGIME`, `TRANSICAO_TIMELINE`, `UF_INCENTIVOS_FISCAIS`, and `FATOR_EFETIVIDADE` (sector/regime effectiveness ratios)
+- `src/lib/simulator/types.ts` — All types (`SimuladorInput`, `SimuladorResult`, `SimuladorTeaser`). Result includes `metodologia` field, `confiancaPerfil`, `splitPaymentImpacto`, and `efetividadeTributaria` (formalization pressure decomposition)
+- `src/lib/simulator/calculator.ts` — Core calculation engine, imports all data from `tax-data.ts`. `calcularImpacto()` decomposes impact into rate change + formalization pressure using effectiveness factors. UF-aware alerts, formalization-specific alerts for high-gap sectors
 - `src/lib/simulator/storage.ts` — localStorage bridge (`saveSimulatorData`, `getStoredSimulatorData`, `clearStoredSimulatorData`, `simulatorInputToProfile`)
 - `src/components/ui/methodology-card.tsx` — Reusable transparency component: compact mode (expandable line) on simulator, full mode (card with sources/limitations) on diagnostic
 - `src/app/simulador/page.tsx` — 4-step public quiz, persists results to localStorage, shows methodology card on results. CTAs route to `/signup?from=simulador`
+
+### Compliance Reality / Formalization Pressure System
+The simulator accounts for the fact that Brazilian SMEs don't always pay 100% of statutory tax obligations. The reform's automated collection (split payment, 2027+) will close this gap, creating a "hidden cost" beyond rate changes.
+
+- `src/lib/simulator/tax-data.ts` — `FATOR_EFETIVIDADE`: 40 sector/regime combinations (10 sectors x 4 regimes), each a `CitedValue<{medio, min, max}>` where `medio` is the ratio of actual vs statutory tax payment (e.g., 0.65 for comércio/simples = 65% effective compliance)
+- `src/lib/simulator/calculator.ts` — `calcularImpacto()` computes: current burden = `faturamento * cargaAtual * fatorEfetividade` (effective), new burden = `faturamento * cargaNova * 1.0` (statutory, because split payment enforces full compliance). Impact decomposed into `impactoMudancaAliquota` (rate change only) + `impactoFormalizacao` (enforcement gap closure) = `impactoTotalEstimado`
+- `src/lib/simulator/types.ts` — `efetividadeTributaria` field on `SimuladorResult` with: `fatorEfetividade`, `cargaEfetivaAtualPct`, `cargaLegalAtualPct`, `impactoMudancaAliquota`, `impactoFormalizacao`, `impactoTotalEstimado`, `pressaoFormalizacao` (baixa/moderada/alta/muito_alta)
+- Year-by-year projections model formalization ramp-up: 2026 test year (no change), 2027+ effectiveness trends toward 1.0 as enforcement tightens through 2033
+- All customer-facing language is non-judgmental (sector-level public data, never individual accusations), uses plain Portuguese (no "split payment" — says "retenção automática" or "cobrança mais rigorosa")
+- Research docs: `docs/COMPLIANCE_RESEARCH.md` (statistics + sources), `docs/EFFECTIVENESS_METHODOLOGY.md` (derivation of each factor value)
 
 ### Diagnostic Report System (`/diagnostico`)
 Protected route (requires auth, does NOT require onboarding completion).
 
 - `src/app/(dashboard)/diagnostico/page.tsx` — Server component: loads profile, runs simulation server-side, checks `isPaid` status
 - `src/app/(dashboard)/diagnostico/diagnostico-client.tsx` — Client bridge: reads localStorage, saves to profile via server action, triggers page refresh
-- `src/app/(dashboard)/diagnostico/diagnostico-report.tsx` — Client component with analytics tracking. Full report UI with 9 sections:
+- `src/app/(dashboard)/diagnostico/diagnostico-report.tsx` — Client component with analytics tracking. Full report UI with 10 sections:
   1. Impact Summary (FREE) — risk badge, R$ range
-  2. Methodology (FREE) — `<MethodologyCard>` with sources, confidence, limitations
-  3. Alerts (PARTIAL) — first 3 free, rest gated with `<GatedSection>`
-  4. Timeline (FREE) — key dates
-  5. Action Checklist (PARTIAL) — first 2 free, rest + full interactive checklist gated (uses `<ChecklistItem>`)
-  6. Regime Comparison (PAID) — full analysis gated
-  7. Year-by-Year Projection (PAID) — 2026-2033 projection gated
-  8. PDF Export (PAID) — `<PdfDownloadButton>` generates PDF via `/api/diagnostico/pdf`
-  9. Upgrade CTA — links to `/checkout`, shows alert count + action count
+  2. **O Custo Oculto da Reforma (FREE)** — decomposed impact: rate change + stricter enforcement = total; effective vs legal rates side-by-side; sector context; action guidance for high-pressure sectors
+  3. Methodology (FREE) — `<MethodologyCard>` with sources, confidence, limitations
+  4. Alerts (PARTIAL) — first 3 free, rest gated with `<GatedSection>`
+  5. Timeline (FREE) — key dates (includes formalization deadlines)
+  6. Action Checklist (PARTIAL) — first 2 free, rest + full interactive checklist gated (uses `<ChecklistItem>`)
+  7. Regime Comparison (PAID) — full analysis gated
+  8. Year-by-Year Projection (PAID) — 2026-2033 projection with formalization ramp-up gated
+  9. PDF Export (PAID) — `<PdfDownloadButton>` generates PDF via `/api/diagnostico/pdf`
+  10. Upgrade CTA — links to `/checkout`, shows alert count + action count
 - `src/app/(dashboard)/diagnostico/actions.ts` — `saveSimulatorDataToProfile()` and `toggleChecklistItem()` server actions
 - `src/app/(dashboard)/diagnostico/checklist-item.tsx` — Interactive checkbox with optimistic UI
 - `src/components/ui/gated-section.tsx` — Reusable `<GatedSection locked={boolean}>` component: renders real content with `blur(5px)` + lock icon overlay when locked
@@ -168,7 +180,7 @@ The public landing page (`src/app/page.tsx`) is a conversion-focused single-file
 3. **Product preview** — Diagnostic report feature list + dark mockup
 4. **How it works** — 3 steps: simulate → free report → unlock full report
 5. **Pricing** — 3 tiers: Básico (free), Completo (R$49), Pro (R$199/mês — "Em breve")
-6. **FAQ** — BotRTC comparison, accountant relationship, pricing, data security
+6. **FAQ** — BotRTC comparison, accountant relationship, pricing, data security, compliance assumption explanation
 7. **Final CTA** — "A reforma não espera. Simule agora."
 
 Landing page styles are in `src/app/globals.css` (`.landing-root`, `.landing-backdrop`, `.landing-grid`, `.landing-reveal` animations).
@@ -214,7 +226,7 @@ Database columns: `diagnostico_purchased_at`, `subscription_tier`, `stripe_custo
 ### Other Tables
 - `conversations` - Chat conversation metadata
 - `messages` - Individual chat messages with role and sources
-- `content_chunks` - RAG knowledge base with embeddings (177 chunks from 23 articles)
+- `content_chunks` - RAG knowledge base with embeddings (from 26 articles; re-ingest after adding articles)
 - `analytics_events` - Custom event tracking
 - `newsletter_subscribers` - Email collection
 - `checklist_progress` - Diagnostic checklist completion state per user
@@ -247,7 +259,7 @@ Run migrations in order in Supabase SQL Editor:
 
 ### Knowledge Base Ingestion
 ```bash
-npx tsx scripts/knowledge-base/ingest.ts --force --verbose  # Ingest all 20 articles into Supabase
+npx tsx scripts/knowledge-base/ingest.ts --force --verbose  # Ingest all 26 articles into Supabase
 npx tsx scripts/knowledge-base/ingest.ts --dry-run          # Preview without writing
 ```
 Loads `.env.local` for credentials. Generates OpenAI embeddings and writes to `content_chunks` table.
