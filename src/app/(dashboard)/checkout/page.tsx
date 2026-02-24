@@ -144,8 +144,16 @@ export default function CheckoutPage() {
           </div>
           <CardHeader>
             <CardTitle className="text-lg">Diagnóstico Completo</CardTitle>
-            <p className="text-3xl font-bold">R$29</p>
-            <p className="text-sm text-muted-foreground">Pagamento único — sem assinatura</p>
+            <div className="flex items-baseline gap-2">
+              <span className="text-lg text-muted-foreground line-through">R$97</span>
+              <span className="text-3xl font-bold">R$49</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800">
+                Preço de lançamento
+              </span>
+              <span className="text-sm text-muted-foreground">Pagamento único — sem assinatura</span>
+            </div>
           </CardHeader>
           <CardContent className="space-y-6">
             <ul className="space-y-3">
@@ -173,7 +181,7 @@ export default function CheckoutPage() {
               ) : (
                 <CreditCard className="h-4 w-4 mr-2" />
               )}
-              {stripeLoading ? "Redirecionando..." : "Pagar R$29 com cartão"}
+              {stripeLoading ? "Redirecionando..." : "Pagar R$49 com cartão"}
             </Button>
             {stripeError && (
               <p className="text-sm text-destructive text-center">{stripeError}</p>

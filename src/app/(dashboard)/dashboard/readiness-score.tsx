@@ -130,7 +130,7 @@ export function ReadinessScoreCard({ score }: ReadinessScoreCardProps) {
                 )}
                 {score.nextSteps[0]?.includes("Desbloqueie") && (
                   <Button asChild size="sm" className="mt-3">
-                    <Link href="/checkout">Desbloquear por R$29</Link>
+                    <Link href="/checkout">Desbloquear por R$49</Link>
                   </Button>
                 )}
               </div>

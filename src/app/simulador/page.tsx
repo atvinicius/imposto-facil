@@ -800,7 +800,7 @@ export default function SimuladorPage() {
                       <div className="absolute inset-0 flex items-center justify-center">
                         <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground bg-background/80 px-4 py-2 rounded-full border">
                           <Lock className="h-4 w-4" />
-                          Desbloqueie por R$29
+                          Desbloqueie por R$49
                         </div>
                       </div>
                     </div>

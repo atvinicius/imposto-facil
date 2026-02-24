@@ -64,7 +64,7 @@ export async function POST() {
         {
           price_data: {
             currency: "brl",
-            unit_amount: 2900, // R$29.00
+            unit_amount: 4900, // R$49.00
             product_data: {
               name: "Diagnóstico Tributário Completo",
               description:

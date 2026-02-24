@@ -77,7 +77,7 @@ export function calculateReadinessScore(
     nextSteps.push("Gere seu diagnóstico tributário no simulador")
   }
   if (diagnosticViewed && !diagnosticPurchased) {
-    nextSteps.push("Desbloqueie o diagnóstico completo por R$29")
+    nextSteps.push("Desbloqueie o diagnóstico completo por R$49")
   }
   if (diagnosticPurchased && checklistRatio < 1) {
     nextSteps.push("Complete as ações do checklist de adequação")

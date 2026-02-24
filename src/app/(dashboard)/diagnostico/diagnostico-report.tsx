@@ -402,7 +402,7 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
             <div className="flex flex-col items-stretch gap-3 pt-2 sm:flex-row sm:items-center sm:justify-center">
               <Button asChild size="lg" className="w-full bg-white text-slate-900 hover:bg-slate-100 sm:w-auto">
                 <Link href="/checkout">
-                  Desbloquear por R$29
+                  Desbloquear por R$49
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Link>
               </Button>

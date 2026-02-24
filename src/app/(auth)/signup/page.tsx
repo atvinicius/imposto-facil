@@ -167,7 +167,7 @@ function SimulatorSignupFlow() {
               ))}
               <li className="flex items-center gap-2 text-sm text-slate-400">
                 <Lock className="h-3.5 w-3.5 shrink-0" />
-                + análise de regime e PDF (R$29)
+                + análise de regime e PDF (R$49)
               </li>
             </ul>
           </div>

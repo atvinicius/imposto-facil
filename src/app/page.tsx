@@ -26,7 +26,7 @@ const FAQ_ITEMS = [
   {
     question: "Quanto custa?",
     answer:
-      "O simulador e o diagnóstico básico são gratuitos. O Diagnóstico Completo (com checklist, projeção ano a ano e análise de regime) custa R$29 — pagamento único, sem assinatura. Uma fração do custo de uma consultoria tributária.",
+      "O simulador e o diagnóstico básico são gratuitos. O Diagnóstico Completo (com checklist, projeção ano a ano e análise de regime) está com preço de lançamento de R$49 — pagamento único, sem assinatura. Uma fração do custo de uma consultoria tributária (R$500-2.000+).",
   },
   {
     question: "Meus dados são seguros?",
@@ -48,7 +48,7 @@ const jsonLd = {
       operatingSystem: "Web",
       offers: [
         { "@type": "Offer", price: "0", priceCurrency: "BRL", name: "Diagnóstico Básico" },
-        { "@type": "Offer", price: "29", priceCurrency: "BRL", name: "Diagnóstico Completo" },
+        { "@type": "Offer", price: "49", priceCurrency: "BRL", name: "Diagnóstico Completo" },
       ],
     },
     {
@@ -348,7 +348,7 @@ export default function LandingPage() {
           <div className="landing-reveal mb-8 flex flex-col gap-3 sm:max-w-3xl">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">Preços</p>
             <h2 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
-              Invista menos que um almoço para proteger sua empresa
+              Proteção profissional por uma fração do custo
             </h2>
           </div>
 
@@ -391,8 +391,16 @@ export default function LandingPage() {
                 Mais popular
               </span>
               <p className="text-sm font-medium text-slate-500">Diagnóstico Completo</p>
-              <p className="mt-2 text-4xl font-bold text-slate-900">R$29</p>
-              <p className="mt-1 text-sm text-slate-500">Pagamento único</p>
+              <div className="mt-2 flex items-baseline gap-2">
+                <span className="text-lg text-slate-400 line-through">R$97</span>
+                <span className="text-4xl font-bold text-slate-900">R$49</span>
+              </div>
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800">
+                  Preço de lançamento
+                </span>
+                <span className="text-sm text-slate-500">Pagamento único</span>
+              </div>
               <ul className="mt-6 space-y-3 text-sm text-slate-700">
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
@@ -425,13 +433,17 @@ export default function LandingPage() {
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
+              <p className="mt-3 text-center text-xs text-slate-500">Economia de R$48 · Garantia de 7 dias</p>
             </article>
 
             {/* Pro */}
-            <article className="landing-reveal rounded-3xl border border-slate-200/80 bg-white/90 p-6 shadow-sm">
+            <article className="landing-reveal rounded-3xl border border-slate-200/80 bg-white/90 p-6 shadow-sm relative">
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-slate-900 px-4 py-1 text-xs font-medium text-white">
+                Em breve
+              </span>
               <p className="text-sm font-medium text-slate-500">Pro</p>
-              <p className="mt-2 text-4xl font-bold text-slate-900">R$19<span className="text-lg font-normal text-slate-500">/mês</span></p>
-              <p className="mt-1 text-sm text-slate-500">Em breve</p>
+              <p className="mt-2 text-4xl font-bold text-slate-900">R$199<span className="text-lg font-normal text-slate-500">/mês</span></p>
+              <p className="mt-1 text-sm text-slate-500">Gestão tributária contínua com IA</p>
               <ul className="mt-6 space-y-3 text-sm text-slate-700">
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
@@ -439,20 +451,45 @@ export default function LandingPage() {
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
-                  Chat com IA ilimitado
+                  Diagnóstico recalculado a cada mudança regulatória
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
-                  Diagnóstico atualizado com mudanças regulatórias
+                  Alertas em tempo real de novas leis e regulamentos
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
-                  Modelos de IA prioritários
+                  Simulador de cenários: troca de regime, crescimento, novos produtos
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
+                  Consultoria IA ilimitada com modelos prioritários
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
+                  Painel de prazos e obrigações com lembretes automáticos
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
+                  Relatórios executivos mensais para sócios e contador
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
+                  Benchmark: compare seu impacto com empresas do mesmo setor e porte
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
+                  Análise de créditos tributários e oportunidades de recuperação
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
+                  Suporte prioritário por chat
                 </li>
               </ul>
               <Button className="mt-6 w-full" variant="outline" disabled>
-                Em breve
+                Lista de espera
               </Button>
+              <p className="mt-3 text-center text-xs text-slate-500">Menos que 1h de consultoria tributária por mês</p>
             </article>
           </div>
         </section>
