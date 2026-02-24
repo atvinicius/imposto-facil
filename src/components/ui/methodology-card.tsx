@@ -20,7 +20,7 @@ const CONFIANCA_CONFIG = {
   media: {
     label: "Média",
     icon: Shield,
-    color: "text-yellow-800 bg-yellow-100",
+    color: "text-amber-900 bg-amber-100",
   },
   baixa: {
     label: "Baixa",
@@ -80,7 +80,7 @@ export function MethodologyCard({ metodologia, compact }: MethodologyCardProps) 
         <p className="text-sm text-muted-foreground">{metodologia.resumo}</p>
         <MethodologyDetails metodologia={metodologia} />
         <div className="rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 p-3">
-          <p className="text-xs text-amber-800 dark:text-amber-300">
+          <p className="text-xs text-amber-950 dark:text-amber-200">
             Esta simulação tem caráter informativo e educacional. Não substitui consultoria
             tributária profissional. Consulte seu contador para decisões específicas.
           </p>

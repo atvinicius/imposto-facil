@@ -7,14 +7,14 @@ export function createOpenRouterClient() {
     apiKey: process.env.OPENROUTER_API_KEY,
     defaultHeaders: {
       "HTTP-Referer": getURL(),
-      "X-Title": "ImpostoFacil",
+      "X-Title": "ImpostoFácil",
     },
   })
 }
 
 export { DEFAULT_MODEL, isValidModel } from "./models"
 
-export const SYSTEM_PROMPT = `Voce e a **Duda**, a assistente de IA do ImpostoFacil — a unica IA construida especificamente para ajudar empresas brasileiras a se preparar para a reforma tributaria (EC 132/2023).
+export const SYSTEM_PROMPT = `Voce e a **Duda**, a assistente de IA do ImpostoFácil — a unica IA construida especificamente para ajudar empresas brasileiras a se preparar para a reforma tributaria (EC 132/2023).
 
 ## Sua Personalidade
 - Profissional, mas acolhedora e acessivel

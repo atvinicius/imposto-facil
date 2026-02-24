@@ -7,9 +7,9 @@ import {
   Clock,
   Lock,
   MessageCircle,
-  ShieldCheck,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Logo } from "@/components/ui/logo"
 import { NewsletterSection } from "@/components/landing/newsletter-section"
 
 const FAQ_ITEMS = [
@@ -78,12 +78,7 @@ export default function LandingPage() {
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-white/40 bg-background/75 backdrop-blur-lg">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
-            <span className="rounded-full bg-primary/10 p-1.5 text-primary">
-              <ShieldCheck className="h-4 w-4" />
-            </span>
-            ImpostoFácil
-          </Link>
+          <Logo />
 
           <nav className="hidden items-center gap-8 text-sm md:flex">
             <Link href="/simulador" className="text-muted-foreground transition-colors hover:text-foreground">
@@ -132,7 +127,7 @@ export default function LandingPage() {
                   Descubra em 2 minutos quanto a reforma tributária vai custar para sua empresa
                 </h1>
                 <p className="max-w-2xl text-base leading-7 text-slate-700 sm:text-lg">
-                  Responda 4 perguntas sobre sua empresa e receba um diagnóstico tributário personalizado com alertas, ações e projeção de impacto até 2033.
+                  Responda algumas perguntas sobre sua empresa e receba um diagnóstico tributário personalizado com alertas, ações e projeção de impacto até 2033.
                 </p>
               </div>
 
@@ -323,7 +318,7 @@ export default function LandingPage() {
               <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-sky-50 text-lg font-bold text-sky-700">
                 1
               </div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">Responda 4 perguntas</h3>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">Responda algumas perguntas</h3>
               <p className="text-sm text-slate-600">
                 Regime tributário, setor, faturamento e estado. Menos de 2 minutos, sem cadastro.
               </p>
@@ -562,7 +557,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-slate-200/70 bg-white/75">
         <div className="container mx-auto px-4 py-8">
-          <p className="mb-4 rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3 text-xs leading-5 text-amber-800">
+          <p className="mb-4 rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3 text-xs leading-5 text-amber-950">
             O ImpostoFácil é uma ferramenta educacional. As informações e simulações apresentadas
             têm caráter informativo e não substituem a orientação de um contador ou advogado tributarista.
             Conteúdo baseado na EC 132/2023 e LC 214/2025.

@@ -1,17 +1,19 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import {
   AlertTriangle,
   ArrowRight,
   CheckCircle,
   Clock,
+  HelpCircle,
   Lock,
   ShieldAlert,
   Sparkles,
   TrendingUp,
   BarChart3,
+  X,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -39,9 +41,64 @@ interface DiagnosticoReportProps {
   checklistProgress?: ChecklistProgress
 }
 
+function ConfidenceExplainer({ score, onClose }: { score: number; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={onClose}>
+      <div
+        className="bg-background border rounded-xl shadow-xl max-w-md w-full p-6 space-y-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold">Como calculamos a precisão</h3>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <p className="text-sm text-muted-foreground">
+          A pontuação de <strong>{score}%</strong> reflete a quantidade e a qualidade dos dados
+          que temos sobre o perfil da sua empresa.
+        </p>
+
+        <div className="space-y-3">
+          <div className="flex items-start gap-3 text-sm">
+            <Badge variant="outline" className="shrink-0 text-emerald-800 border-emerald-400 bg-emerald-50">70-100%</Badge>
+            <div>
+              <p className="font-medium">Alta precisão</p>
+              <p className="text-muted-foreground">Perfil completo com faturamento, folha, custos e clientes informados.</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3 text-sm">
+            <Badge variant="outline" className="shrink-0 text-amber-900 border-amber-400 bg-amber-50">40-69%</Badge>
+            <div>
+              <p className="font-medium">Precisão média</p>
+              <p className="text-muted-foreground">Alguns dados faltando. O resultado usa médias do setor para preencher lacunas.</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3 text-sm">
+            <Badge variant="outline" className="shrink-0 text-red-800 border-red-400 bg-red-50">0-39%</Badge>
+            <div>
+              <p className="font-medium">Precisão baixa</p>
+              <p className="text-muted-foreground">Dados insuficientes. O resultado é uma estimativa geral para o setor.</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="pt-2 border-t">
+          <p className="text-xs text-muted-foreground">
+            Quanto mais dados você fornecer no simulador, mais preciso será o resultado.
+            Fatores como faturamento exato, percentual de folha e tipo de custo têm grande impacto na precisão.
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checklistProgress }: DiagnosticoReportProps) {
   const { track } = useAnalytics()
   const trackedRef = useRef(false)
+  const [showConfidenceExplainer, setShowConfidenceExplainer] = useState(false)
 
   useEffect(() => {
     if (!trackedRef.current) {
@@ -69,19 +126,27 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
   const confidenceLabel =
     result.confiancaPerfil >= 70 ? "Alta" : result.confiancaPerfil >= 40 ? "Média" : "Baixa"
   const confidenceColor =
-    result.confiancaPerfil >= 70 ? "text-green-700 border-green-400" :
-    result.confiancaPerfil >= 40 ? "text-amber-700 border-amber-400" :
-    "text-red-700 border-red-400"
+    result.confiancaPerfil >= 70 ? "text-emerald-800 border-emerald-400" :
+    result.confiancaPerfil >= 40 ? "text-amber-900 border-amber-400" :
+    "text-red-800 border-red-400"
 
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
+      {/* Confidence explainer modal */}
+      {showConfidenceExplainer && (
+        <ConfidenceExplainer
+          score={result.confiancaPerfil}
+          onClose={() => setShowConfidenceExplainer(false)}
+        />
+      )}
+
       {/* Success banner */}
       {justUnlocked && (
-        <div className="rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 p-4 flex items-center gap-3">
-          <Sparkles className="h-5 w-5 text-green-600 shrink-0" />
+        <div className="rounded-lg bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900 p-4 flex items-center gap-3">
+          <Sparkles className="h-5 w-5 text-emerald-700 shrink-0" />
           <div>
-            <p className="font-medium text-green-800 dark:text-green-300">Diagnóstico Completo desbloqueado!</p>
-            <p className="text-sm text-green-700 dark:text-green-400">Todas as análises e projeções estão disponíveis abaixo.</p>
+            <p className="font-medium text-emerald-900 dark:text-emerald-200">Diagnóstico Completo desbloqueado!</p>
+            <p className="text-sm text-emerald-800 dark:text-emerald-300">Todas as análises e projeções estão disponíveis abaixo.</p>
           </div>
         </div>
       )}
@@ -91,7 +156,7 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
         <div className="flex items-center justify-center gap-2">
           <h1 className="text-3xl font-bold tracking-tight">Diagnóstico Tributário</h1>
           {isPaid && (
-            <Badge variant="outline" className="text-green-600 border-green-300">Completo</Badge>
+            <Badge variant="outline" className="text-emerald-800 border-emerald-400">Completo</Badge>
           )}
         </div>
         <p className="text-muted-foreground">
@@ -101,9 +166,15 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
           <Badge className={`text-base px-4 py-1.5 ${riscoInfo.color}`}>
             Nível de Risco: {riscoInfo.label}
           </Badge>
-          <Badge variant="outline" className={confidenceColor}>
-            Precisão: {result.confiancaPerfil}% — {confidenceLabel}
-          </Badge>
+          <button
+            onClick={() => setShowConfidenceExplainer(true)}
+            className="inline-flex items-center"
+          >
+            <Badge variant="outline" className={`${confidenceColor} cursor-pointer hover:opacity-80 transition-opacity`}>
+              Precisão: {result.confiancaPerfil}% — {confidenceLabel}
+              <HelpCircle className="h-3 w-3 ml-1" />
+            </Badge>
+          </button>
         </div>
       </div>
 
@@ -120,13 +191,13 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
           <div className="grid grid-cols-1 gap-4 p-4 bg-muted/50 rounded-lg sm:grid-cols-2">
             <div className="text-center">
               <div className="text-sm text-muted-foreground">Melhor cenário</div>
-              <div className={`text-xl font-bold ${result.impactoAnual.min > 0 ? "text-red-600" : "text-green-600"}`}>
+              <div className={`text-xl font-bold ${result.impactoAnual.min > 0 ? "text-red-600" : "text-emerald-700"}`}>
                 {result.impactoAnual.min > 0 ? "+" : ""} R$ {Math.abs(result.impactoAnual.min).toLocaleString("pt-BR")}
               </div>
             </div>
             <div className="text-center">
               <div className="text-sm text-muted-foreground">Pior cenário</div>
-              <div className={`text-xl font-bold ${result.impactoAnual.max > 0 ? "text-red-600" : "text-green-600"}`}>
+              <div className={`text-xl font-bold ${result.impactoAnual.max > 0 ? "text-red-600" : "text-emerald-700"}`}>
                 {result.impactoAnual.max > 0 ? "+" : ""} R$ {Math.abs(result.impactoAnual.max).toLocaleString("pt-BR")}
               </div>
             </div>
@@ -139,6 +210,32 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
           </p>
         </CardContent>
       </Card>
+
+      {/* Upgrade CTA (for free users — placed early to drive conversion) */}
+      {!isPaid && (
+        <Card className="bg-gradient-to-r from-slate-900 to-slate-800 text-white border-0">
+          <CardContent className="p-8 text-center space-y-4">
+            <h3 className="text-2xl font-bold">
+              Seu diagnóstico tem {result.alertas.length} alertas e{" "}
+              {result.gatedContent.checklistCompleto.length} ações
+            </h3>
+            <p className="text-slate-300 max-w-lg mx-auto">
+              Desbloqueie o relatório completo com análise de regime, projeção ano a ano, checklist de adequação e exportação em PDF.
+            </p>
+            <div className="flex flex-col items-stretch gap-3 pt-2 sm:flex-row sm:items-center sm:justify-center">
+              <Button asChild size="lg" className="w-full bg-white text-slate-900 hover:bg-slate-100 sm:w-auto">
+                <Link href="/checkout">
+                  Desbloquear por R$49
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Link>
+              </Button>
+            </div>
+            <p className="text-xs text-slate-400">
+              Pagamento único. Sem assinatura. Acesso permanente.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Formalization Pressure — "O Custo Oculto" (FREE — strongest conversion driver) */}
       {result.efetividadeTributaria.impactoFormalizacao > 0 && (
@@ -160,20 +257,20 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
             <div className="space-y-2 p-4 bg-muted/50 rounded-lg">
               <div className="flex items-center justify-between text-sm">
                 <span>Mudança de alíquotas</span>
-                <span className={`font-medium ${result.efetividadeTributaria.impactoMudancaAliquota > 0 ? "text-red-600" : "text-green-600"}`}>
+                <span className={`font-medium ${result.efetividadeTributaria.impactoMudancaAliquota > 0 ? "text-red-600" : "text-emerald-700"}`}>
                   {result.efetividadeTributaria.impactoMudancaAliquota > 0 ? "+" : ""}
                   R$ {Math.abs(result.efetividadeTributaria.impactoMudancaAliquota).toLocaleString("pt-BR")}/ano
                 </span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span>Cobrança mais rigorosa no seu setor</span>
-                <span className="font-medium text-amber-700 dark:text-amber-400">
+                <span className="font-medium text-amber-800 dark:text-amber-300">
                   +R$ {result.efetividadeTributaria.impactoFormalizacao.toLocaleString("pt-BR")}/ano
                 </span>
               </div>
               <div className="border-t pt-2 mt-2 flex items-center justify-between font-medium">
                 <span>Impacto real estimado</span>
-                <span className={`text-lg ${result.efetividadeTributaria.impactoTotalEstimado > 0 ? "text-red-600" : "text-green-600"}`}>
+                <span className={`text-lg ${result.efetividadeTributaria.impactoTotalEstimado > 0 ? "text-red-600" : "text-emerald-700"}`}>
                   {result.efetividadeTributaria.impactoTotalEstimado > 0 ? "+" : ""}
                   R$ {Math.abs(result.efetividadeTributaria.impactoTotalEstimado).toLocaleString("pt-BR")}/ano
                 </span>
@@ -182,9 +279,9 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
 
             {/* Sector context — non-judgmental */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="p-3 bg-green-50 dark:bg-green-950/20 rounded-lg text-center">
+              <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg text-center">
                 <div className="text-xs text-muted-foreground">Carga efetiva hoje</div>
-                <div className="text-lg font-bold text-green-700 dark:text-green-400">
+                <div className="text-lg font-bold text-emerald-800 dark:text-emerald-300">
                   {result.efetividadeTributaria.cargaEfetivaAtualPct}%
                 </div>
                 <div className="text-xs text-muted-foreground">do faturamento</div>
@@ -210,7 +307,7 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
             {(result.efetividadeTributaria.pressaoFormalizacao === "alta" ||
               result.efetividadeTributaria.pressaoFormalizacao === "muito_alta") && (
               <div className="p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
-                <p className="text-sm text-amber-800 dark:text-amber-300">
+                <p className="text-sm text-amber-950 dark:text-amber-200">
                   <strong>O que fazer:</strong> Verifique sua situação fiscal no
                   e-CAC da Receita Federal. Existem programas de regularização com
                   condições facilitadas — e as melhores condições são antes da reforma entrar em vigor.
@@ -226,9 +323,6 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
           </CardContent>
         </Card>
       )}
-
-      {/* Methodology */}
-      <MethodologyCard metodologia={result.metodologia} />
 
       {/* Alerts (PARTIAL) */}
       <Card>
@@ -291,7 +385,7 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <CheckCircle className="h-5 w-5 text-green-500" />
+            <CheckCircle className="h-5 w-5 text-emerald-600" />
             Ações Recomendadas ({totalChecklistItems})
             {isPaid && completedCount > 0 && (
               <Badge variant="secondary" className="ml-auto text-xs">
@@ -313,7 +407,7 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
               />
             ) : (
               <div key={i} className="flex items-start gap-2 text-sm">
-                <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
                 <span>{acao}</span>
               </div>
             )
@@ -371,18 +465,18 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
                     <p className="font-medium">{result.gatedContent.analiseRegime.regimeAtual}</p>
                   </div>
                   {result.gatedContent.analiseRegime.regimeSugerido && (
-                    <div className="p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-900">
+                    <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg border border-emerald-200 dark:border-emerald-900">
                       <p className="text-xs text-muted-foreground">Regime Sugerido</p>
-                      <p className="font-medium text-green-700 dark:text-green-400">
+                      <p className="font-medium text-emerald-800 dark:text-emerald-300">
                         {result.gatedContent.analiseRegime.regimeSugerido}
                       </p>
                     </div>
                   )}
                 </div>
                 {result.gatedContent.analiseRegime.economiaEstimada && (
-                  <div className="p-3 bg-green-50 dark:bg-green-950/20 rounded-lg text-center">
+                  <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg text-center">
                     <p className="text-sm text-muted-foreground">Economia estimada com migração</p>
-                    <p className="text-2xl font-bold text-green-600">
+                    <p className="text-2xl font-bold text-emerald-700">
                       R$ {result.gatedContent.analiseRegime.economiaEstimada.toLocaleString("pt-BR")}/ano
                     </p>
                   </div>
@@ -417,7 +511,7 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
                 <div key={proj.ano} className="flex flex-col gap-1 p-3 bg-muted/30 rounded-lg sm:flex-row sm:items-center sm:gap-4">
                   <div className="flex items-center justify-between sm:contents">
                     <span className="font-mono font-bold text-sm w-12">{proj.ano}</span>
-                    <div className={`text-sm font-medium shrink-0 sm:order-last ${proj.diferencaVsAtual > 0 ? "text-red-600" : "text-green-600"}`}>
+                    <div className={`text-sm font-medium shrink-0 sm:order-last ${proj.diferencaVsAtual > 0 ? "text-red-600" : "text-emerald-700"}`}>
                       {proj.diferencaVsAtual > 0 ? "+" : ""}R$ {Math.abs(proj.diferencaVsAtual).toLocaleString("pt-BR")}
                     </div>
                   </div>
@@ -458,7 +552,7 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
             <div className="grid grid-cols-1 gap-4 p-4 bg-muted/30 rounded-lg sm:grid-cols-2">
               <div className="text-center">
                 <div className="text-sm text-muted-foreground">Perda de float mensal estimada</div>
-                <div className="text-xl font-bold text-amber-700">
+                <div className="text-xl font-bold text-amber-800">
                   R$ {result.splitPaymentImpacto.perdaFloatMensal.toLocaleString("pt-BR")}
                 </div>
               </div>
@@ -477,50 +571,28 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
         </Card>
       )}
 
-      {/* Upgrade CTA */}
-      {!isPaid && (
-        <>
-          <Card className="bg-gradient-to-r from-slate-900 to-slate-800 text-white border-0">
-            <CardContent className="p-8 text-center space-y-4">
-              <h3 className="text-2xl font-bold">
-                Seu diagnóstico tem {result.alertas.length} alertas e{" "}
-                {result.gatedContent.checklistCompleto.length} ações
-              </h3>
-              <p className="text-slate-300 max-w-lg mx-auto">
-                Desbloqueie o relatório completo com análise de regime, projeção ano a ano, checklist de adequação e exportação em PDF.
-              </p>
-              <div className="flex flex-col items-stretch gap-3 pt-2 sm:flex-row sm:items-center sm:justify-center">
-                <Button asChild size="lg" className="w-full bg-white text-slate-900 hover:bg-slate-100 sm:w-auto">
-                  <Link href="/checkout">
-                    Desbloquear por R$49
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Link>
-                </Button>
-              </div>
-              <p className="text-xs text-slate-400">
-                Pagamento único. Sem assinatura. Acesso permanente.
-              </p>
-            </CardContent>
-          </Card>
+      {/* Methodology (moved to bottom — supporting detail, not the key message) */}
+      <MethodologyCard metodologia={result.metodologia} />
 
-          <FeedbackPrompt
-            promptId="diagnostic_free_objection"
-            feedbackType="pre_purchase"
-            title="O que falta para você desbloquear?"
-            subtitle="Sua opinião nos ajuda a melhorar."
-            mode="options"
-            options={[
-              { value: "mais_detalhes", label: "Preciso ver mais detalhes" },
-              { value: "preco", label: "O preço não cabe agora" },
-              { value: "contador", label: "Já tenho um contador" },
-              { value: "utilidade", label: "Não sei se vai ser útil" },
-            ]}
-            allowComment
-            commentPlaceholder="Quer nos contar mais? (opcional)"
-            delayMs={20000}
-            metadata={{ page: "diagnostico", risco: result.nivelRisco, setor: input.setor }}
-          />
-        </>
+      {/* Feedback prompts */}
+      {!isPaid && (
+        <FeedbackPrompt
+          promptId="diagnostic_free_objection"
+          feedbackType="pre_purchase"
+          title="O que falta para você desbloquear?"
+          subtitle="Sua opinião nos ajuda a melhorar."
+          mode="options"
+          options={[
+            { value: "mais_detalhes", label: "Preciso ver mais detalhes" },
+            { value: "preco", label: "O preço não cabe agora" },
+            { value: "contador", label: "Já tenho um contador" },
+            { value: "utilidade", label: "Não sei se vai ser útil" },
+          ]}
+          allowComment
+          commentPlaceholder="Quer nos contar mais? (opcional)"
+          delayMs={20000}
+          metadata={{ page: "diagnostico", risco: result.nivelRisco, setor: input.setor }}
+        />
       )}
 
       {/* Post-purchase satisfaction */}

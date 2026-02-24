@@ -14,6 +14,7 @@ import {
   BarChart3,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Logo } from "@/components/ui/logo"
 import {
   Card,
   CardContent,
@@ -232,9 +233,7 @@ export default function SimuladorPage() {
       {/* Header */}
       <header className="border-b bg-background/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="text-xl font-bold">
-            ImpostoFácil
-          </Link>
+          <Logo />
           <Link
             href="/"
             className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1"
@@ -561,7 +560,7 @@ export default function SimuladorPage() {
                         Melhor cenário
                       </div>
                       <div
-                        className={`text-xl font-bold ${result.impactoAnual.min > 0 ? "text-red-600" : "text-green-600"}`}
+                        className={`text-xl font-bold ${result.impactoAnual.min > 0 ? "text-red-600" : "text-emerald-700"}`}
                       >
                         {result.impactoAnual.min > 0 ? "+" : ""} R${" "}
                         {Math.abs(result.impactoAnual.min).toLocaleString("pt-BR")}
@@ -572,7 +571,7 @@ export default function SimuladorPage() {
                         Pior cenário
                       </div>
                       <div
-                        className={`text-xl font-bold ${result.impactoAnual.max > 0 ? "text-red-600" : "text-green-600"}`}
+                        className={`text-xl font-bold ${result.impactoAnual.max > 0 ? "text-red-600" : "text-emerald-700"}`}
                       >
                         {result.impactoAnual.max > 0 ? "+" : ""} R${" "}
                         {Math.abs(result.impactoAnual.max).toLocaleString("pt-BR")}
@@ -584,9 +583,9 @@ export default function SimuladorPage() {
                   <div className="flex items-center justify-center gap-2 mb-4">
                     <div className="text-sm text-muted-foreground">Precisão da simulação:</div>
                     <Badge variant="outline" className={
-                      result.confiancaPerfil >= 70 ? "text-green-600 border-green-300" :
-                      result.confiancaPerfil >= 40 ? "text-amber-700 border-amber-400" :
-                      "text-red-600 border-red-300"
+                      result.confiancaPerfil >= 70 ? "text-emerald-800 border-emerald-400" :
+                      result.confiancaPerfil >= 40 ? "text-amber-900 border-amber-400" :
+                      "text-red-800 border-red-400"
                     }>
                       {result.confiancaPerfil}% — {result.confiancaPerfil >= 70 ? "Alta" : result.confiancaPerfil >= 40 ? "Média" : "Baixa"}
                     </Badge>
@@ -707,7 +706,7 @@ export default function SimuladorPage() {
                         <p className="text-sm truncate">{proj.descricao}</p>
                       </div>
                       <div
-                        className={`text-sm font-medium shrink-0 ${proj.diferencaVsAtual > 0 ? "text-red-600" : "text-green-600"}`}
+                        className={`text-sm font-medium shrink-0 ${proj.diferencaVsAtual > 0 ? "text-red-600" : "text-emerald-700"}`}
                       >
                         {proj.diferencaVsAtual > 0 ? "+" : ""}R${" "}
                         {Math.abs(proj.diferencaVsAtual).toLocaleString("pt-BR")}
@@ -787,7 +786,7 @@ export default function SimuladorPage() {
                             <p className="text-sm text-muted-foreground">
                               Economia estimada
                             </p>
-                            <p className="text-xl font-bold text-green-600">
+                            <p className="text-xl font-bold text-emerald-700">
                               R${" "}
                               {result.gatedContent.analiseRegime.economiaEstimada.toLocaleString(
                                 "pt-BR"

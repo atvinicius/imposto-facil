@@ -15,7 +15,7 @@ interface GuidePageProps {
 
 const DIFFICULTY_LABELS = {
   basico: { label: "Basico", color: "bg-green-100 text-green-800" },
-  intermediario: { label: "Intermediario", color: "bg-yellow-100 text-yellow-800" },
+  intermediario: { label: "Intermediario", color: "bg-yellow-100 text-amber-900" },
   avancado: { label: "Avancado", color: "bg-red-100 text-red-800" },
 } as const
 
@@ -75,7 +75,7 @@ export async function generateMetadata({ params }: GuidePageProps): Promise<Meta
   const canonical = `${BASE_URL}/guias/${category}/${slug}`
 
   return {
-    title: `${frontmatter.title} | Guias ImpostoFacil`,
+    title: `${frontmatter.title} | Guias ImpostoFácil`,
     description: frontmatter.description,
     keywords: frontmatter.searchKeywords,
     alternates: { canonical },
@@ -83,7 +83,7 @@ export async function generateMetadata({ params }: GuidePageProps): Promise<Meta
       title: frontmatter.title,
       description: frontmatter.description,
       url: canonical,
-      siteName: "ImpostoFacil",
+      siteName: "ImpostoFácil",
       type: "article",
       publishedTime: toDateString(frontmatter.publishedAt),
       modifiedTime: toDateString(frontmatter.updatedAt) || toDateString(frontmatter.lastVerified),
@@ -144,12 +144,12 @@ export default async function GuidePage({ params }: GuidePageProps) {
         dateModified: toDateString(frontmatter.updatedAt) || toDateString(frontmatter.lastVerified) || toDateString(frontmatter.publishedAt),
         author: {
           "@type": "Organization",
-          name: "ImpostoFacil",
+          name: "ImpostoFácil",
           url: BASE_URL,
         },
         publisher: {
           "@type": "Organization",
-          name: "ImpostoFacil",
+          name: "ImpostoFácil",
           url: BASE_URL,
         },
         mainEntityOfPage: `${BASE_URL}/guias/${category}/${slug}`,
@@ -319,7 +319,7 @@ export default async function GuidePage({ params }: GuidePageProps) {
                 Descubra o impacto na sua empresa
               </h2>
               <p className="text-sm text-muted-foreground mb-4">
-                Responda 4 perguntas e receba um diagnostico personalizado com alertas, acoes e projecao ate 2033.
+                Responda algumas perguntas e receba um diagnóstico personalizado com alertas, ações e projeção até 2033.
               </p>
               <Button asChild>
                 <Link href="/simulador">

@@ -3,7 +3,7 @@ import type { Metadata } from "next"
 export const metadata: Metadata = {
   title: "Simulador de Impacto da Reforma Tributária",
   description:
-    "Responda 4 perguntas e descubra em 2 minutos quanto a reforma tributária (EC 132/2023) vai custar para sua empresa. Gratuito, sem cadastro.",
+    "Responda algumas perguntas e descubra em 2 minutos quanto a reforma tributária (EC 132/2023) vai custar para sua empresa. Gratuito, sem cadastro.",
   openGraph: {
     title: "Simulador de Impacto — ImpostoFácil",
     description:

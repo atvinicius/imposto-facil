@@ -13,7 +13,7 @@ interface CategoryPageProps {
 
 const DIFFICULTY_LABELS = {
   basico: { label: "Basico", color: "bg-green-100 text-green-800" },
-  intermediario: { label: "Intermediario", color: "bg-yellow-100 text-yellow-800" },
+  intermediario: { label: "Intermediario", color: "bg-yellow-100 text-amber-900" },
   avancado: { label: "Avancado", color: "bg-red-100 text-red-800" },
 } as const
 
@@ -51,10 +51,10 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
     description,
     alternates: { canonical },
     openGraph: {
-      title: `${categoryInfo.fullName} — Guias ImpostoFacil`,
+      title: `${categoryInfo.fullName} — Guias ImpostoFácil`,
       description,
       url: canonical,
-      siteName: "ImpostoFacil",
+      siteName: "ImpostoFácil",
       type: "website",
       locale: "pt_BR",
     },

@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
+import { Logo } from "@/components/ui/logo"
 import { logout } from "@/app/(auth)/actions"
 
 interface HeaderProps {
@@ -48,63 +49,7 @@ export function Header({ user }: HeaderProps) {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto flex h-14 max-w-6xl items-center px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-6">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <svg
-              className="h-7 w-7"
-              viewBox="0 0 32 32"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <defs>
-                <linearGradient
-                  id="logo-grad"
-                  x1="0"
-                  y1="0"
-                  x2="32"
-                  y2="32"
-                >
-                  <stop stopColor="#0ea5e9" />
-                  <stop offset="1" stopColor="#0d9488" />
-                </linearGradient>
-              </defs>
-              <rect width="32" height="32" rx="8" fill="url(#logo-grad)" />
-              <rect
-                x="9"
-                y="6"
-                width="14"
-                height="20"
-                rx="2"
-                fill="white"
-                fillOpacity="0.9"
-              />
-              <path
-                d="M13 16l2.5 2.5L19 14"
-                stroke="#0d9488"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <rect
-                x="12"
-                y="9"
-                width="8"
-                height="1.5"
-                rx="0.75"
-                fill="#0d9488"
-                fillOpacity="0.3"
-              />
-              <rect
-                x="12"
-                y="12"
-                width="5"
-                height="1.5"
-                rx="0.75"
-                fill="#0d9488"
-                fillOpacity="0.3"
-              />
-            </svg>
-            <span className="text-lg font-bold">ImpostoFacil</span>
-          </Link>
+          <Logo href="/dashboard" />
 
           <nav className="hidden items-center gap-1 md:flex">
             {navigation.map((item) => {

@@ -17,16 +17,16 @@ import { Button } from "@/components/ui/button"
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://impostofacil.com.br"
 
 export const metadata: Metadata = {
-  title: "Guias da Reforma Tributaria | ImpostoFacil",
+  title: "Guias da Reforma Tributaria | ImpostoFácil",
   description:
     "23 guias gratuitos sobre a reforma tributaria brasileira (EC 132/2023). IBS, CBS, Imposto Seletivo, cronograma de transicao, impacto por setor e regime — verificados com fontes legislativas oficiais.",
   alternates: { canonical: `${BASE_URL}/guias` },
   openGraph: {
-    title: "Guias da Reforma Tributaria — ImpostoFacil",
+    title: "Guias da Reforma Tributaria — ImpostoFácil",
     description:
       "23 guias gratuitos sobre a reforma tributaria brasileira. Verificados com fontes legislativas oficiais.",
     url: `${BASE_URL}/guias`,
-    siteName: "ImpostoFacil",
+    siteName: "ImpostoFácil",
     type: "website",
     locale: "pt_BR",
   },
@@ -76,7 +76,7 @@ export default function GuiasIndexPage() {
         url: `${BASE_URL}/guias`,
         publisher: {
           "@type": "Organization",
-          name: "ImpostoFacil",
+          name: "ImpostoFácil",
           url: BASE_URL,
         },
       },
