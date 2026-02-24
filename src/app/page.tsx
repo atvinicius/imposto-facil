@@ -84,6 +84,9 @@ export default function LandingPage() {
             <Link href="/simulador" className="text-muted-foreground transition-colors hover:text-foreground">
               Simulador
             </Link>
+            <Link href="/guias" className="text-muted-foreground transition-colors hover:text-foreground">
+              Guias
+            </Link>
             <Link href="#como-funciona" className="text-muted-foreground transition-colors hover:text-foreground">
               Como funciona
             </Link>
