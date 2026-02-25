@@ -63,6 +63,8 @@ export async function saveSimulatorDataToProfile(data: SaveSimulatorDataInput) {
   if (profileFields.fator_r_estimado !== undefined) updateData.fator_r_estimado = profileFields.fator_r_estimado
   if (profileFields.tipo_custo_principal) updateData.tipo_custo_principal = profileFields.tipo_custo_principal
   if (profileFields.pct_b2b !== undefined) updateData.pct_b2b = profileFields.pct_b2b
+  if (profileFields.tem_incentivo_icms) updateData.tem_incentivo_icms = profileFields.tem_incentivo_icms
+  if (profileFields.exporta_servicos !== undefined) updateData.exporta_servicos = profileFields.exporta_servicos
 
   // For paid re-runs, decrement remaining runs using raw SQL to avoid race conditions
   if (data.isRerun) {

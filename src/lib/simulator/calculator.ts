@@ -188,13 +188,18 @@ function calcularConfiancaPerfil(input: SimuladorInput): number {
   if (resolveB2B(input) !== undefined) score += 10
   if (input.tipoCusto ?? input.enhanced?.tipoCusto) score += 10
 
+  // ICMS incentive and export fields (top-level or legacy enhanced)
+  const temICMS = input.temIncentivoICMS ?? input.enhanced?.temIncentivoICMS
+  if (temICMS && temICMS !== "nao_sei") score += 3
+
+  const exporta = input.exportaServicos ?? input.enhanced?.exportaServicos
+  if (exporta !== undefined) score += 2
+
   // Extra enhanced fields
   const e = input.enhanced
   if (e) {
     if (e.pctInterestadual !== undefined) score += 5
-    if (e.temIncentivoICMS && e.temIncentivoICMS !== "nao_sei") score += 3
     if (e.numFuncionarios) score += 2
-    if (e.exportaServicos !== undefined) score += 2
   }
 
   return Math.min(score, 100)
@@ -248,14 +253,14 @@ function gerarAlertas(
     alertas.push(`📊 Folha de pagamento representa ~${payroll}% da receita — folha não gera crédito de IBS/CBS, aumentando sua carga efetiva`)
   }
 
-  // ICMS incentive confirmation (from enhanced legacy fields)
-  const temIncentivo = input.enhanced?.temIncentivoICMS
+  // ICMS incentive confirmation (top-level or legacy enhanced)
+  const temIncentivo = input.temIncentivoICMS ?? input.enhanced?.temIncentivoICMS
   if (temIncentivo === "sim" && input.uf) {
     alertas.push(`📍 Você confirmou ter incentivo de ICMS em ${input.uf} — esses benefícios serão extintos gradualmente até 2032. Planeje a transição`)
   }
 
-  // Export services benefit
-  if (input.enhanced?.exportaServicos) {
+  // Export services benefit (top-level or legacy enhanced)
+  if (input.exportaServicos ?? input.enhanced?.exportaServicos) {
     alertas.push("🌍 Exportação de serviços mantém alíquota zero de IBS/CBS — oportunidade de expansão internacional")
   }
 

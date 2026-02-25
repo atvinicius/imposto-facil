@@ -47,6 +47,9 @@ export interface SimuladorInput {
   tipoCusto?: TipoCustoPrincipal
   perfilClientes?: PerfilClientes // b2b, b2c, or misto
   pctB2B?: number                 // 0-100: derived from perfilClientes
+  // Adaptive simulator fields
+  temIncentivoICMS?: "sim" | "nao" | "nao_sei"
+  exportaServicos?: boolean
   enhanced?: EnhancedProfile      // legacy progressive profiling (kept for compatibility)
 }
 

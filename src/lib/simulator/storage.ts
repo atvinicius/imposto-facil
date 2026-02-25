@@ -81,6 +81,8 @@ export function simulatorInputToProfile(input: SimuladorInput): {
   fator_r_estimado?: number
   tipo_custo_principal?: string
   pct_b2b?: number
+  tem_incentivo_icms?: string
+  exporta_servicos?: boolean
 } {
   return {
     uf: input.uf,
@@ -92,5 +94,7 @@ export function simulatorInputToProfile(input: SimuladorInput): {
     ...(input.fatorR !== undefined ? { fator_r_estimado: input.fatorR } : {}),
     ...(input.tipoCusto ? { tipo_custo_principal: input.tipoCusto } : {}),
     ...(input.pctB2B !== undefined ? { pct_b2b: input.pctB2B } : {}),
+    ...(input.temIncentivoICMS ? { tem_incentivo_icms: input.temIncentivoICMS } : {}),
+    ...(input.exportaServicos !== undefined ? { exporta_servicos: input.exportaServicos } : {}),
   }
 }
