@@ -184,6 +184,10 @@ export default function CheckoutPage() {
               )}
               {stripeLoading ? "Redirecionando..." : "Pagar R$49 com cartão"}
             </Button>
+            <p className="text-xs text-muted-foreground text-center">
+              Ao prosseguir, você concorda com nossos{" "}
+              <Link href="/termos" className="underline hover:text-foreground">Termos de Uso</Link>.
+            </p>
             {stripeError && (
               <p className="text-sm text-destructive text-center">{stripeError}</p>
             )}

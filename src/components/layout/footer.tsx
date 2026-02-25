@@ -32,6 +32,19 @@ export function Footer() {
               >
                 Assistente
               </Link>
+              <span className="text-muted-foreground">|</span>
+              <Link
+                href="/termos"
+                className="text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Termos
+              </Link>
+              <Link
+                href="/privacidade"
+                className="text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Privacidade
+              </Link>
             </nav>
           </div>
           <p className="text-xs text-muted-foreground">

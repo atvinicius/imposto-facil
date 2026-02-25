@@ -310,6 +310,12 @@ function SimulatorSignupFlow() {
             <p className="text-center text-xs text-muted-foreground">
               Enviaremos um link de acesso para seu email
             </p>
+            <p className="text-center text-xs text-muted-foreground">
+              Ao criar sua conta, você concorda com nossos{" "}
+              <Link href="/termos" className="underline hover:text-foreground">Termos de Uso</Link>
+              {" "}e{" "}
+              <Link href="/privacidade" className="underline hover:text-foreground">Política de Privacidade</Link>.
+            </p>
           </div>
 
           <div className="relative">
@@ -516,6 +522,12 @@ function StandardSignupForm() {
               </Button>
               <p className="text-center text-xs text-muted-foreground">
                 Enviaremos um link de acesso para seu email
+              </p>
+              <p className="text-center text-xs text-muted-foreground">
+                Ao criar sua conta, você concorda com nossos{" "}
+                <Link href="/termos" className="underline hover:text-foreground">Termos de Uso</Link>
+                {" "}e{" "}
+                <Link href="/privacidade" className="underline hover:text-foreground">Política de Privacidade</Link>.
               </p>
             </div>
           </CardContent>
