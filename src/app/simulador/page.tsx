@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import {
   ArrowLeft,
   ArrowRight,
@@ -154,6 +155,7 @@ export default function SimuladorPage() {
   const [result, setResult] = useState<SimuladorResult | null>(null)
   const [teaser, setTeaser] = useState<SimuladorTeaser | null>(null)
   const { track } = useAnalytics()
+  const router = useRouter()
   const trackedRef = useRef(false)
 
   const handleCurrencyChange = useCallback((raw: string) => {
@@ -221,6 +223,8 @@ export default function SimuladorPage() {
       setStep(TOTAL_STEPS as Step)
     } else if (typeof step === "number" && step > 1) {
       setStep((step - 1) as Step)
+    } else if (step === 1) {
+      router.push("/")
     }
   }
 
@@ -513,7 +517,7 @@ export default function SimuladorPage() {
                   <Button
                     variant="outline"
                     onClick={handleBack}
-                    disabled={step === 1}
+                    disabled={false}
                     className="w-full sm:w-auto"
                   >
                     <ArrowLeft className="h-4 w-4 mr-2" />
