@@ -31,22 +31,22 @@ export const STEP_DEFINITIONS: StepDefinition[] = [
   {
     id: "setor",
     title: "Qual o setor da sua empresa?",
-    subtitle: "Alguns setores serao mais impactados pela reforma",
+    subtitle: "Alguns setores serão mais impactados pela reforma",
   },
   {
     id: "uf",
-    title: "Em qual estado sua empresa esta?",
-    subtitle: "A localizacao influencia incentivos e aliquotas",
+    title: "Em qual estado sua empresa está?",
+    subtitle: "A localização influencia incentivos e alíquotas",
   },
   {
     id: "icms",
     title: "Sua empresa tem incentivo fiscal de ICMS?",
-    subtitle: "Beneficios como PRODUZIR, DESENVOLVE ou similares do seu estado",
+    subtitle: "Benefícios como PRODUZIR, DESENVOLVE ou similares do seu estado",
     condition: (a) => !!a.uf && INCENTIVE_UFS.has(a.uf),
   },
   {
     id: "regime",
-    title: "Qual o regime tributario?",
+    title: "Qual o regime tributário?",
     subtitle: "Isso determina como a reforma vai te impactar",
   },
   {
@@ -57,22 +57,22 @@ export const STEP_DEFINITIONS: StepDefinition[] = [
   {
     id: "folha",
     title: "Quanto da receita vai para folha de pagamento?",
-    subtitle: "Folha nao gera credito de IBS/CBS — isso impacta sua carga",
+    subtitle: "Folha não gera crédito de IBS/CBS — isso impacta sua carga",
   },
   {
     id: "custo",
     title: "Qual o principal tipo de custo?",
-    subtitle: "Custos com insumos geram credito; folha nao",
+    subtitle: "Custos com insumos geram crédito; folha não",
   },
   {
     id: "clientes",
-    title: "Para quem voce vende?",
-    subtitle: "Clientes PJ no Simples nao aproveitam credito integral",
+    title: "Para quem você vende?",
+    subtitle: "Clientes PJ no Simples não aproveitam crédito integral",
   },
   {
     id: "exporta",
-    title: "Sua empresa exporta servicos?",
-    subtitle: "Exportacao de servicos para o exterior",
+    title: "Sua empresa exporta serviços?",
+    subtitle: "Exportação de serviços para o exterior",
     condition: (a) =>
       a.setor === "tecnologia" || a.setor === "servicos" || a.setor === "educacao",
   },

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useCallback, useEffect, useMemo } from "react"
+import { useState, useRef, useCallback, useMemo } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import {
@@ -74,35 +74,20 @@ function InsightScreen({
   insight: Insight
   onComplete: () => void
 }) {
-  const duration = insight.durationMs ?? 3500
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  useEffect(() => {
-    timerRef.current = setTimeout(onComplete, duration)
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current)
-    }
-  }, [duration, onComplete])
-
   return (
-    <div
-      className="insight-enter cursor-pointer select-none"
-      onClick={onComplete}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") onComplete() }}
-    >
+    <div className="insight-enter">
       <div className="flex flex-col items-center text-center py-8 px-4 space-y-4">
         <span className="text-4xl">{insight.emoji}</span>
         <h3 className="text-xl font-bold">{insight.headline}</h3>
         <p className="text-muted-foreground max-w-sm">{insight.detail}</p>
-        <div className="w-full max-w-xs h-1.5 bg-muted rounded-full overflow-hidden mt-4">
-          <div
-            className="h-full bg-primary rounded-full insight-progress-bar"
-            style={{ "--insight-duration": `${duration}ms` } as React.CSSProperties}
-          />
-        </div>
-        <p className="text-xs text-muted-foreground">Toque para continuar</p>
+        <Button
+          onClick={onComplete}
+          className="mt-4"
+          size="sm"
+        >
+          Continuar
+          <ArrowRight className="h-4 w-4 ml-2" />
+        </Button>
       </div>
     </div>
   )
@@ -288,13 +273,13 @@ export default function SimuladorPage() {
   // --- ICMS options ---
   const ICMS_OPTIONS = [
     { value: "sim" as const, label: "Sim", description: "Minha empresa tem incentivo fiscal de ICMS" },
-    { value: "nao" as const, label: "Nao", description: "Nao tenho incentivo fiscal" },
-    { value: "nao_sei" as const, label: "Nao sei", description: "Preciso verificar com meu contador" },
+    { value: "nao" as const, label: "Não", description: "Não tenho incentivo fiscal" },
+    { value: "nao_sei" as const, label: "Não sei", description: "Preciso verificar com meu contador" },
   ]
 
   const EXPORT_OPTIONS = [
-    { value: true, label: "Sim", description: "Exporto servicos para clientes no exterior" },
-    { value: false, label: "Nao", description: "Atendo apenas o mercado brasileiro" },
+    { value: true, label: "Sim", description: "Exporto serviços para clientes no exterior" },
+    { value: false, label: "Não", description: "Atendo apenas o mercado brasileiro" },
   ]
 
   return (
@@ -308,7 +293,7 @@ export default function SimuladorPage() {
             className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1"
           >
             <ArrowLeft className="h-4 w-4" />
-            Voltar ao inicio
+            Voltar ao início
           </Link>
         </div>
       </header>
@@ -499,7 +484,7 @@ export default function SimuladorPage() {
                                 : faturamentoExato <= 4_800_000
                                   ? "Faixa Pequena Empresa (EPP)"
                                   : faturamentoExato <= 78_000_000
-                                    ? "Media empresa"
+                                    ? "Média empresa"
                                     : "Grande empresa"}
                           </p>
                         )}
@@ -525,12 +510,12 @@ export default function SimuladorPage() {
                           className="w-full accent-primary h-2"
                         />
                         <div className="flex justify-between text-xs text-muted-foreground">
-                          <span>0% (sem funcionarios)</span>
-                          <span>80%+ (intensivo em mao de obra)</span>
+                          <span>0% (sem funcionários)</span>
+                          <span>80%+ (intensivo em mão de obra)</span>
                         </div>
                         {fatorR > 50 && (
                           <p className="text-sm text-amber-600 bg-amber-50 dark:bg-amber-950/20 p-3 rounded-lg">
-                            Folha elevada: despesas com pessoal nao geram credito de IBS/CBS, o que tende a aumentar sua carga tributaria efetiva.
+                            Folha elevada: despesas com pessoal não geram crédito de IBS/CBS, o que tende a aumentar sua carga tributária efetiva.
                           </p>
                         )}
                       </div>
@@ -650,7 +635,7 @@ export default function SimuladorPage() {
                         disabled={!canProceed}
                         className="w-full sm:w-auto"
                       >
-                        {stepIndex === activeSteps.length - 1 ? "Ver resultado" : "Proximo"}
+                        {stepIndex === activeSteps.length - 1 ? "Ver resultado" : "Próximo"}
                         <ArrowRight className="h-4 w-4 ml-2" />
                       </Button>
                     </div>
@@ -678,21 +663,21 @@ export default function SimuladorPage() {
                   <Badge
                     className={`w-fit mx-auto mb-4 ${NIVEL_RISCO_LABELS[result.nivelRisco].color}`}
                   >
-                    Nivel de Risco: {NIVEL_RISCO_LABELS[result.nivelRisco].label}
+                    Nível de Risco: {NIVEL_RISCO_LABELS[result.nivelRisco].label}
                   </Badge>
                   <CardTitle className="text-2xl md:text-3xl">
                     {teaser.impactoResumo}
                   </CardTitle>
                   <CardDescription className="text-base mt-2">
                     {result.impactoAnual.percentual > 0
-                      ? `Aumento estimado de ${result.impactoAnual.percentual}% na carga tributaria`
-                      : `Reducao estimada de ${Math.abs(result.impactoAnual.percentual)}% na carga tributaria`}
+                      ? `Aumento estimado de ${result.impactoAnual.percentual}% na carga tributária`
+                      : `Redução estimada de ${Math.abs(result.impactoAnual.percentual)}% na carga tributária`}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg mb-6">
                     <div className="text-center">
-                      <div className="text-sm text-muted-foreground">Melhor cenario</div>
+                      <div className="text-sm text-muted-foreground">Melhor cenário</div>
                       <div
                         className={`text-xl font-bold ${result.impactoAnual.min > 0 ? "text-red-600" : "text-emerald-700"}`}
                       >
@@ -701,7 +686,7 @@ export default function SimuladorPage() {
                       </div>
                     </div>
                     <div className="text-center">
-                      <div className="text-sm text-muted-foreground">Pior cenario</div>
+                      <div className="text-sm text-muted-foreground">Pior cenário</div>
                       <div
                         className={`text-xl font-bold ${result.impactoAnual.max > 0 ? "text-red-600" : "text-emerald-700"}`}
                       >
@@ -713,20 +698,20 @@ export default function SimuladorPage() {
 
                   {/* Confidence badge */}
                   <div className="flex items-center justify-center gap-2 mb-4">
-                    <div className="text-sm text-muted-foreground">Precisao da simulacao:</div>
+                    <div className="text-sm text-muted-foreground">Precisão da simulação:</div>
                     <Badge variant="outline" className={
                       result.confiancaPerfil >= 70 ? "text-emerald-800 border-emerald-400" :
                       result.confiancaPerfil >= 40 ? "text-amber-900 border-amber-400" :
                       "text-red-800 border-red-400"
                     }>
-                      {result.confiancaPerfil}% — {result.confiancaPerfil >= 70 ? "Alta" : result.confiancaPerfil >= 40 ? "Media" : "Baixa"}
+                      {result.confiancaPerfil}% — {result.confiancaPerfil >= 70 ? "Alta" : result.confiancaPerfil >= 40 ? "Média" : "Baixa"}
                     </Badge>
                   </div>
 
                   {/* CTA */}
                   <Button asChild className="w-full" size="lg">
                     <Link href="/signup?from=simulador">
-                      Ver diagnostico completo
+                      Ver diagnóstico completo
                     </Link>
                   </Button>
                 </CardContent>
@@ -754,7 +739,7 @@ export default function SimuladorPage() {
                   {result.alertas.length > 3 && (
                     <p className="text-sm text-muted-foreground mt-3 flex items-center gap-1">
                       <Lock className="h-4 w-4" />+{result.alertas.length - 3}{" "}
-                      alertas no relatorio completo
+                      alertas no relatório completo
                     </p>
                   )}
                 </CardContent>
@@ -765,7 +750,7 @@ export default function SimuladorPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <Clock className="h-5 w-5 text-primary" />
-                    Datas importantes para voce
+                    Datas importantes para você
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -811,7 +796,7 @@ export default function SimuladorPage() {
                     {result.acoesRecomendadas.length -
                       2 +
                       result.gatedContent.checklistCompleto.length}{" "}
-                    acoes no relatorio completo
+                    ações no relatório completo
                   </p>
                 </CardContent>
               </Card>
@@ -821,7 +806,7 @@ export default function SimuladorPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <TrendingUp className="h-5 w-5 text-primary" />
-                    Projecao Ano a Ano
+                    Projeção Ano a Ano
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -868,7 +853,7 @@ export default function SimuladorPage() {
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground bg-background/80 px-4 py-2 rounded-full border">
                         <Lock className="h-4 w-4" />+
-                        {result.gatedContent.projecaoAnual.length - 2} anos no diagnostico
+                        {result.gatedContent.projecaoAnual.length - 2} anos no diagnóstico
                       </div>
                     </div>
                   </div>
@@ -881,7 +866,7 @@ export default function SimuladorPage() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg">
                       <BarChart3 className="h-5 w-5 text-violet-500" />
-                      Analise de Regime Tributario
+                      Análise de Regime Tributário
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -898,7 +883,7 @@ export default function SimuladorPage() {
                             </p>
                           </div>
                           <div className="p-3 bg-green-50 dark:bg-green-950/20 rounded-lg">
-                            <p className="text-xs text-muted-foreground">Sugestao</p>
+                            <p className="text-xs text-muted-foreground">Sugestão</p>
                             <p className="font-medium">
                               {result.gatedContent.analiseRegime.regimeSugerido || "Manter atual"}
                             </p>
@@ -930,14 +915,14 @@ export default function SimuladorPage() {
               <Card className="bg-primary text-primary-foreground">
                 <CardContent className="p-6 text-center">
                   <h3 className="text-xl font-bold mb-2">
-                    Receba seu Diagnostico Tributario completo
+                    Receba seu Diagnóstico Tributário completo
                   </h3>
                   <p className="mb-4 text-primary-foreground/80">
-                    Crie sua conta e veja alertas, checklist de acoes e projecao ano a ano
+                    Crie sua conta e veja alertas, checklist de ações e projeção ano a ano
                   </p>
                   <Button asChild variant="secondary" size="lg">
                     <Link href="/signup?from=simulador">
-                      Ver diagnostico completo
+                      Ver diagnóstico completo
                       <ArrowRight className="h-4 w-4 ml-2" />
                     </Link>
                   </Button>
@@ -968,7 +953,7 @@ export default function SimuladorPage() {
                   }}
                 >
                   <ArrowLeft className="h-4 w-4 mr-2" />
-                  Fazer nova simulacao
+                  Fazer nova simulação
                 </Button>
               </div>
             </div>

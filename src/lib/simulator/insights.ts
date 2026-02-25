@@ -26,15 +26,15 @@ export interface Insight {
 // ---------------------------------------------------------------------------
 
 const CONTEXTUALIZERS: Record<string, string> = {
-  setor: "O setor define quanto imposto voce paga — e quanto vai pagar",
-  uf: "A localizacao influencia incentivos fiscais que podem acabar com a reforma",
-  icms: "Saber se voce tem incentivo ajuda a calcular o impacto da extincao deles",
-  regime: "O regime tributario muda completamente como a reforma te afeta",
-  faturamento: "O valor exato da receita torna o calculo mais preciso",
-  folha: "Salarios nao geram credito no novo sistema — isso pesa na conta",
-  custo: "Custos com materiais geram credito; com pessoas, nao",
-  clientes: "Quem compra de voce define se o credito tributario funciona na cadeia",
-  exporta: "Exportacao de servicos tem imposto zero no novo sistema",
+  setor: "O setor define quanto imposto você paga — e quanto vai pagar",
+  uf: "A localização influencia incentivos fiscais que podem acabar com a reforma",
+  icms: "Saber se você tem incentivo ajuda a calcular o impacto da extinção deles",
+  regime: "O regime tributário muda completamente como a reforma te afeta",
+  faturamento: "O valor exato da receita torna o cálculo mais preciso",
+  folha: "Salários não geram crédito no novo sistema — isso pesa na conta",
+  custo: "Custos com materiais geram crédito; com pessoas, não",
+  clientes: "Quem compra de você define se o crédito tributário funciona na cadeia",
+  exporta: "Exportação de serviços tem imposto zero no novo sistema",
 }
 
 export function getContextualizer(stepId: string): string {
@@ -48,53 +48,53 @@ export function getContextualizer(stepId: string): string {
 const SETOR_INSIGHTS: Record<Setor, Insight> = {
   servicos: {
     emoji: "💼",
-    headline: "Servicos: o setor mais impactado",
-    detail: "A aliquota pode mais que dobrar. Mas o impacto real depende do seu perfil completo.",
+    headline: "Serviços: o setor mais impactado",
+    detail: "A alíquota pode mais que dobrar. Mas o impacto real depende do seu perfil completo.",
   },
   comercio: {
     emoji: "🛒",
-    headline: "Comercio: creditos a seu favor",
-    detail: "A nova base de creditos sobre mercadorias pode compensar boa parte do aumento.",
+    headline: "Comércio: créditos a seu favor",
+    detail: "A nova base de créditos sobre mercadorias pode compensar boa parte do aumento.",
   },
   industria: {
     emoji: "🏭",
-    headline: "Industria: creditos amplos",
-    detail: "Com creditos sobre todos os insumos, a industria tende a ter transicao mais suave.",
+    headline: "Indústria: créditos amplos",
+    detail: "Com créditos sobre todos os insumos, a indústria tende a ter transição mais suave.",
   },
   tecnologia: {
     emoji: "💻",
-    headline: "Tecnologia: atencao a folha",
-    detail: "Se a maior parte do custo e com pessoas, os creditos serao limitados.",
+    headline: "Tecnologia: atenção à folha",
+    detail: "Se a maior parte do custo é com pessoas, os créditos serão limitados.",
   },
   saude: {
     emoji: "🏥",
-    headline: "Saude: aliquota reduzida em 60%",
-    detail: "Vamos verificar se o seu perfil se qualifica para essa reducao.",
+    headline: "Saúde: alíquota reduzida em 60%",
+    detail: "Vamos verificar se o seu perfil se qualifica para essa redução.",
   },
   educacao: {
     emoji: "📚",
-    headline: "Educacao: aliquota reduzida em 60%",
-    detail: "Instituicoes de ensino tem tratamento especial na reforma.",
+    headline: "Educação: alíquota reduzida em 60%",
+    detail: "Instituições de ensino têm tratamento especial na reforma.",
   },
   agronegocio: {
     emoji: "🌾",
     headline: "Agro: regime diferenciado",
-    detail: "Produtos agropecuarios tem reducao de 60% na aliquota. Mas ha detalhes importantes.",
+    detail: "Produtos agropecuários têm redução de 60% na alíquota. Mas há detalhes importantes.",
   },
   construcao: {
     emoji: "🏗️",
-    headline: "Construcao: atencao a formalizacao",
-    detail: "Um dos setores com maior pressao. A reforma cobra automaticamente a partir de 2027.",
+    headline: "Construção: atenção à formalização",
+    detail: "Um dos setores com maior pressão. A reforma cobra automaticamente a partir de 2027.",
   },
   financeiro: {
     emoji: "🏦",
-    headline: "Financeiro: regime especifico",
-    detail: "Bancos e seguradoras terao regras proprias. A base de calculo muda.",
+    headline: "Financeiro: regime específico",
+    detail: "Bancos e seguradoras terão regras próprias. A base de cálculo muda.",
   },
   outro: {
     emoji: "📦",
     headline: "Vamos calcular seu impacto",
-    detail: "Mesmo sem setor especifico, conseguimos estimar o efeito da reforma.",
+    detail: "Mesmo sem setor específico, conseguimos estimar o efeito da reforma.",
   },
 }
 
@@ -111,50 +111,50 @@ const UF_INCENTIVE_STATES = new Set(Object.keys(UF_INCENTIVOS_FISCAIS))
 const UF_INSIGHT_MAP: Record<string, Insight> = {
   AM: {
     emoji: "🌳",
-    headline: "Zona Franca: protecao ate 2073",
-    detail: "Empresas na Zona Franca de Manaus tem tratamento especial — vantagem unica no Brasil.",
+    headline: "Zona Franca: proteção até 2073",
+    detail: "Empresas na Zona Franca de Manaus têm tratamento especial — vantagem única no Brasil.",
   },
   GO: {
     emoji: "📍",
-    headline: "Goias: incentivos em extincao",
-    detail: "Programas como PRODUZIR serao extintos ate 2032. Isso afeta diretamente o calculo.",
+    headline: "Goiás: incentivos em extinção",
+    detail: "Programas como PRODUZIR serão extintos até 2032. Isso afeta diretamente o cálculo.",
   },
   BA: {
     emoji: "📍",
-    headline: "Bahia: DESENVOLVE em transicao",
-    detail: "Os incentivos de ICMS serao extintos gradualmente. Ha compensacao federal prevista.",
+    headline: "Bahia: DESENVOLVE em transição",
+    detail: "Os incentivos de ICMS serão extintos gradualmente. Há compensação federal prevista.",
   },
   CE: {
     emoji: "📍",
-    headline: "Ceara: incentivos em transicao",
-    detail: "O FDI e outros incentivos de ICMS serao extintos gradualmente ate 2032.",
+    headline: "Ceará: incentivos em transição",
+    detail: "O FDI e outros incentivos de ICMS serão extintos gradualmente até 2032.",
   },
   PE: {
     emoji: "📍",
-    headline: "Pernambuco: PRODEPE em transicao",
-    detail: "Os incentivos fiscais serao compensados pelo Fundo federal, mas exigem planejamento.",
+    headline: "Pernambuco: PRODEPE em transição",
+    detail: "Os incentivos fiscais serão compensados pelo Fundo federal, mas exigem planejamento.",
   },
   SC: {
     emoji: "📍",
-    headline: "Santa Catarina: TTD em transicao",
-    detail: "Os programas de ICMS terao sunset com a reforma. Planeje a transicao.",
+    headline: "Santa Catarina: TTD em transição",
+    detail: "Os programas de ICMS terão sunset com a reforma. Planeje a transição.",
   },
   ES: {
     emoji: "📍",
-    headline: "Espirito Santo: INVEST-ES em transicao",
-    detail: "Incentivos de comercio exterior e industria serao extintos gradualmente.",
+    headline: "Espírito Santo: INVEST-ES em transição",
+    detail: "Incentivos de comércio exterior e indústria serão extintos gradualmente.",
   },
   MG: {
     emoji: "📍",
-    headline: "Minas Gerais: incentivos industriais em transicao",
-    detail: "Os incentivos de ICMS de Minas serao extintos progressivamente ate 2032.",
+    headline: "Minas Gerais: incentivos industriais em transição",
+    detail: "Os incentivos de ICMS de Minas serão extintos progressivamente até 2032.",
   },
 }
 
 const UF_DEFAULT_INSIGHT: Insight = {
   emoji: "📍",
   headline: "Sem incentivos em risco",
-  detail: "Sua transicao e mais direta — menos variaveis para calcular.",
+  detail: "Sua transição é mais direta — menos variáveis para calcular.",
 }
 
 export function getUfInsight(uf: string): Insight {
@@ -175,19 +175,19 @@ export function getIcmsInsight(answer: "sim" | "nao" | "nao_sei"): Insight {
       return {
         emoji: "⚠️",
         headline: "Incentivo confirmado",
-        detail: "Esses beneficios serao extintos ate 2032. Vamos incluir isso no calculo.",
+        detail: "Esses benefícios serão extintos até 2032. Vamos incluir isso no cálculo.",
       }
     case "nao":
       return {
         emoji: "✅",
         headline: "Sem incentivo de ICMS",
-        detail: "Menos uma variavel — seu calculo fica mais direto.",
+        detail: "Menos uma variável — seu cálculo fica mais direto.",
       }
     case "nao_sei":
       return {
         emoji: "🤔",
         headline: "Tudo bem, vamos estimar",
-        detail: "Usaremos a media do seu estado. Confirme com seu contador depois.",
+        detail: "Usaremos a média do seu estado. Confirme com seu contador depois.",
       }
   }
 }
@@ -203,8 +203,8 @@ export function getRegimeInsight(regime: RegimeTributario, setor: Setor): Insigh
       emoji: "📋",
       headline: "Simples: impacto indireto",
       detail: isB2BHeavy
-        ? "Seus clientes PJ nao aproveitam creditos. A partir de set/2026, existe o Simples Hibrido."
-        : "O Simples continua existindo. O impacto maior e nos precos dos fornecedores.",
+        ? "Seus clientes PJ não aproveitam créditos. A partir de set/2026, existe o Simples Híbrido."
+        : "O Simples continua existindo. O impacto maior é nos preços dos fornecedores.",
     }
   }
   if (regime === "lucro_presumido") {
@@ -213,22 +213,22 @@ export function getRegimeInsight(regime: RegimeTributario, setor: Setor): Insigh
       emoji: "⚠️",
       headline: "Lucro Presumido: maior impacto",
       detail: isService
-        ? "Voce sai de PIS/Cofins de 3,65% para aliquota cheia. E folha nao gera credito."
-        : "A mudanca de cumulativo para nao-cumulativo e grande. Mas creditos sobre compras ajudam.",
+        ? "Você sai de PIS/Cofins de 3,65% para alíquota cheia. E folha não gera crédito."
+        : "A mudança de cumulativo para não-cumulativo é grande. Mas créditos sobre compras ajudam.",
     }
   }
   if (regime === "lucro_real") {
     return {
       emoji: "✅",
-      headline: "Boa noticia para Lucro Real",
-      detail: "Voce ja usa nao-cumulativo. A reforma amplia seus creditos — transicao mais suave.",
+      headline: "Boa notícia para Lucro Real",
+      detail: "Você já usa não-cumulativo. A reforma amplia seus créditos — transição mais suave.",
     }
   }
   // nao_sei
   return {
     emoji: "🤔",
     headline: "Sem regime definido",
-    detail: "Vamos estimar com uma media. Descubra seu regime com seu contador para resultado exato.",
+    detail: "Vamos estimar com uma média. Descubra seu regime com seu contador para resultado exato.",
   }
 }
 
@@ -241,7 +241,7 @@ export function getFaturamentoInsight(valor: number): Insight {
     return {
       emoji: "📊",
       headline: "Na faixa MEI",
-      detail: "O custo contabil adicional (R$50-150/mes) pode pesar mais que a mudanca de aliquota.",
+      detail: "O custo contábil adicional (R$50-150/mês) pode pesar mais que a mudança de alíquota.",
     }
   }
   if (valor <= 360_000) {
@@ -255,20 +255,20 @@ export function getFaturamentoInsight(valor: number): Insight {
     return {
       emoji: "📊",
       headline: "Pequena empresa",
-      detail: "Faixa com mais opcoes de regime. Vale comparar Simples vs Lucro Presumido vs Real.",
+      detail: "Faixa com mais opções de regime. Vale comparar Simples vs Lucro Presumido vs Real.",
     }
   }
   if (valor <= 78_000_000) {
     return {
       emoji: "📊",
-      headline: "Media empresa",
-      detail: "Nesse porte, a estrutura de creditos faz toda a diferenca no resultado final.",
+      headline: "Média empresa",
+      detail: "Nesse porte, a estrutura de créditos faz toda a diferença no resultado final.",
     }
   }
   return {
     emoji: "📊",
     headline: "Grande empresa",
-    detail: "O impacto em valor absoluto e significativo. Cada ponto percentual conta.",
+    detail: "O impacto em valor absoluto é significativo. Cada ponto percentual conta.",
   }
 }
 
@@ -280,21 +280,21 @@ export function getFolhaInsight(fatorR: number): Insight {
   if (fatorR > 50) {
     return {
       emoji: "💰",
-      headline: "Folha alta = menos creditos",
-      detail: "A maior parte dos seus custos nao gera credito no novo sistema. Isso aumenta a carga.",
+      headline: "Folha alta = menos créditos",
+      detail: "A maior parte dos seus custos não gera crédito no novo sistema. Isso aumenta a carga.",
     }
   }
   if (fatorR > 25) {
     return {
       emoji: "💰",
       headline: "Folha moderada",
-      detail: "Parte dos custos gera credito, parte nao. O impacto depende dos outros fatores.",
+      detail: "Parte dos custos gera crédito, parte não. O impacto depende dos outros fatores.",
     }
   }
   return {
     emoji: "💰",
-    headline: "Folha baixa = mais creditos",
-    detail: "Com menos gastos em pessoal, voce aproveita mais creditos sobre outros custos.",
+    headline: "Folha baixa = mais créditos",
+    detail: "Com menos gastos em pessoal, você aproveita mais créditos sobre outros custos.",
   }
 }
 
@@ -307,26 +307,26 @@ export function getCustoInsight(tipo: TipoCustoPrincipal): Insight {
     case "materiais":
       return {
         emoji: "📦",
-        headline: "Materiais geram credito total",
-        detail: "Cada compra de insumo vira credito de IBS/CBS. Boa noticia para sua empresa.",
+        headline: "Materiais geram crédito total",
+        detail: "Cada compra de insumo vira crédito de IBS/CBS. Boa notícia para sua empresa.",
       }
     case "servicos":
       return {
         emoji: "🔧",
-        headline: "Servicos terceirizados: credito parcial",
-        detail: "Servicos geram credito, mas depende de como o fornecedor emite a nota.",
+        headline: "Serviços terceirizados: crédito parcial",
+        detail: "Serviços geram crédito, mas depende de como o fornecedor emite a nota.",
       }
     case "folha":
       return {
         emoji: "👥",
-        headline: "Folha nao gera credito",
-        detail: "Salarios e encargos ficam fora do sistema de creditos. Isso pesa na conta final.",
+        headline: "Folha não gera crédito",
+        detail: "Salários e encargos ficam fora do sistema de créditos. Isso pesa na conta final.",
       }
     case "misto":
       return {
         emoji: "⚖️",
         headline: "Custos equilibrados",
-        detail: "A parte de materiais gera credito; a de pessoal, nao. Resultado intermediario.",
+        detail: "A parte de materiais gera crédito; a de pessoal, não. Resultado intermediário.",
       }
   }
 }
@@ -339,47 +339,47 @@ export function getClientesInsight(perfil: PerfilClientes, regime: RegimeTributa
   if (perfil === "b2b" && regime === "simples") {
     return {
       emoji: "⚠️",
-      headline: "Atencao: creditos B2B",
-      detail: "No Simples, seus clientes PJ nao aproveitam creditos. Avalie o Simples Hibrido.",
+      headline: "Atenção: créditos B2B",
+      detail: "No Simples, seus clientes PJ não aproveitam créditos. Avalie o Simples Híbrido.",
     }
   }
   if (perfil === "b2b") {
     return {
       emoji: "🏢",
-      headline: "Vendas B2B: cadeia de creditos",
-      detail: "Seus clientes vao querer credito. Estar fora do Simples e vantagem aqui.",
+      headline: "Vendas B2B: cadeia de créditos",
+      detail: "Seus clientes vão querer crédito. Estar fora do Simples é vantagem aqui.",
     }
   }
   if (perfil === "b2c") {
     return {
       emoji: "👤",
       headline: "Vendas ao consumidor final",
-      detail: "O consumidor nao usa credito. Seu impacto depende mais da aliquota do que da cadeia.",
+      detail: "O consumidor não usa crédito. Seu impacto depende mais da alíquota do que da cadeia.",
     }
   }
   // misto
   return {
     emoji: "🔄",
-    headline: "Publico misto",
-    detail: "A parte B2B exige atencao aos creditos. A parte B2C depende mais da aliquota.",
+    headline: "Público misto",
+    detail: "A parte B2B exige atenção aos créditos. A parte B2C depende mais da alíquota.",
   }
 }
 
 // ---------------------------------------------------------------------------
-// Export de servicos insights (conditional step)
+// Export de serviços insights (conditional step)
 // ---------------------------------------------------------------------------
 
 export function getExportInsight(exporta: boolean): Insight {
   if (exporta) {
     return {
       emoji: "🌍",
-      headline: "Exportacao = imposto zero",
-      detail: "Servicos exportados tem aliquota zero de IBS/CBS. Oportunidade de expansao.",
+      headline: "Exportação = imposto zero",
+      detail: "Serviços exportados têm alíquota zero de IBS/CBS. Oportunidade de expansão.",
     }
   }
   return {
     emoji: "🏠",
     headline: "Mercado interno",
-    detail: "Sem exportacao, a aliquota padrao se aplica integralmente.",
+    detail: "Sem exportação, a alíquota padrão se aplica integralmente.",
   }
 }

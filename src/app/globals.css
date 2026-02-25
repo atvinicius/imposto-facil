@@ -225,22 +225,9 @@
   animation: insight-enter 300ms ease-out both;
 }
 
-@keyframes insight-progress {
-  from { width: 0%; }
-  to { width: 100%; }
-}
-
-.insight-progress-bar {
-  animation: insight-progress var(--insight-duration, 3500ms) linear both;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .insight-enter {
     animation: none;
-  }
-  .insight-progress-bar {
-    animation: none;
-    width: 100%;
   }
 }
 

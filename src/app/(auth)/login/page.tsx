@@ -218,7 +218,7 @@ function LoginForm() {
           </div>
           <GoogleButton mode="login" next={redirectTo !== "/dashboard" ? redirectTo : undefined} />
           <p className="text-sm text-muted-foreground text-center">
-            Ainda nao tem conta?{" "}
+            Ainda não tem conta?{" "}
             <Link href="/signup" className="text-primary hover:underline">
               Criar conta
             </Link>
