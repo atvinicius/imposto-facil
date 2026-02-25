@@ -1,4 +1,5 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr"
+import { createClient as createBareClient } from "@supabase/supabase-js"
 import { cookies } from "next/headers"
 import type { Database, Tables } from "@/types/database"
 
@@ -25,6 +26,25 @@ export async function createClient() {
             // This can be ignored if you have middleware refreshing user sessions.
           }
         },
+      },
+    }
+  )
+}
+
+/**
+ * Creates a Supabase client with implicit flow (no PKCE).
+ * Use ONLY for signInWithOtp() calls — this avoids the code_verifier cookie
+ * that breaks cross-device magic link flows.
+ */
+export function createOtpClient() {
+  return createBareClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      auth: {
+        flowType: "implicit",
+        autoRefreshToken: false,
+        persistSession: false,
       },
     }
   )

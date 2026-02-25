@@ -85,6 +85,9 @@ function SimulatorSignupFlow() {
     }
 
     formData.set("from", "simulador")
+    if (simulatorData?.input) {
+      formData.set("simulator_input", JSON.stringify(simulatorData.input))
+    }
 
     try {
       const result = await signupWithMagicLink(formData)
@@ -114,6 +117,9 @@ function SimulatorSignupFlow() {
       formData.set("nome", sentNome)
       formData.set("email", sentEmail)
       formData.set("from", "simulador")
+      if (simulatorData?.input) {
+        formData.set("simulator_input", JSON.stringify(simulatorData.input))
+      }
       const result = await signupWithMagicLink(formData)
       if (result?.success) {
         setResendCountdown(60)

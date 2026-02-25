@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
-import { createClient } from "@/lib/supabase/server"
+import { createClient, createOtpClient } from "@/lib/supabase/server"
 import { getURL } from "@/lib/get-url"
 
 function translateAuthError(message: string): string {
@@ -20,20 +20,31 @@ function translateAuthError(message: string): string {
 }
 
 export async function signupWithMagicLink(formData: FormData) {
-  const supabase = await createClient()
+  const supabase = createOtpClient()
 
   const email = formData.get("email") as string
   const nome = formData.get("nome") as string
   const from = formData.get("from") as string | null
+  const simulatorInputRaw = formData.get("simulator_input") as string | null
 
   const callbackUrl = from === "simulador"
     ? `${getURL()}auth/callback?next=/diagnostico`
     : `${getURL()}auth/callback`
 
+  // Include simulator input in user metadata so it survives cross-device flows
+  const metadata: Record<string, unknown> = { nome }
+  if (simulatorInputRaw) {
+    try {
+      metadata.simulator_input = JSON.parse(simulatorInputRaw)
+    } catch {
+      // Invalid JSON — skip
+    }
+  }
+
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
-      data: { nome },
+      data: metadata,
       emailRedirectTo: callbackUrl,
       shouldCreateUser: true,
     },
@@ -47,7 +58,7 @@ export async function signupWithMagicLink(formData: FormData) {
 }
 
 export async function loginWithMagicLink(formData: FormData) {
-  const supabase = await createClient()
+  const supabase = createOtpClient()
 
   const email = formData.get("email") as string
   const redirectTo = (formData.get("redirect") as string) || "/dashboard"

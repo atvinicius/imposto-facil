@@ -1,6 +1,44 @@
-import { type EmailOtpType } from "@supabase/supabase-js"
+import { type EmailOtpType, type User } from "@supabase/supabase-js"
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
+import { simulatorInputToProfile } from "@/lib/simulator/storage"
+import type { SimuladorInput } from "@/lib/simulator/types"
+
+/**
+ * Saves simulator data from user metadata to the user profile.
+ * Called after successful auth — handles the cross-device case where
+ * localStorage is unavailable.
+ */
+async function saveSimulatorMetadataToProfile(user: User) {
+  const simulatorInput = user.user_metadata?.simulator_input as SimuladorInput | undefined
+  if (!simulatorInput?.setor || !simulatorInput?.uf || !simulatorInput?.faturamento) {
+    return // No simulator data in metadata
+  }
+
+  const admin = createAdminClient()
+
+  // Check if profile already has simulator data (idempotent)
+  const { data: existing } = await admin
+    .from("user_profiles")
+    .select("setor, uf, faturamento")
+    .eq("id", user.id)
+    .single()
+
+  if (existing?.setor && existing?.uf && existing?.faturamento) {
+    return // Profile already has data — don't overwrite
+  }
+
+  const profileData = simulatorInputToProfile(simulatorInput)
+
+  await admin
+    .from("user_profiles")
+    .update({
+      ...profileData,
+      onboarding_completed_at: new Date().toISOString(),
+    })
+    .eq("id", user.id)
+}
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
@@ -29,16 +67,18 @@ export async function GET(request: Request) {
 
   // PKCE flow: exchange code for session
   if (code) {
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
-    if (!error) {
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+    if (!error && data.user) {
+      await saveSimulatorMetadataToProfile(data.user)
       return buildRedirect(next)
     }
   }
 
-  // Token hash flow (fallback): verify OTP directly
+  // Token hash flow (implicit/magic link): verify OTP directly
   if (token_hash && type) {
-    const { error } = await supabase.auth.verifyOtp({ type, token_hash })
-    if (!error) {
+    const { data, error } = await supabase.auth.verifyOtp({ type, token_hash })
+    if (!error && data.user) {
+      await saveSimulatorMetadataToProfile(data.user)
       return buildRedirect(next)
     }
   }

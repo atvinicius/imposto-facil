@@ -1,29 +1,23 @@
-import { type EmailOtpType } from "@supabase/supabase-js"
 import { type NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
 
+/**
+ * Redirects to /auth/callback preserving all query params.
+ * Ensures a single code path for all auth verification
+ * regardless of which URL Supabase email templates point to.
+ */
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
-  const token_hash = searchParams.get("token_hash")
-  const type = searchParams.get("type") as EmailOtpType | null
-  const nextParam = searchParams.get("next") ?? "/dashboard"
-  // Validate redirect to prevent open redirect attacks
-  const next = nextParam.startsWith("/") && !nextParam.startsWith("//") && !nextParam.includes("@")
-    ? nextParam
-    : "/dashboard"
+  const forwardedHost = request.headers.get("x-forwarded-host")
+  const isLocalEnv = process.env.NODE_ENV === "development"
 
-  if (token_hash && type) {
-    const supabase = await createClient()
+  const base = !isLocalEnv && forwardedHost
+    ? `https://${forwardedHost}`
+    : origin
 
-    const { error } = await supabase.auth.verifyOtp({
-      type,
-      token_hash,
-    })
+  const callbackUrl = new URL(`${base}/auth/callback`)
+  searchParams.forEach((value, key) => {
+    callbackUrl.searchParams.set(key, value)
+  })
 
-    if (!error) {
-      return NextResponse.redirect(`${origin}${next}`)
-    }
-  }
-
-  return NextResponse.redirect(`${origin}/login?error=auth_callback_error`)
+  return NextResponse.redirect(callbackUrl.toString())
 }
