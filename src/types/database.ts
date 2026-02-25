@@ -45,6 +45,7 @@ export type Database = {
           imovel_proprio: boolean | null
           faturamento_exato: number | null
           cnae_principal: string | null
+          diagnostico_runs_remaining: number
           created_at: string
           updated_at: string
         }
@@ -82,6 +83,7 @@ export type Database = {
           imovel_proprio?: boolean | null
           faturamento_exato?: number | null
           cnae_principal?: string | null
+          diagnostico_runs_remaining?: number
           created_at?: string
           updated_at?: string
         }
@@ -119,6 +121,7 @@ export type Database = {
           imovel_proprio?: boolean | null
           faturamento_exato?: number | null
           cnae_principal?: string | null
+          diagnostico_runs_remaining?: number
           created_at?: string
           updated_at?: string
         }

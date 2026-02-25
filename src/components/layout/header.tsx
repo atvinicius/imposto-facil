@@ -22,9 +22,10 @@ interface HeaderProps {
     email?: string
     nome?: string
   }
+  hasSimulatorData?: boolean
 }
 
-const navigation = [
+const allNavigation = [
   { name: "Dashboard", href: "/dashboard" },
   { name: "Diagnóstico", href: "/diagnostico" },
   { name: "Simulador", href: "/simulador" },
@@ -32,7 +33,10 @@ const navigation = [
   { name: "Conhecimento", href: "/conhecimento" },
 ]
 
-export function Header({ user }: HeaderProps) {
+export function Header({ user, hasSimulatorData }: HeaderProps) {
+  const navigation = hasSimulatorData
+    ? allNavigation.filter((item) => item.href !== "/simulador")
+    : allNavigation
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 

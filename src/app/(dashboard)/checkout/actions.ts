@@ -35,7 +35,10 @@ export async function redeemPromoCode(code: string) {
 
   const profile = data as Tables<"user_profiles"> | null
 
-  if (profile?.diagnostico_purchased_at || (profile?.subscription_tier && profile.subscription_tier !== "free")) {
+  const isPaid = !!(profile?.diagnostico_purchased_at || (profile?.subscription_tier && profile.subscription_tier !== "free"))
+
+  // Block promo only if user still has runs remaining
+  if (isPaid && (profile?.diagnostico_runs_remaining ?? 0) > 0) {
     return { error: "Você já possui o diagnóstico completo" }
   }
 
@@ -45,6 +48,7 @@ export async function redeemPromoCode(code: string) {
     .update({
       subscription_tier: promo.tier,
       diagnostico_purchased_at: new Date().toISOString(),
+      diagnostico_runs_remaining: 3,
     })
     .eq("id", user.id)
 

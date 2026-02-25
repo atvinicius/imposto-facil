@@ -26,6 +26,7 @@ import { useAnalytics } from "@/lib/analytics/track"
 import { ChecklistItem } from "./checklist-item"
 import { toggleChecklistItem } from "./actions"
 import { FeedbackPrompt } from "@/components/feedback/feedback-prompt"
+import { RerunForm } from "./rerun-form"
 
 export interface ChecklistProgress {
   completed: string[]
@@ -38,6 +39,7 @@ interface DiagnosticoReportProps {
   isPaid: boolean
   justUnlocked?: boolean
   checklistProgress?: ChecklistProgress
+  runsRemaining?: number
 }
 
 function ConfidenceExplainer({ score, onClose }: { score: number; onClose: () => void }) {
@@ -94,7 +96,7 @@ function ConfidenceExplainer({ score, onClose }: { score: number; onClose: () =>
   )
 }
 
-export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checklistProgress }: DiagnosticoReportProps) {
+export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checklistProgress, runsRemaining = 0 }: DiagnosticoReportProps) {
   const { track } = useAnalytics()
   const trackedRef = useRef(false)
   const [showConfidenceExplainer, setShowConfidenceExplainer] = useState(false)
@@ -149,6 +151,13 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
           </div>
         </div>
       )}
+
+      {/* Re-run form */}
+      <RerunForm
+        currentInput={input}
+        isPaid={isPaid}
+        runsRemaining={runsRemaining}
+      />
 
       {/* Header */}
       <div className="text-center space-y-4">

@@ -24,11 +24,14 @@ export async function POST() {
 
     const profile = data as Tables<"user_profiles"> | null
 
-    if (
+    const isPaid = !!(
       profile?.diagnostico_purchased_at ||
       profile?.subscription_tier === "diagnostico" ||
       profile?.subscription_tier === "pro"
-    ) {
+    )
+
+    // Block re-purchase only if user still has runs remaining
+    if (isPaid && (profile?.diagnostico_runs_remaining ?? 0) > 0) {
       return NextResponse.json(
         { error: "Você já possui o diagnóstico completo" },
         { status: 400 }

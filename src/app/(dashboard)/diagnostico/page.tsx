@@ -31,6 +31,7 @@ async function verifyStripeSession(sessionId: string, userId: string): Promise<b
           subscription_tier: "diagnostico",
           diagnostico_purchased_at: new Date().toISOString(),
           stripe_customer_id: (session.customer as string) || undefined,
+          diagnostico_runs_remaining: 3,
         })
         .eq("id", userId)
       return true
@@ -92,6 +93,8 @@ export default async function DiagnosticoPage({ searchParams }: DiagnosticoPageP
 
   const isPaid = !!(profile.diagnostico_purchased_at || profile.subscription_tier === "diagnostico" || profile.subscription_tier === "pro")
 
+  const runsRemaining = (profile as Record<string, unknown>).diagnostico_runs_remaining as number ?? 0
+
   const checklistProgress = (profile.checklist_progress as { completed: string[]; updated_at: string | null } | null) ?? {
     completed: [],
     updated_at: null,
@@ -104,6 +107,7 @@ export default async function DiagnosticoPage({ searchParams }: DiagnosticoPageP
       isPaid={isPaid}
       justUnlocked={justUnlocked}
       checklistProgress={checklistProgress}
+      runsRemaining={runsRemaining}
     />
   )
 }

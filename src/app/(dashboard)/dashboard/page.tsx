@@ -75,11 +75,12 @@ export default async function DashboardPage() {
       bg: "bg-emerald-50",
     },
     {
-      title: "Simulador de Impacto",
-      description:
-        "Simule o impacto da reforma na sua empresa em menos de 2 minutos.",
-      href: "/simulador",
-      cta: "Abrir simulador",
+      title: hasSimulatorData ? "Recalcular Diagnóstico" : "Simulador de Impacto",
+      description: hasSimulatorData
+        ? "Atualize seus dados e veja como o impacto muda."
+        : "Simule o impacto da reforma na sua empresa em menos de 2 minutos.",
+      href: hasSimulatorData ? "/diagnostico" : "/simulador",
+      cta: hasSimulatorData ? "Recalcular" : "Abrir simulador",
       icon: Calculator,
       color: "text-amber-700",
       bg: "bg-amber-50",

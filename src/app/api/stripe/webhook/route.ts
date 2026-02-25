@@ -51,6 +51,7 @@ export async function POST(request: Request) {
         subscription_tier: "diagnostico",
         diagnostico_purchased_at: new Date().toISOString(),
         stripe_customer_id: session.customer as string,
+        diagnostico_runs_remaining: 3,
       })
       .eq("id", userId)
 

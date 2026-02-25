@@ -9,6 +9,7 @@ interface SaveSimulatorDataInput {
   input: SimuladorInput
   result: SimuladorResult
   teaser: SimuladorTeaser
+  isRerun?: boolean
 }
 
 export async function saveSimulatorDataToProfile(data: SaveSimulatorDataInput) {
@@ -20,6 +21,29 @@ export async function saveSimulatorDataToProfile(data: SaveSimulatorDataInput) {
 
   if (!user) {
     return { error: "Não autorizado" }
+  }
+
+  // If this is a re-run, check run limits for paid users
+  if (data.isRerun) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: profile } = await (supabase as any)
+      .from("user_profiles")
+      .select("diagnostico_purchased_at, subscription_tier, diagnostico_runs_remaining")
+      .eq("id", user.id)
+      .single()
+
+    const isPaid = !!(
+      profile?.diagnostico_purchased_at ||
+      profile?.subscription_tier === "diagnostico" ||
+      profile?.subscription_tier === "pro"
+    )
+
+    if (isPaid) {
+      const runsRemaining = profile?.diagnostico_runs_remaining ?? 0
+      if (runsRemaining <= 0) {
+        return { error: "run_limit_reached" }
+      }
+    }
   }
 
   const profileFields = simulatorInputToProfile(data.input)
@@ -39,6 +63,26 @@ export async function saveSimulatorDataToProfile(data: SaveSimulatorDataInput) {
   if (profileFields.fator_r_estimado !== undefined) updateData.fator_r_estimado = profileFields.fator_r_estimado
   if (profileFields.tipo_custo_principal) updateData.tipo_custo_principal = profileFields.tipo_custo_principal
   if (profileFields.pct_b2b !== undefined) updateData.pct_b2b = profileFields.pct_b2b
+
+  // For paid re-runs, decrement remaining runs using raw SQL to avoid race conditions
+  if (data.isRerun) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: profile } = await (supabase as any)
+      .from("user_profiles")
+      .select("diagnostico_purchased_at, subscription_tier, diagnostico_runs_remaining")
+      .eq("id", user.id)
+      .single()
+
+    const isPaid = !!(
+      profile?.diagnostico_purchased_at ||
+      profile?.subscription_tier === "diagnostico" ||
+      profile?.subscription_tier === "pro"
+    )
+
+    if (isPaid && (profile?.diagnostico_runs_remaining ?? 0) > 0) {
+      updateData.diagnostico_runs_remaining = (profile.diagnostico_runs_remaining as number) - 1
+    }
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (supabase as any)
