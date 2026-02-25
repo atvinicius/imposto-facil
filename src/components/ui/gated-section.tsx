@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { Lock } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -23,20 +24,23 @@ export function GatedSection({
   return (
     <div className={cn("relative", className)}>
       <div
-        className="select-none"
+        className="select-none pointer-events-none"
         style={{ filter: "blur(5px)" }}
         aria-hidden="true"
       >
         {children}
       </div>
-      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-transparent via-background/60 to-background/90 rounded-lg">
+      <Link
+        href="/checkout"
+        className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-transparent via-background/60 to-background/90 rounded-lg cursor-pointer transition-opacity hover:opacity-90"
+      >
         <div className="flex flex-col items-center gap-2 text-center px-4">
           <div className="rounded-full bg-muted p-3">
             <Lock className="h-5 w-5 text-muted-foreground" />
           </div>
           <p className="text-sm font-medium">{ctaText}</p>
         </div>
-      </div>
+      </Link>
     </div>
   )
 }
