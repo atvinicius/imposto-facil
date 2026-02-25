@@ -87,6 +87,8 @@ export default async function DiagnosticoPage({ searchParams }: DiagnosticoPageP
   if (profile.fator_r_estimado != null) input.fatorR = Number(profile.fator_r_estimado)
   if (profile.tipo_custo_principal) input.tipoCusto = profile.tipo_custo_principal as TipoCustoPrincipal
   if (profile.pct_b2b != null) input.pctB2B = Number(profile.pct_b2b)
+  if (profile.tem_incentivo_icms) input.temIncentivoICMS = profile.tem_incentivo_icms as SimuladorInput["temIncentivoICMS"]
+  if (profile.exporta_servicos != null) input.exportaServicos = profile.exporta_servicos
 
   // Always calculate fresh to use the latest calculator logic
   const result: SimuladorResult = calcularSimulacao(input)
