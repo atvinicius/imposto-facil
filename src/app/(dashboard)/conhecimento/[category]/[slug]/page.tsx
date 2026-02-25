@@ -150,9 +150,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
       <div className="border-t pt-6 mt-12">
         <p className="text-sm text-muted-foreground">
-          Tem duvidas sobre este conteudo?{" "}
+          Tem dúvidas sobre este conteúdo?{" "}
           <Link href="/assistente" className="text-primary hover:underline">
-            Pergunte ao nosso assistente virtual
+            Tire suas dúvidas sobre este conteúdo
           </Link>
         </p>
       </div>

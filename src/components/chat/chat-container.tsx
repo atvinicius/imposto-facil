@@ -5,16 +5,17 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { ChatMessage } from "./chat-message"
 import { ChatInput } from "./chat-input"
 import { ModelSelector, DEFAULT_MODEL } from "./model-selector"
-import { DudaWelcome } from "./duda-welcome"
+import { ChatWelcome, type DiagnosticSummary } from "./chat-welcome"
 import { FollowUpSuggestions } from "./follow-up-suggestions"
 import { Skeleton } from "@/components/ui/skeleton"
 import type { useChat } from "@/hooks/use-chat"
 
 interface ChatContainerProps {
   chat: ReturnType<typeof useChat>
+  diagnosticSummary?: DiagnosticSummary | null
 }
 
-export function ChatContainer({ chat }: ChatContainerProps) {
+export function ChatContainer({ chat, diagnosticSummary }: ChatContainerProps) {
   const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL)
   const { messages, isLoading, error, sendMessage, suggestions } = chat
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -37,7 +38,7 @@ export function ChatContainer({ chat }: ChatContainerProps) {
       </div>
       <ScrollArea className="flex-1 pr-4" ref={scrollRef}>
         {messages.length === 0 ? (
-          <DudaWelcome onSendMessage={sendMessage} />
+          <ChatWelcome onSendMessage={sendMessage} diagnosticSummary={diagnosticSummary} />
         ) : (
           <div className="space-y-0">
             {messages.map((message) => (

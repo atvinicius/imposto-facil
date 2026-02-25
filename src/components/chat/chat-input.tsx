@@ -44,7 +44,7 @@ export function ChatInput({ onSend, isLoading, disabled }: ChatInputProps) {
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Digite sua pergunta sobre a reforma tributaria..."
+        placeholder="Pergunte sobre seu diagnóstico ou a reforma tributária..."
         className="min-h-[44px] max-h-[200px] resize-none"
         disabled={isLoading || disabled}
         rows={1}

@@ -30,7 +30,7 @@ export function Footer() {
                 href="/assistente"
                 className="text-muted-foreground transition-colors hover:text-foreground"
               >
-                Assistente
+                Tire Dúvidas
               </Link>
               <span className="text-muted-foreground">|</span>
               <Link

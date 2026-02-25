@@ -9,6 +9,7 @@ import {
   Clock,
   HelpCircle,
   Lock,
+  MessageCircle,
   ShieldAlert,
   Sparkles,
   TrendingUp,
@@ -40,6 +41,17 @@ interface DiagnosticoReportProps {
   justUnlocked?: boolean
   checklistProgress?: ChecklistProgress
   runsRemaining?: number
+}
+
+function EntendaMelhorButton({ question }: { question: string }) {
+  return (
+    <Button variant="ghost" size="sm" asChild className="text-xs text-muted-foreground hover:text-primary gap-1">
+      <Link href={`/assistente?q=${encodeURIComponent(question)}`}>
+        <MessageCircle className="h-3.5 w-3.5" />
+        Entenda melhor
+      </Link>
+    </Button>
+  )
 }
 
 function ConfidenceExplainer({ score, onClose }: { score: number; onClose: () => void }) {
@@ -217,6 +229,7 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
               : `Redução estimada de ${Math.abs(result.impactoAnual.percentual)}% na carga tributária com a reforma.`}
             {" "}Baseado no perfil: {input.setor}, {input.regime}, {input.uf}.
           </p>
+          <EntendaMelhorButton question={`Por que meu impacto estimado é de ${result.impactoAnual.percentual > 0 ? "+" : ""}${result.impactoAnual.percentual}%? O que mais influencia esse número?`} />
         </CardContent>
       </Card>
 
@@ -329,6 +342,7 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
               Estimativa baseada em dados públicos sobre a arrecadação efetiva do setor, não em dados
               individuais da sua empresa. Empresas que já pagam todos os impostos em dia terão impacto menor.
             </p>
+            <EntendaMelhorButton question={`O que significa a cobrança mais rigorosa para o setor de ${input.setor}? Como me preparar?`} />
           </CardContent>
         </Card>
       )}
@@ -356,6 +370,7 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
               ))}
             </GatedSection>
           )}
+          <EntendaMelhorButton question="Explique os alertas do meu diagnóstico e o que devo priorizar." />
         </CardContent>
       </Card>
 
@@ -407,6 +422,7 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
                 ))}
               </GatedSection>
             )}
+            <EntendaMelhorButton question="Quais são os prazos mais urgentes para minha empresa?" />
           </div>
         </CardContent>
       </Card>
@@ -474,6 +490,7 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
               </div>
             </div>
           </GatedSection>
+          <EntendaMelhorButton question="Quais ações recomendadas são mais urgentes para minha empresa?" />
         </CardContent>
       </Card>
 
@@ -522,6 +539,7 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
                 </ul>
               </div>
             </GatedSection>
+            <EntendaMelhorButton question="Vale a pena mudar meu regime tributário?" />
           </CardContent>
         </Card>
       )}
@@ -555,6 +573,7 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
               ))}
             </div>
           </GatedSection>
+          <EntendaMelhorButton question="Como vai ficar minha carga tributária ano a ano até 2033?" />
         </CardContent>
       </Card>
 

@@ -56,11 +56,11 @@ export default async function DashboardPage() {
       bg: "bg-violet-50",
     },
     {
-      title: "Assistente IA",
+      title: "Tire Dúvidas",
       description:
-        "Tire dúvidas sobre regras, prazos e impacto da reforma.",
+        "Pergunte sobre seu diagnóstico, prazos e ações recomendadas.",
       href: "/assistente",
-      cta: "Iniciar conversa",
+      cta: "Fazer uma pergunta",
       icon: MessageCircle,
       color: "text-sky-600",
       bg: "bg-sky-50",

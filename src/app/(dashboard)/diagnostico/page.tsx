@@ -1,8 +1,8 @@
 import { getUserProfile, getUser } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { createStripeClient } from "@/lib/stripe/client"
-import { calcularSimulacao } from "@/lib/simulator"
-import type { SimuladorInput, SimuladorResult, FaixaFaturamento, RegimeTributario, Setor, TipoCustoPrincipal } from "@/lib/simulator"
+import { calcularSimulacao, buildSimulatorInputFromProfile } from "@/lib/simulator"
+import type { SimuladorResult } from "@/lib/simulator"
 import { DiagnosticoClient } from "./diagnostico-client"
 import { DiagnosticoReport } from "./diagnostico-report"
 
@@ -68,27 +68,8 @@ export default async function DiagnosticoPage({ searchParams }: DiagnosticoPageP
     return <DiagnosticoClient />
   }
 
-  // Build input from profile data
-  const regimeMap: Record<string, RegimeTributario> = {
-    "Simples Nacional": "simples",
-    "Lucro Presumido": "lucro_presumido",
-    "Lucro Real": "lucro_real",
-  }
-
-  const input: SimuladorInput = {
-    regime: regimeMap[profile.regime_tributario || ""] || "nao_sei",
-    setor: profile.setor as Setor,
-    faturamento: profile.faturamento as FaixaFaturamento,
-    uf: profile.uf!,
-  }
-
-  // Apply expanded simulator fields from profile (collected upfront)
-  if (profile.faturamento_exato != null) input.faturamentoExato = Number(profile.faturamento_exato)
-  if (profile.fator_r_estimado != null) input.fatorR = Number(profile.fator_r_estimado)
-  if (profile.tipo_custo_principal) input.tipoCusto = profile.tipo_custo_principal as TipoCustoPrincipal
-  if (profile.pct_b2b != null) input.pctB2B = Number(profile.pct_b2b)
-  if (profile.tem_incentivo_icms) input.temIncentivoICMS = profile.tem_incentivo_icms as SimuladorInput["temIncentivoICMS"]
-  if (profile.exporta_servicos != null) input.exportaServicos = profile.exporta_servicos
+  // Build input from profile data using shared utility
+  const input = buildSimulatorInputFromProfile(profile)!
 
   // Always calculate fresh to use the latest calculator logic
   const result: SimuladorResult = calcularSimulacao(input)

@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback } from "react"
+import { useCallback, useEffect, useRef } from "react"
 import { Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ChatContainer } from "@/components/chat/chat-container"
@@ -10,8 +10,14 @@ import {
 } from "@/components/chat/conversation-sidebar"
 import { useChat } from "@/hooks/use-chat"
 import { useConversations } from "@/hooks/use-conversations"
+import type { DiagnosticSummary } from "@/components/chat/chat-welcome"
 
-export function AssistenteClient() {
+interface AssistenteClientProps {
+  initialQuestion?: string | null
+  diagnosticSummary?: DiagnosticSummary | null
+}
+
+export function AssistenteClient({ initialQuestion, diagnosticSummary }: AssistenteClientProps) {
   const { conversations, isLoading: convLoading, fetchConversations, deleteConversation } =
     useConversations()
 
@@ -22,6 +28,15 @@ export function AssistenteClient() {
   const chat = useChat({
     onConversationCreated: handleConversationCreated,
   })
+
+  // Auto-send initial question from URL params (e.g. from "Entenda melhor" buttons)
+  const initialQuestionSent = useRef(false)
+  useEffect(() => {
+    if (initialQuestion && !initialQuestionSent.current) {
+      initialQuestionSent.current = true
+      chat.sendMessage(initialQuestion)
+    }
+  }, [initialQuestion, chat])
 
   const handleSelectConversation = useCallback(
     (id: string) => {
@@ -66,9 +81,9 @@ export function AssistenteClient() {
               </Button>
             }
           />
-          <h1 className="text-lg font-semibold">Duda</h1>
+          <h1 className="text-lg font-semibold">Tire Dúvidas</h1>
         </div>
-        <ChatContainer chat={chat} />
+        <ChatContainer chat={chat} diagnosticSummary={diagnosticSummary} />
       </div>
     </div>
   )

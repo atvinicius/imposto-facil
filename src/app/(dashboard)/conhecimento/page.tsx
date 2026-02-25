@@ -41,7 +41,7 @@ export default async function KnowledgePage({ searchParams }: KnowledgePageProps
               className="inline-flex items-center gap-2 text-primary hover:underline"
             >
               <MessageSquare className="h-4 w-4" />
-              Pergunte ao assistente virtual
+              Tire suas dúvidas
             </Link>
           </div>
         ) : (

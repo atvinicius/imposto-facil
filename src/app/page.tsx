@@ -263,6 +263,10 @@ export default function LandingPage() {
                     <CheckCircle className="mt-0.5 h-4 w-4 text-emerald-400 shrink-0" />
                     PDF para compartilhar com seu contador
                   </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="mt-0.5 h-4 w-4 text-emerald-400 shrink-0" />
+                    Diagnóstico interativo: pergunte e receba respostas personalizadas
+                  </li>
                 </ul>
                 <Button asChild size="lg" className="mt-8 bg-white text-slate-900 hover:bg-slate-100">
                   <Link href="/simulador">
@@ -330,7 +334,7 @@ export default function LandingPage() {
               </div>
               <h3 className="text-lg font-semibold text-slate-900 mb-2">Receba seu diagnóstico grátis</h3>
               <p className="text-sm text-slate-600">
-                Impacto estimado, nível de risco, alertas principais e primeiras ações recomendadas.
+                Impacto estimado, nível de risco, alertas principais e primeiras ações recomendadas. Pergunte o que quiser — o diagnóstico responde com base nos seus dados.
               </p>
             </div>
 
@@ -466,7 +470,7 @@ export default function LandingPage() {
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
-                  Consultoria IA ilimitada com modelos prioritários
+                  Perguntas ilimitadas sobre seu diagnóstico com modelos prioritários
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />

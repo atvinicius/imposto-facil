@@ -1,7 +1,8 @@
+import { Sparkles } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 
-interface DudaAvatarProps {
+interface AssistantAvatarProps {
   size?: "sm" | "md" | "lg"
   className?: string
 }
@@ -12,11 +13,17 @@ const sizeClasses = {
   lg: "h-16 w-16 text-2xl",
 }
 
-export function DudaAvatar({ size = "sm", className }: DudaAvatarProps) {
+const iconSizes = {
+  sm: "h-4 w-4",
+  md: "h-5 w-5",
+  lg: "h-8 w-8",
+}
+
+export function AssistantAvatar({ size = "sm", className }: AssistantAvatarProps) {
   return (
     <Avatar className={cn(sizeClasses[size], className)}>
       <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white font-bold">
-        D
+        <Sparkles className={iconSizes[size]} />
       </AvatarFallback>
     </Avatar>
   )

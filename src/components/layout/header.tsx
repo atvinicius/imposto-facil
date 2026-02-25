@@ -29,7 +29,7 @@ const allNavigation = [
   { name: "Dashboard", href: "/dashboard" },
   { name: "Diagnóstico", href: "/diagnostico" },
   { name: "Simulador", href: "/simulador" },
-  { name: "Duda", href: "/assistente" },
+  { name: "Tire Dúvidas", href: "/assistente" },
   { name: "Conhecimento", href: "/conhecimento" },
 ]
 

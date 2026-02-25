@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { getCategoryConfig } from "@/lib/chat/category-colors"
-import { DudaAvatar } from "./duda-avatar"
+import { AssistantAvatar } from "./assistant-avatar"
 import type { Message } from "@/hooks/use-chat"
 
 interface ChatMessageProps {
@@ -35,7 +35,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
           </AvatarFallback>
         </Avatar>
       ) : (
-        <DudaAvatar size="sm" className="shrink-0" />
+        <AssistantAvatar size="sm" className="shrink-0" />
       )}
 
       <div
