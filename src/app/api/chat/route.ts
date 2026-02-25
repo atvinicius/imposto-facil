@@ -119,9 +119,6 @@ export async function POST(request: Request) {
           const acoes = sim.acoesRecomendadas.slice(0, 2)
           diagParts.push(`- Acoes recomendadas: ${acoes.join("; ")}`)
         }
-        if (sim.splitPaymentImpacto) {
-          diagParts.push(`- Retencao automatica: perda de float R$${sim.splitPaymentImpacto.perdaFloatMensal.toLocaleString("pt-BR")}/mes (${sim.splitPaymentImpacto.pctEletronico}% vendas eletronicas)`)
-        }
         // Formalization pressure context
         if (sim.efetividadeTributaria) {
           const ef = sim.efetividadeTributaria

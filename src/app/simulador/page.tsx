@@ -807,37 +807,6 @@ export default function SimuladorPage() {
                 </Card>
               )}
 
-              {/* Split payment impact */}
-              {result.splitPaymentImpacto && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      <BarChart3 className="h-5 w-5 text-blue-500" />
-                      Impacto do Split Payment
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg">
-                      <div className="text-center">
-                        <div className="text-sm text-muted-foreground">Perda de float/mês</div>
-                        <div className="text-xl font-bold text-amber-600">
-                          R$ {result.splitPaymentImpacto.perdaFloatMensal.toLocaleString("pt-BR")}
-                        </div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-sm text-muted-foreground">Vendas afetadas</div>
-                        <div className="text-xl font-bold">
-                          {result.splitPaymentImpacto.pctEletronico}%
-                        </div>
-                      </div>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Split payment (2027+) retém IBS/CBS automaticamente no pagamento eletrônico.
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
-
               {/* Final CTA */}
               <Card className="bg-primary text-primary-foreground">
                 <CardContent className="p-6 text-center">

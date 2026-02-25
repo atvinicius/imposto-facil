@@ -113,7 +113,7 @@ Simulator users skip the 4-step onboarding wizard — their profile is auto-fill
 
 ### Simulator System
 - `src/lib/simulator/tax-data.ts` — **Cited data registry**: all tax rates wrapped in `CitedValue<T>` with `source` (legislation reference), `confidence` (legislada/estimativa_oficial/derivada), and optional `notes`. Includes `FATURAMENTO_MEDIO`, `CARGA_ATUAL`, `CARGA_NOVA`, `AJUSTE_REGIME`, `TRANSICAO_TIMELINE`, `UF_INCENTIVOS_FISCAIS`, and `FATOR_EFETIVIDADE` (sector/regime effectiveness ratios)
-- `src/lib/simulator/types.ts` — All types (`SimuladorInput`, `SimuladorResult`, `SimuladorTeaser`). Result includes `metodologia` field, `confiancaPerfil`, `splitPaymentImpacto`, and `efetividadeTributaria` (formalization pressure decomposition)
+- `src/lib/simulator/types.ts` — All types (`SimuladorInput`, `SimuladorResult`, `SimuladorTeaser`). Result includes `metodologia` field, `confiancaPerfil`, and `efetividadeTributaria` (formalization pressure decomposition)
 - `src/lib/simulator/calculator.ts` — Core calculation engine, imports all data from `tax-data.ts`. `calcularImpacto()` decomposes impact into rate change + formalization pressure using effectiveness factors. UF-aware alerts, formalization-specific alerts for high-gap sectors
 - `src/lib/simulator/storage.ts` — localStorage bridge (`saveSimulatorData`, `getStoredSimulatorData`, `clearStoredSimulatorData`, `simulatorInputToProfile`)
 - `src/components/ui/methodology-card.tsx` — Reusable transparency component: compact mode (expandable line) on simulator, full mode (card with sources/limitations) on diagnostic

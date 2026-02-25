@@ -200,47 +200,6 @@ function calcularConfiancaPerfil(input: SimuladorInput): number {
   return Math.min(score, 100)
 }
 
-/**
- * Estimates split payment cash flow impact based on payment mix data.
- * Split payment (starting 2027) automatically withholds IBS/CBS at payment settlement.
- */
-function calcularSplitPaymentImpacto(
-  input: SimuladorInput,
-  faturamentoBase: number,
-): SimuladorResult["splitPaymentImpacto"] {
-  // Default electronic payment assumptions by sector if no mix data
-  const defaultPctEletronico: Partial<Record<Setor, number>> = {
-    comercio: 75,
-    tecnologia: 90,
-    saude: 60,
-    servicos: 65,
-    educacao: 55,
-    financeiro: 95,
-    industria: 80,
-    construcao: 40,
-    agronegocio: 35,
-  }
-
-  const pctEletronico = defaultPctEletronico[input.setor] ?? 60
-
-  // Estimate monthly revenue affected by split payment
-  const faturamentoMensal = faturamentoBase / 12
-  const revenueAfetada = faturamentoMensal * (pctEletronico / 100)
-
-  // Average IBS+CBS rate (~26.5%). Split payment withholds this at transaction time
-  // instead of allowing the business to hold it until month-end apuração.
-  // Assume average float loss of ~15 days of working capital.
-  const aliquotaMedia = 0.265
-  const diasFloat = 15
-  const taxaDiaria = 0.0004 // ~CDI/252 (approximate)
-  const perdaFloatMensal = Math.round(revenueAfetada * aliquotaMedia * diasFloat * taxaDiaria)
-
-  return {
-    perdaFloatMensal,
-    pctEletronico,
-  }
-}
-
 function gerarAlertas(
   input: SimuladorInput,
   percentual: number,
@@ -634,7 +593,6 @@ export function calcularSimulacao(input: SimuladorInput): SimuladorResult {
     acoesRecomendadas: gerarAcoesRecomendadas(input, impacto.efetividade.pressao),
     metodologia: gerarMetodologia(input),
     confiancaPerfil: calcularConfiancaPerfil(input),
-    splitPaymentImpacto: calcularSplitPaymentImpacto(input, impacto.faturamentoBase),
     efetividadeTributaria: {
       fatorEfetividade: impacto.efetividade.fator,
       cargaEfetivaAtualPct: impacto.efetividade.cargaEfetivaPct,

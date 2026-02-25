@@ -12,7 +12,6 @@ import {
   ShieldAlert,
   Sparkles,
   TrendingUp,
-  BarChart3,
   X,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
@@ -538,38 +537,6 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
           <PdfDownloadButton isPaid={isPaid} />
         </CardContent>
       </Card>
-
-      {/* Split Payment Cash Flow Impact */}
-      {result.splitPaymentImpacto && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-blue-500" />
-              Impacto da Retenção Automática no Fluxo de Caixa
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="grid grid-cols-1 gap-4 p-4 bg-muted/30 rounded-lg sm:grid-cols-2">
-              <div className="text-center">
-                <div className="text-sm text-muted-foreground">Perda de float mensal estimada</div>
-                <div className="text-xl font-bold text-amber-800">
-                  R$ {result.splitPaymentImpacto.perdaFloatMensal.toLocaleString("pt-BR")}
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-sm text-muted-foreground">Vendas afetadas (eletrônicas)</div>
-                <div className="text-xl font-bold">
-                  {result.splitPaymentImpacto.pctEletronico}%
-                </div>
-              </div>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              A partir de 2027, o imposto será retido automaticamente no momento do pagamento eletrônico.
-              Sua empresa perde o uso temporário desses recursos como capital de giro.
-            </p>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Methodology (moved to bottom — supporting detail, not the key message) */}
       <MethodologyCard metodologia={result.metodologia} />

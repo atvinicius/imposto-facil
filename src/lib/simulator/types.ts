@@ -86,12 +86,6 @@ export interface SimuladorResult {
   // Confidence score (0-100) based on data completeness
   confiancaPerfil: number
 
-  // Split payment cash flow impact (if payment mix data provided)
-  splitPaymentImpacto?: {
-    perdaFloatMensal: number  // R$ lost working capital per month
-    pctEletronico: number     // % of sales affected by split payment
-  }
-
   // Formalization pressure from tax reform enforcement
   efetividadeTributaria: {
     fatorEfetividade: number                              // 0-1, sector avg effectiveness
