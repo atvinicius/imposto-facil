@@ -4,6 +4,58 @@ All notable changes to ImpostoFacil are documented in this file.
 
 ---
 
+## [2026-02-25] State-Specific ICMS Rate Adjustment
+
+### Overview
+Made the simulator **state-aware for ICMS**, adjusting `CARGA_ATUAL` based on the user's UF. ICMS modal rates vary from 17% (ES, MT, MS, RS, SC) to 23% (MA) — a 6pp spread that translates to ~0.6-1.2pp difference in effective tax burden on revenue for goods-based businesses.
+
+### Scope
+- **Applies to**: Goods-based sectors (`comercio`, `industria`, `construcao`, `agronegocio`) on non-Simples regimes only
+- **Does NOT apply to**: Simples Nacional (DAS is nationally uniform), service sectors (ISS is municipal, not ICMS), `setor = "outro"`, missing/unknown UF
+
+### Data Layer (`src/lib/simulator/tax-data.ts`)
+- `ICMS_ALIQUOTA_MODAL`: 27-entry record with each state's modal ICMS rate (%), each citing specific state law. Confidence: `legislada`
+- `ICMS_REFERENCIA_NACIONAL`: GDP-weighted national average (19%). Confidence: `derivada`
+- `MARGEM_BRUTA_ESTIMADA`: Sector gross margins from IBGE (comercio 0.30, industria 0.35, construcao 0.25, agronegocio 0.20). Confidence: `derivada`
+- `SETORES_ICMS`: Set of goods-based sectors as guard condition
+- `collectSources()` updated to include state ICMS law source
+- `collectLimitacoes()` updated to accept `uf` param and add margin-based limitation
+
+### Calculator (`src/lib/simulator/calculator.ts`)
+- New `calcularAjusteIcmsUf()`: returns null when guards fail, otherwise computes `ajustePp = (ufRate - refRate) * sectorMargin`
+- `calcularImpacto()`: applies ICMS pp adjustment to `CARGA_ATUAL` min/max before all downstream calculations
+- `gerarProjecaoAnual()`: uses adjusted baseline for year-by-year projections
+- `gerarAnaliseRegime()`: applies ICMS adjustment when comparing LP vs LR burden
+- `gerarAlertas()`: quantitative state alerts (e.g., "MA tem ICMS de 23% — encarece em ~1.2pp")
+- `gerarMetodologia()`: appends state ICMS adjustment info to resumo, passes `uf` to limitations
+- `calcularConfiancaPerfil()`: +3 bonus when ICMS data enriches the calculation
+
+### Types (`src/lib/simulator/types.ts`)
+- New optional `ajusteIcmsUf` field on `SimuladorResult`: `ufAliquota`, `referenciaAliquota`, `margemEstimada`, `ajustePp`, `direcao` (favoravel/desfavoravel/neutro), `fonteUf`
+
+### Diagnostic Report (`diagnostico-report.tsx`)
+- Impact Summary profile text now shows "ICMS {uf}: X% (acima/abaixo da média)" when applicable
+- New info card below Impact Summary when |ajustePp| > 0.3, showing state rate, national reference, and margin used
+
+### PDF Export (`diagnostico-pdf.tsx`)
+- Profile summary line includes state ICMS rate when relevant
+- New highlighted section before Alerts showing state adjustment details
+
+### Edge Cases
+| Case | Behavior |
+|------|----------|
+| `regime = "simples"` | No adjustment (DAS is nationally uniform) |
+| `regime = "nao_sei"` | Adjustment applied (user likely LP/LR) |
+| Service sectors | No adjustment (ISS is municipal) |
+| `setor = "outro"` | No adjustment (can't determine if goods-based) |
+| Missing/unknown UF | No adjustment, returns null |
+| Small adjustment (<0.1pp) | Marked "neutro", card hidden |
+
+### Git Commit
+- `6462b3f` - feat: state-specific ICMS rate adjustment for goods-based sectors
+
+---
+
 ## [2025-02-01] Landing Page Redesign
 
 ### Overview

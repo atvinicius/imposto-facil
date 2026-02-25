@@ -38,7 +38,7 @@ Each `SimuladorResult` includes a `metodologia` field with:
 - `limitacoes`: known limitations of the estimate
 - `ultimaAtualizacao`: last verification date
 
-Additionally, `confiancaPerfil` (0-100) scores how complete the user's profile data is, affecting estimate precision.
+Additionally, `confiancaPerfil` (0-100) scores how complete the user's profile data is, affecting estimate precision. State-specific ICMS data (`ICMS_ALIQUOTA_MODAL`, 27 states) adjusts burden calculations for goods-based sectors, with sources cited per state law.
 
 ## Current Implementation
 
@@ -50,6 +50,7 @@ The chat API (`src/app/api/chat/route.ts`) injects the user's full `SimuladorRes
 - First 3 alerts and first 2 recommended actions (free tier data)
 - Key dates from the transition timeline
 - Split payment impact (if available)
+- State ICMS adjustment data (if applicable — goods sectors, non-Simples)
 - For paid users: regime analysis summary and year-by-year projection
 
 ### System Prompt Guardrails

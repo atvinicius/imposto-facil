@@ -112,9 +112,9 @@ LANDING PAGE → SIMULATOR (public, no login) → RESULTS + localStorage persist
 Simulator users skip the 4-step onboarding wizard — their profile is auto-filled from simulator data (`simulatorInputToProfile()` in `src/lib/simulator/storage.ts`).
 
 ### Simulator System
-- `src/lib/simulator/tax-data.ts` — **Cited data registry**: all tax rates wrapped in `CitedValue<T>` with `source` (legislation reference), `confidence` (legislada/estimativa_oficial/derivada), and optional `notes`. Includes `FATURAMENTO_MEDIO`, `CARGA_ATUAL`, `CARGA_NOVA`, `AJUSTE_REGIME`, `TRANSICAO_TIMELINE`, `UF_INCENTIVOS_FISCAIS`, and `FATOR_EFETIVIDADE` (sector/regime effectiveness ratios)
-- `src/lib/simulator/types.ts` — All types (`SimuladorInput`, `SimuladorResult`, `SimuladorTeaser`). Result includes `metodologia` field, `confiancaPerfil`, and `efetividadeTributaria` (formalization pressure decomposition)
-- `src/lib/simulator/calculator.ts` — Core calculation engine, imports all data from `tax-data.ts`. `calcularImpacto()` decomposes impact into rate change + formalization pressure using effectiveness factors. UF-aware alerts, formalization-specific alerts for high-gap sectors
+- `src/lib/simulator/tax-data.ts` — **Cited data registry**: all tax rates wrapped in `CitedValue<T>` with `source` (legislation reference), `confidence` (legislada/estimativa_oficial/derivada), and optional `notes`. Includes `FATURAMENTO_MEDIO`, `CARGA_ATUAL`, `CARGA_NOVA`, `AJUSTE_REGIME`, `TRANSICAO_TIMELINE`, `UF_INCENTIVOS_FISCAIS`, `FATOR_EFETIVIDADE` (sector/regime effectiveness ratios), **`ICMS_ALIQUOTA_MODAL`** (27-state modal ICMS rates, 17%-23%, each citing state law), **`ICMS_REFERENCIA_NACIONAL`** (19% GDP-weighted avg), **`MARGEM_BRUTA_ESTIMADA`** (sector gross margins from IBGE), and **`SETORES_ICMS`** (goods-based sectors: comercio, industria, construcao, agronegocio)
+- `src/lib/simulator/types.ts` — All types (`SimuladorInput`, `SimuladorResult`, `SimuladorTeaser`). Result includes `metodologia` field, `confiancaPerfil`, `efetividadeTributaria` (formalization pressure decomposition), and **`ajusteIcmsUf`** (state-specific ICMS rate adjustment data)
+- `src/lib/simulator/calculator.ts` — Core calculation engine, imports all data from `tax-data.ts`. **`calcularAjusteIcmsUf()`** adjusts `CARGA_ATUAL` based on state ICMS rate vs national average (goods sectors, non-Simples only). `calcularImpacto()` decomposes impact into rate change + formalization pressure using effectiveness factors, with state ICMS adjustment applied. UF-aware alerts with quantitative ICMS data, formalization-specific alerts for high-gap sectors
 - `src/lib/simulator/storage.ts` — localStorage bridge (`saveSimulatorData`, `getStoredSimulatorData`, `clearStoredSimulatorData`, `simulatorInputToProfile`)
 - `src/components/ui/methodology-card.tsx` — Reusable transparency component: compact mode (expandable line) on simulator, full mode (card with sources/limitations) on diagnostic
 - `src/app/simulador/page.tsx` — 4-step public quiz, persists results to localStorage, shows methodology card on results. CTAs route to `/signup?from=simulador`
@@ -123,8 +123,8 @@ Simulator users skip the 4-step onboarding wizard — their profile is auto-fill
 The simulator accounts for the fact that Brazilian SMEs don't always pay 100% of statutory tax obligations. The reform's automated collection (split payment, 2027+) will close this gap, creating a "hidden cost" beyond rate changes.
 
 - `src/lib/simulator/tax-data.ts` — `FATOR_EFETIVIDADE`: 40 sector/regime combinations (10 sectors x 4 regimes), each a `CitedValue<{medio, min, max}>` where `medio` is the ratio of actual vs statutory tax payment (e.g., 0.65 for comércio/simples = 65% effective compliance)
-- `src/lib/simulator/calculator.ts` — `calcularImpacto()` computes: current burden = `faturamento * cargaAtual * fatorEfetividade` (effective), new burden = `faturamento * cargaNova * 1.0` (statutory, because split payment enforces full compliance). Impact decomposed into `impactoMudancaAliquota` (rate change only) + `impactoFormalizacao` (enforcement gap closure) = `impactoTotalEstimado`
-- `src/lib/simulator/types.ts` — `efetividadeTributaria` field on `SimuladorResult` with: `fatorEfetividade`, `cargaEfetivaAtualPct`, `cargaLegalAtualPct`, `impactoMudancaAliquota`, `impactoFormalizacao`, `impactoTotalEstimado`, `pressaoFormalizacao` (baixa/moderada/alta/muito_alta)
+- `src/lib/simulator/calculator.ts` — `calcularImpacto()` computes: current burden = `faturamento * (cargaAtual + icmsAjuste) * fatorEfetividade` (effective), new burden = `faturamento * cargaNova * 1.0` (statutory, because split payment enforces full compliance). Impact decomposed into `impactoMudancaAliquota` (rate change only) + `impactoFormalizacao` (enforcement gap closure) = `impactoTotalEstimado`. State ICMS adjustment applied via `calcularAjusteIcmsUf()` for goods-based sectors on non-Simples regimes
+- `src/lib/simulator/types.ts` — `efetividadeTributaria` field on `SimuladorResult` with: `fatorEfetividade`, `cargaEfetivaAtualPct`, `cargaLegalAtualPct`, `impactoMudancaAliquota`, `impactoFormalizacao`, `impactoTotalEstimado`, `pressaoFormalizacao` (baixa/moderada/alta/muito_alta). **`ajusteIcmsUf`** field with: `ufAliquota`, `referenciaAliquota`, `margemEstimada`, `ajustePp`, `direcao` (favoravel/desfavoravel/neutro), `fonteUf`
 - Year-by-year projections model formalization ramp-up: 2026 test year (no change), 2027+ effectiveness trends toward 1.0 as enforcement tightens through 2033
 - All customer-facing language is non-judgmental (sector-level public data, never individual accusations), uses plain Portuguese (no "split payment" — says "retenção automática" or "cobrança mais rigorosa")
 - Research docs: `docs/COMPLIANCE_RESEARCH.md` (statistics + sources), `docs/EFFECTIVENESS_METHODOLOGY.md` (derivation of each factor value)
@@ -134,17 +134,18 @@ Protected route (requires auth, does NOT require onboarding completion).
 
 - `src/app/(dashboard)/diagnostico/page.tsx` — Server component: loads profile, runs simulation server-side, checks `isPaid` status
 - `src/app/(dashboard)/diagnostico/diagnostico-client.tsx` — Client bridge: reads localStorage, saves to profile via server action, triggers page refresh
-- `src/app/(dashboard)/diagnostico/diagnostico-report.tsx` — Client component with analytics tracking. Full report UI with 10 sections:
-  1. Impact Summary (FREE) — risk badge, R$ range
-  2. **O Custo Oculto da Reforma (FREE)** — decomposed impact: rate change + stricter enforcement = total; effective vs legal rates side-by-side; sector context; action guidance for high-pressure sectors
-  3. Methodology (FREE) — `<MethodologyCard>` with sources, confidence, limitations
-  4. Alerts (PARTIAL) — first 3 free, rest gated with `<GatedSection>`
-  5. Timeline (FREE) — key dates (includes formalization deadlines)
-  6. Action Checklist (PARTIAL) — first 2 free, rest + full interactive checklist gated (uses `<ChecklistItem>`)
-  7. Regime Comparison (PAID) — full analysis gated
-  8. Year-by-Year Projection (PAID) — 2026-2033 projection with formalization ramp-up gated
-  9. PDF Export (PAID) — `<PdfDownloadButton>` generates PDF via `/api/diagnostico/pdf`
-  10. Upgrade CTA — links to `/checkout`, shows alert count + action count
+- `src/app/(dashboard)/diagnostico/diagnostico-report.tsx` — Client component with analytics tracking. Full report UI with 11 sections:
+  1. Impact Summary (FREE) — risk badge, R$ range, state ICMS info in profile text
+  2. **State ICMS Adjustment Card (FREE)** — shown when |ajustePp| > 0.3; displays state rate, national reference, margin used, and adjustment direction
+  3. **O Custo Oculto da Reforma (FREE)** — decomposed impact: rate change + stricter enforcement = total; effective vs legal rates side-by-side; sector context; action guidance for high-pressure sectors
+  4. Methodology (FREE) — `<MethodologyCard>` with sources, confidence, limitations
+  5. Alerts (PARTIAL) — first 2 free, rest gated with `<GatedSection>`
+  6. Timeline (PARTIAL) — first 2 free, rest gated
+  7. Action Checklist (PARTIAL) — first 1 free, rest + full interactive checklist gated (uses `<ChecklistItem>`)
+  8. Regime Comparison (PAID) — full analysis gated
+  9. Year-by-Year Projection (PAID) — 2026-2033 projection with formalization ramp-up gated
+  10. PDF Export (PAID) — `<PdfDownloadButton>` generates PDF via `/api/diagnostico/pdf`
+  11. Upgrade CTA — links to `/checkout`, shows alert count + action count
 - `src/app/(dashboard)/diagnostico/actions.ts` — `saveSimulatorDataToProfile()` and `toggleChecklistItem()` server actions
 - `src/app/(dashboard)/diagnostico/checklist-item.tsx` — Interactive checkbox with optimistic UI
 - `src/components/ui/gated-section.tsx` — Reusable `<GatedSection locked={boolean}>` component: renders real content with `blur(5px)` + lock icon overlay when locked

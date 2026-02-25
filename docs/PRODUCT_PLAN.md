@@ -70,7 +70,8 @@ ImpostoFacil gives you a personalized view of the tax reform's impact on your bu
   - Practical checklists (what to do in 2026, what to do in 2027)
   - Credit management basics
   - Contract review considerations
-- [ ] Improve simulator with better disclaimers and export (PDF/share)
+- [x] Improve simulator with better disclaimers and export (PDF/share)
+- [x] State-specific ICMS rate adjustment (27 states, goods-based sectors, non-Simples)
 - [ ] Improve AI assistant system prompt with more context
 - [ ] Add "Proximos Passos" (next steps) feature to simulator results
 - [ ] Mobile optimization pass

@@ -164,6 +164,26 @@ These factors should be reviewed:
 ## Limitations
 
 1. These are sector-level averages — individual businesses may be fully compliant or significantly less compliant
-2. The factors don't capture regional variation (e.g., Northeast vs Southeast informality rates)
+2. ~~The factors don't capture regional variation~~ — **Partially addressed** (Feb 2026): State-specific ICMS modal rates (17%-23%) now adjust `CARGA_ATUAL` for goods-based sectors on non-Simples regimes via `calcularAjusteIcmsUf()`. However, effectiveness factors themselves remain national averages — regional informality variation (e.g., Northeast vs Southeast) is not yet modeled
 3. MEI vs ME vs EPP likely have different effectiveness profiles, but we don't differentiate by size within Simples
 4. Factors will need recalibration as the reform enforcement ramps up (2027-2033)
+
+---
+
+## Related: State ICMS Rate Adjustment
+
+> Added: 2026-02-25
+
+The effectiveness factors above model the *compliance gap* (how much of the statutory burden is actually paid). A separate system now models *state-level rate variation* for ICMS:
+
+- `ICMS_ALIQUOTA_MODAL` in `tax-data.ts`: 27-state modal ICMS rates, each citing specific state law
+- `ICMS_REFERENCIA_NACIONAL`: 19% GDP-weighted national average
+- `MARGEM_BRUTA_ESTIMADA`: Sector gross margins from IBGE (how ICMS rate differences translate to burden-on-revenue)
+- Formula: `ajustePp = (ufRate - refRate) × sectorMargin`
+- Example: MA (23%) comercio (margin 30%) → (23 - 19) × 0.30 = **+1.2pp** on `CARGA_ATUAL`
+
+This is orthogonal to effectiveness factors — ICMS adjustment changes the *legal* baseline, while effectiveness factors model the *compliance gap* against that baseline. Both are applied together in `calcularImpacto()`.
+
+**Scope**: Only goods-based sectors (`comercio`, `industria`, `construcao`, `agronegocio`) on non-Simples regimes. Services use ISS (municipal, not state ICMS). Simples DAS is nationally uniform.
+
+**Limitation**: Uses sector-average gross margins. A business's actual margin may differ significantly, making the ICMS adjustment more or less impactful than estimated.
