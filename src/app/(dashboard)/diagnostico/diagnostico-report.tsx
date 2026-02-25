@@ -109,8 +109,9 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
   }, [track, isPaid, result.nivelRisco])
   const teaser = gerarTeaser(result, input)
   const riscoInfo = NIVEL_RISCO_LABELS[result.nivelRisco]
-  const freeAlertCount = 3
-  const freeActionCount = 2
+  const freeAlertCount = 2
+  const freeActionCount = 1
+  const freeTimelineCount = 2
 
   const completedItems = checklistProgress?.completed ?? []
   const allChecklistItems = [
@@ -358,17 +359,17 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
         </CardContent>
       </Card>
 
-      {/* Timeline (FREE) */}
+      {/* Timeline (PARTIAL) */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5 text-primary" />
-            Datas Importantes
+            Datas Importantes ({result.datasImportantes.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {result.datasImportantes.map((data, i) => (
+            {result.datasImportantes.slice(0, freeTimelineCount).map((data, i) => (
               <div key={i} className="flex items-start gap-3">
                 <Badge
                   variant={
@@ -385,6 +386,27 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
                 <span className="text-sm">{data.descricao}</span>
               </div>
             ))}
+            {result.datasImportantes.length > freeTimelineCount && (
+              <GatedSection locked={!isPaid} ctaText={`Desbloqueie +${result.datasImportantes.length - freeTimelineCount} datas`}>
+                {result.datasImportantes.slice(freeTimelineCount).map((data, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <Badge
+                      variant={
+                        data.urgencia === "danger"
+                          ? "destructive"
+                          : data.urgencia === "warning"
+                            ? "secondary"
+                            : "outline"
+                      }
+                      className="shrink-0"
+                    >
+                      {data.data}
+                    </Badge>
+                    <span className="text-sm">{data.descricao}</span>
+                  </div>
+                ))}
+              </GatedSection>
+            )}
           </div>
         </CardContent>
       </Card>
