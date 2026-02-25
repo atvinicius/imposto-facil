@@ -215,11 +215,28 @@ export function DiagnosticoPDF({ result, input, userName, generatedAt }: Diagnos
             </View>
           </View>
           <Text style={{ fontSize: 9, color: "#64748b" }}>
-            Perfil: {input.setor} | {input.regime} | {input.uf} | Variação estimada:{" "}
-            {result.impactoAnual.percentual > 0 ? "+" : ""}
+            Perfil: {input.setor} | {input.regime} | {input.uf}
+            {result.ajusteIcmsUf && result.ajusteIcmsUf.direcao !== "neutro"
+              ? ` | ICMS ${input.uf}: ${result.ajusteIcmsUf.ufAliquota}% (${result.ajusteIcmsUf.direcao === "desfavoravel" ? "acima" : "abaixo"} da média)`
+              : ""}
+            {" "}| Variação estimada: {result.impactoAnual.percentual > 0 ? "+" : ""}
             {result.impactoAnual.percentual}%
           </Text>
         </View>
+
+        {/* State ICMS Adjustment */}
+        {result.ajusteIcmsUf && Math.abs(result.ajusteIcmsUf.ajustePp) > 0.3 && (
+          <View style={[styles.section, { padding: 10, backgroundColor: "#fffbeb", borderRadius: 4 }]}>
+            <Text style={{ fontFamily: "Helvetica-Bold", fontSize: 11, marginBottom: 4 }}>
+              Ajuste Estadual: ICMS {input.uf}
+            </Text>
+            <Text style={{ fontSize: 9, color: "#64748b" }}>
+              Alíquota modal de {result.ajusteIcmsUf.ufAliquota}% vs. média nacional de {result.ajusteIcmsUf.referenciaAliquota}%.
+              {" "}Ajuste de {result.ajusteIcmsUf.ajustePp > 0 ? "+" : ""}{result.ajusteIcmsUf.ajustePp.toFixed(1)}pp
+              na carga atual (margem bruta do setor: {Math.round(result.ajusteIcmsUf.margemEstimada * 100)}%).
+            </Text>
+          </View>
+        )}
 
         {/* Alerts */}
         <View style={styles.section}>

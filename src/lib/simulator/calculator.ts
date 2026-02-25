@@ -14,6 +14,10 @@ import {
   FATOR_EFETIVIDADE,
   TRANSICAO_TIMELINE,
   UF_INCENTIVOS_FISCAIS,
+  ICMS_ALIQUOTA_MODAL,
+  ICMS_REFERENCIA_NACIONAL,
+  MARGEM_BRUTA_ESTIMADA,
+  SETORES_ICMS,
   collectSources,
   collectLimitacoes,
   determineConfidence,
@@ -67,11 +71,55 @@ function computeAjuste(input: SimuladorInput): number {
   return base
 }
 
+/**
+ * Calculate state-specific ICMS adjustment to CARGA_ATUAL.
+ * Only applies to goods-based sectors on non-Simples regimes.
+ * Returns null when adjustment doesn't apply.
+ */
+function calcularAjusteIcmsUf(input: SimuladorInput): SimuladorResult["ajusteIcmsUf"] | null {
+  // Guard: Simples DAS rates are nationally uniform
+  if (input.regime === "simples") return null
+
+  // Guard: only goods-based sectors pay ICMS
+  if (!SETORES_ICMS.has(input.setor)) return null
+
+  // Guard: need a known UF
+  if (!input.uf || !ICMS_ALIQUOTA_MODAL[input.uf]) return null
+
+  // Guard: need sector margin data
+  const margemData = MARGEM_BRUTA_ESTIMADA[input.setor]
+  if (!margemData) return null
+
+  const ufRate = ICMS_ALIQUOTA_MODAL[input.uf].value
+  const refRate = ICMS_REFERENCIA_NACIONAL.value
+  const margin = margemData.value
+
+  // Adjustment in percentage points of revenue
+  // ICMS burden on revenue ≈ nominal_rate × gross_margin
+  // Difference = (ufRate - refRate) × margin
+  const ajustePp = Math.round(((ufRate - refRate) * margin) * 100) / 100
+
+  const direcao: "favoravel" | "desfavoravel" | "neutro" =
+    ajustePp > 0.1 ? "desfavoravel" :
+    ajustePp < -0.1 ? "favoravel" :
+    "neutro"
+
+  return {
+    ufAliquota: ufRate,
+    referenciaAliquota: refRate,
+    margemEstimada: margin,
+    ajustePp,
+    direcao,
+    fonteUf: ICMS_ALIQUOTA_MODAL[input.uf].source,
+  }
+}
+
 interface ImpactoResult {
   diferencaMin: number
   diferencaMax: number
   percentualMedio: number
   faturamentoBase: number
+  icmsAjuste: SimuladorResult["ajusteIcmsUf"] | null
   efetividade: {
     fator: number
     cargaEfetivaPct: number        // what they likely pay today (%)
@@ -86,10 +134,20 @@ interface ImpactoResult {
 function calcularImpacto(input: SimuladorInput): ImpactoResult {
   // Use exact revenue when provided, fall back to bracket midpoint
   const faturamento = input.faturamentoExato ?? FATURAMENTO_MEDIO[input.faturamento].value
-  const cargaLegal = CARGA_ATUAL[input.regime][input.setor].value
+  const cargaLegalBase = CARGA_ATUAL[input.regime][input.setor].value
   const cargaNova = CARGA_NOVA[input.setor].value
   const ajuste = computeAjuste(input)
   const efetividade = FATOR_EFETIVIDADE[input.regime][input.setor].value
+
+  // State-specific ICMS adjustment
+  const icmsAjuste = calcularAjusteIcmsUf(input)
+  const icmsAdj = icmsAjuste?.ajustePp ?? 0
+
+  // Adjusted current legal burden (national avg + state ICMS delta)
+  const cargaLegal = {
+    min: cargaLegalBase.min + icmsAdj,
+    max: cargaLegalBase.max + icmsAdj,
+  }
 
   // Effectiveness factor for this business
   const fatorEf = efetividade.medio
@@ -139,6 +197,7 @@ function calcularImpacto(input: SimuladorInput): ImpactoResult {
     diferencaMax: Math.round(diferencaMax),
     percentualMedio: Math.round(percentualMedio),
     faturamentoBase: faturamento,
+    icmsAjuste,
     efetividade: {
       fator: fatorEf,
       cargaEfetivaPct: Math.round(cargaLegalMediaPct * fatorEf * 10) / 10,
@@ -202,6 +261,11 @@ function calcularConfiancaPerfil(input: SimuladorInput): number {
     if (e.numFuncionarios) score += 2
   }
 
+  // Bonus when UF data enables state-specific ICMS adjustment
+  if (input.uf && ICMS_ALIQUOTA_MODAL[input.uf] && SETORES_ICMS.has(input.setor) && input.regime !== "simples") {
+    score += 3
+  }
+
   return Math.min(score, 100)
 }
 
@@ -209,6 +273,7 @@ function gerarAlertas(
   input: SimuladorInput,
   percentual: number,
   pressao: ImpactoResult["efetividade"]["pressao"] = "baixa",
+  icmsAjuste: SimuladorResult["ajusteIcmsUf"] | null = null,
 ): string[] {
   const alertas: string[] = []
   const payroll = resolvePayroll(input)
@@ -268,6 +333,19 @@ function gerarAlertas(
   const pctInter = input.enhanced?.pctInterestadual
   if (pctInter !== undefined && pctInter > 30) {
     alertas.push(`🚚 ${pctInter}% de vendas interestaduais — a mudança para princípio do destino altera a distribuição de arrecadação entre estados`)
+  }
+
+  // State-specific ICMS quantitative alerts
+  if (icmsAjuste && icmsAjuste.direcao === "desfavoravel") {
+    alertas.push(
+      `📍 ${input.uf} tem ICMS de ${icmsAjuste.ufAliquota}% (média nacional: ${icmsAjuste.referenciaAliquota}%). ` +
+      `Isso encarece a carga atual em ~${Math.abs(icmsAjuste.ajustePp).toFixed(1)}pp sobre o faturamento`
+    )
+  } else if (icmsAjuste && icmsAjuste.direcao === "favoravel") {
+    alertas.push(
+      `📍 ${input.uf} tem ICMS de ${icmsAjuste.ufAliquota}% (abaixo da média de ${icmsAjuste.referenciaAliquota}%). ` +
+      `Com a reforma, essa vantagem relativa pode desaparecer — o IBS terá alíquota uniforme por estado`
+    )
   }
 
   // Alertas UF-aware: estados com grandes programas de incentivos fiscais
@@ -514,10 +592,10 @@ function gerarChecklistCompleto(
   return checklist
 }
 
-function gerarProjecaoAnual(input: SimuladorInput): SimuladorResult["gatedContent"]["projecaoAnual"] {
+function gerarProjecaoAnual(input: SimuladorInput, icmsAjustePp: number = 0): SimuladorResult["gatedContent"]["projecaoAnual"] {
   const faturamento = input.faturamentoExato ?? FATURAMENTO_MEDIO[input.faturamento].value
-  const cargaLegal = CARGA_ATUAL[input.regime][input.setor].value
-  const cargaLegalMedia = (cargaLegal.min + cargaLegal.max) / 2
+  const cargaLegalBase = CARGA_ATUAL[input.regime][input.setor].value
+  const cargaLegalMedia = (cargaLegalBase.min + cargaLegalBase.max) / 2 + icmsAjustePp
   const efetividade = FATOR_EFETIVIDADE[input.regime][input.setor].value.medio
 
   // Baseline: what they effectively pay today
@@ -572,9 +650,14 @@ function gerarAnaliseRegime(input: SimuladorInput): SimuladorResult["gatedConten
   }
 
   const faturamento = input.faturamentoExato ?? FATURAMENTO_MEDIO[input.faturamento].value
-  const cargaPresumido = CARGA_ATUAL.lucro_presumido[input.setor].value
-  const cargaReal = CARGA_ATUAL.lucro_real[input.setor].value
+  const cargaPresumidoBase = CARGA_ATUAL.lucro_presumido[input.setor].value
+  const cargaRealBase = CARGA_ATUAL.lucro_real[input.setor].value
   const cargaNova = CARGA_NOVA[input.setor].value
+
+  // Apply ICMS state adjustment to regime comparison
+  const icmsAdj = calcularAjusteIcmsUf(input)?.ajustePp ?? 0
+  const cargaPresumido = { min: cargaPresumidoBase.min + icmsAdj, max: cargaPresumidoBase.max + icmsAdj }
+  const cargaReal = { min: cargaRealBase.min + icmsAdj, max: cargaRealBase.max + icmsAdj }
 
   // Use dynamic adjustment based on payroll/cost structure
   const inputLP = { ...input, regime: "lucro_presumido" as RegimeTributario }
@@ -625,9 +708,9 @@ function gerarAnaliseRegime(input: SimuladorInput): SimuladorResult["gatedConten
   }
 }
 
-function gerarMetodologia(input: SimuladorInput): SimuladorResult["metodologia"] {
+function gerarMetodologia(input: SimuladorInput, icmsAjuste: SimuladorResult["ajusteIcmsUf"] | null = null): SimuladorResult["metodologia"] {
   const fontes = collectSources(input.regime, input.setor, input.faturamento, input.uf)
-  let limitacoes = collectLimitacoes(input.regime, input.setor)
+  let limitacoes = collectLimitacoes(input.regime, input.setor, input.uf)
   const confianca = determineConfidence(input.regime, input.setor)
 
   // If exact revenue was provided, remove the "uses bracket averages" limitation
@@ -654,6 +737,14 @@ function gerarMetodologia(input: SimuladorInput): SimuladorResult["metodologia"]
     resumoPartes.push("Ajuste dinâmico aplicado com base na estrutura de custos e folha de pagamento.")
   }
 
+  if (icmsAjuste && icmsAjuste.direcao !== "neutro") {
+    const dir = icmsAjuste.direcao === "desfavoravel" ? "acima" : "abaixo"
+    resumoPartes.push(
+      `Ajuste estadual de ICMS aplicado: ${input.uf} (${icmsAjuste.ufAliquota}%) ${dir} da média nacional (${icmsAjuste.referenciaAliquota}%), ` +
+      `resultando em ${icmsAjuste.ajustePp > 0 ? "+" : ""}${icmsAjuste.ajustePp.toFixed(1)}pp na carga atual.`
+    )
+  }
+
   return {
     resumo: resumoPartes.join(" "),
     confianca,
@@ -666,6 +757,7 @@ function gerarMetodologia(input: SimuladorInput): SimuladorResult["metodologia"]
 export function calcularSimulacao(input: SimuladorInput): SimuladorResult {
   const impacto = calcularImpacto(input)
   const nivelRisco = determinarNivelRisco(impacto.percentualMedio, input.setor, input.regime)
+  const icmsAjustePp = impacto.icmsAjuste?.ajustePp ?? 0
 
   return {
     impactoAnual: {
@@ -674,10 +766,10 @@ export function calcularSimulacao(input: SimuladorInput): SimuladorResult {
       percentual: impacto.percentualMedio,
     },
     nivelRisco,
-    alertas: gerarAlertas(input, impacto.percentualMedio, impacto.efetividade.pressao),
+    alertas: gerarAlertas(input, impacto.percentualMedio, impacto.efetividade.pressao, impacto.icmsAjuste),
     datasImportantes: gerarDatasImportantes(input, impacto.efetividade.fator),
     acoesRecomendadas: gerarAcoesRecomendadas(input, impacto.efetividade.pressao),
-    metodologia: gerarMetodologia(input),
+    metodologia: gerarMetodologia(input, impacto.icmsAjuste),
     confiancaPerfil: calcularConfiancaPerfil(input),
     efetividadeTributaria: {
       fatorEfetividade: impacto.efetividade.fator,
@@ -688,11 +780,12 @@ export function calcularSimulacao(input: SimuladorInput): SimuladorResult {
       impactoTotalEstimado: impacto.efetividade.impactoTotal,
       pressaoFormalizacao: impacto.efetividade.pressao,
     },
+    ajusteIcmsUf: impacto.icmsAjuste ?? undefined,
     gatedContent: {
       checklistCompleto: gerarChecklistCompleto(input, impacto.efetividade.pressao),
       analiseDetalhada: "Análise completa do impacto por linha de produto/serviço",
       comparativoRegimes: input.regime !== "simples",
-      projecaoAnual: gerarProjecaoAnual(input),
+      projecaoAnual: gerarProjecaoAnual(input, icmsAjustePp),
       analiseRegime: gerarAnaliseRegime(input),
     },
   }

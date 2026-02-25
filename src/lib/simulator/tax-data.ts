@@ -832,6 +832,92 @@ export const UF_INCENTIVOS_FISCAIS: Record<string, CitedValue<string>> = {
 }
 
 // ---------------------------------------------------------------------------
+// Alíquota modal de ICMS por UF (estado)
+// Only applies to goods-based sectors on non-Simples regimes.
+// ---------------------------------------------------------------------------
+
+export const ICMS_ALIQUOTA_MODAL: Record<string, CitedValue<number>> = {
+  AC: { value: 19, source: "Lei Complementar Estadual AC 55/1997, art. 14", confidence: "legislada" },
+  AL: { value: 19, source: "Lei Estadual AL 5.900/1996, art. 17", confidence: "legislada" },
+  AM: { value: 20, source: "Lei Complementar Estadual AM 19/1997, art. 12", confidence: "legislada" },
+  AP: { value: 18, source: "Lei Estadual AP 400/1997, art. 21", confidence: "legislada" },
+  BA: { value: 20.5, source: "Lei Estadual BA 7.014/1996, art. 50 + FECP (Lei 14.634/2023)", confidence: "legislada" },
+  CE: { value: 20, source: "Lei Estadual CE 12.670/1996, art. 44 + FECOP", confidence: "legislada" },
+  DF: { value: 20, source: "Lei Distrital 1.254/1996, art. 18 + FCDF", confidence: "legislada" },
+  ES: { value: 17, source: "Lei Estadual ES 7.000/2001, art. 20", confidence: "legislada" },
+  GO: { value: 19, source: "Lei Estadual GO 11.651/1991 (CTE), art. 27 + PROTEGE", confidence: "legislada" },
+  MA: { value: 23, source: "Lei Estadual MA 7.799/2002, art. 23 + FUMACOP (Lei 11.867/2022)", confidence: "legislada", notes: "Maior alíquota modal do Brasil" },
+  MG: { value: 18, source: "Lei Estadual MG 6.763/1975, art. 12", confidence: "legislada" },
+  MS: { value: 17, source: "Lei Estadual MS 1.810/1997, art. 41", confidence: "legislada" },
+  MT: { value: 17, source: "Lei Estadual MT 7.098/1998, art. 14", confidence: "legislada" },
+  PA: { value: 19, source: "Lei Estadual PA 5.530/1989, art. 12 + FECP", confidence: "legislada" },
+  PB: { value: 20, source: "Lei Estadual PB 6.379/1996, art. 13 + FUNCEP", confidence: "legislada" },
+  PE: { value: 20.5, source: "Lei Estadual PE 15.730/2016, art. 15 + FECEP", confidence: "legislada" },
+  PI: { value: 21, source: "Lei Estadual PI 4.257/1989, art. 20 + FECEP (Lei 6.745/2015)", confidence: "legislada" },
+  PR: { value: 19.5, source: "Lei Estadual PR 11.580/1996, art. 14 + FECOP (Lei 18.573/2015)", confidence: "legislada" },
+  RJ: { value: 22, source: "Lei Estadual RJ 2.657/1996, art. 14 + FECP 2% (Lei 4.056/2002)", confidence: "legislada", notes: "Inclui 2% do FECP sobre a maioria das mercadorias" },
+  RN: { value: 20, source: "Lei Estadual RN 6.968/1996, art. 27 + FECOP", confidence: "legislada" },
+  RO: { value: 19.5, source: "Lei Estadual RO 688/1996, art. 12 + FECOEP (Lei 4.135/2017)", confidence: "legislada" },
+  RR: { value: 20, source: "Lei Estadual RR 59/1993, art. 15", confidence: "legislada" },
+  RS: { value: 17, source: "Lei Estadual RS 8.820/1989, art. 12", confidence: "legislada" },
+  SC: { value: 17, source: "Lei Estadual SC 10.297/1996, art. 19", confidence: "legislada" },
+  SE: { value: 19, source: "Lei Estadual SE 3.796/1996, art. 40", confidence: "legislada" },
+  SP: { value: 18, source: "Lei Estadual SP 6.374/1989, art. 34", confidence: "legislada" },
+  TO: { value: 20, source: "Lei Estadual TO 1.287/2001, art. 27", confidence: "legislada" },
+}
+
+export const ICMS_REFERENCIA_NACIONAL: CitedValue<number> = {
+  value: 19,
+  source: "Média ponderada pelo PIB estadual das alíquotas modais de ICMS (CONFAZ/IBGE)",
+  confidence: "derivada",
+  notes: "Média ponderada: estados com maior PIB (SP 18%, MG 18%, RJ 22%) têm mais peso. Resultado ~19%",
+}
+
+// ---------------------------------------------------------------------------
+// Margem bruta estimada por setor (IBGE)
+// Needed to convert ICMS rate difference into burden-on-revenue impact.
+// Effective ICMS burden on revenue ≈ nominal_rate × gross_margin
+// ---------------------------------------------------------------------------
+
+export const MARGEM_BRUTA_ESTIMADA: Partial<Record<Setor, CitedValue<number>>> = {
+  comercio: {
+    value: 0.30,
+    source: "IBGE Pesquisa Anual do Comércio 2023 — margem bruta média do comércio varejista",
+    confidence: "derivada",
+    notes: "Margem bruta ~30% no comércio varejista; atacado pode ser menor (~15-20%)",
+  },
+  industria: {
+    value: 0.35,
+    source: "IBGE PIA (Pesquisa Industrial Anual) 2023 — margem bruta média da indústria de transformação",
+    confidence: "derivada",
+    notes: "Margem bruta ~35% na indústria de transformação; varia muito por subsetor",
+  },
+  construcao: {
+    value: 0.25,
+    source: "IBGE PAIC (Pesquisa Anual da Indústria da Construção) 2023",
+    confidence: "derivada",
+    notes: "Margem bruta ~25% na construção civil; alta participação de materiais no custo",
+  },
+  agronegocio: {
+    value: 0.20,
+    source: "IBGE Censo Agropecuário + CEPEA/ESALQ dados de margem",
+    confidence: "derivada",
+    notes: "Margem bruta ~20% no agronegócio; setor com margens historicamente menores",
+  },
+}
+
+// ---------------------------------------------------------------------------
+// Setores que pagam ICMS (goods-based). Serviços pagam ISS (municipal).
+// ---------------------------------------------------------------------------
+
+export const SETORES_ICMS: Set<Setor> = new Set([
+  "comercio",
+  "industria",
+  "construcao",
+  "agronegocio",
+])
+
+// ---------------------------------------------------------------------------
 // Helper: collect all sources used in a calculation
 // ---------------------------------------------------------------------------
 
@@ -851,12 +937,16 @@ export function collectSources(
   if (uf && UF_INCENTIVOS_FISCAIS[uf]) {
     sources.add(UF_INCENTIVOS_FISCAIS[uf].source)
   }
+  if (uf && ICMS_ALIQUOTA_MODAL[uf]) {
+    sources.add(ICMS_ALIQUOTA_MODAL[uf].source)
+  }
   return Array.from(sources)
 }
 
 export function collectLimitacoes(
   regime: RegimeTributario,
   setor: Setor,
+  uf?: string,
 ): string[] {
   const limitacoes: string[] = [
     "Alíquotas finais de IBS/CBS ainda não foram definidas pelo Senado Federal",
@@ -874,6 +964,13 @@ export function collectLimitacoes(
   }
   if (setor === "outro") {
     limitacoes.push("Setor genérico — alíquotas podem variar significativamente conforme atividade específica")
+  }
+
+  // ICMS state adjustment limitation
+  if (uf && ICMS_ALIQUOTA_MODAL[uf] && SETORES_ICMS.has(setor) && regime !== "simples") {
+    limitacoes.push(
+      "O ajuste estadual de ICMS usa a margem bruta média do setor (IBGE). A margem real da sua empresa pode diferir significativamente"
+    )
   }
 
   return limitacoes

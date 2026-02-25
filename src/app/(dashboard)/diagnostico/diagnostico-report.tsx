@@ -227,11 +227,38 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
             {result.impactoAnual.percentual > 0
               ? `Aumento estimado de ${result.impactoAnual.percentual}% na carga tributária com a reforma.`
               : `Redução estimada de ${Math.abs(result.impactoAnual.percentual)}% na carga tributária com a reforma.`}
-            {" "}Baseado no perfil: {input.setor}, {input.regime}, {input.uf}.
+            {" "}Baseado no perfil: {input.setor}, {input.regime}, {input.uf}
+            {result.ajusteIcmsUf && result.ajusteIcmsUf.direcao !== "neutro" && (
+              <> — ICMS {input.uf}: {result.ajusteIcmsUf.ufAliquota}% ({result.ajusteIcmsUf.direcao === "desfavoravel" ? "acima" : "abaixo"} da média)</>
+            )}
+            .
           </p>
           <EntendaMelhorButton question={`Por que meu impacto estimado é de ${result.impactoAnual.percentual > 0 ? "+" : ""}${result.impactoAnual.percentual}%? O que mais influencia esse número?`} />
         </CardContent>
       </Card>
+
+      {/* State ICMS Adjustment Card (FREE — shown when adjustment is material) */}
+      {result.ajusteIcmsUf && Math.abs(result.ajusteIcmsUf.ajustePp) > 0.3 && (
+        <div className={`rounded-lg border p-4 flex items-start gap-3 ${
+          result.ajusteIcmsUf.direcao === "desfavoravel"
+            ? "bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800"
+            : "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800"
+        }`}>
+          <ShieldAlert className={`h-5 w-5 shrink-0 mt-0.5 ${
+            result.ajusteIcmsUf.direcao === "desfavoravel" ? "text-amber-600" : "text-emerald-600"
+          }`} />
+          <div className="space-y-1">
+            <p className="text-sm font-medium">
+              Ajuste Estadual: ICMS {input.uf}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Alíquota modal de {result.ajusteIcmsUf.ufAliquota}% vs. média nacional de {result.ajusteIcmsUf.referenciaAliquota}%.
+              {" "}Ajuste de {result.ajusteIcmsUf.ajustePp > 0 ? "+" : ""}{result.ajusteIcmsUf.ajustePp.toFixed(1)}pp
+              na carga atual estimada (margem bruta do setor: {Math.round(result.ajusteIcmsUf.margemEstimada * 100)}%).
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Upgrade CTA (for free users — placed early to drive conversion) */}
       {!isPaid && (

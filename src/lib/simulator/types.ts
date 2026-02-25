@@ -100,6 +100,16 @@ export interface SimuladorResult {
     pressaoFormalizacao: "baixa" | "moderada" | "alta" | "muito_alta"
   }
 
+  // State-specific ICMS adjustment (goods sectors, non-Simples only)
+  ajusteIcmsUf?: {
+    ufAliquota: number           // state modal ICMS rate (e.g., 23)
+    referenciaAliquota: number   // national reference (19)
+    margemEstimada: number       // sector gross margin (e.g., 0.30)
+    ajustePp: number             // adjustment in pp applied to CARGA_ATUAL
+    direcao: "favoravel" | "desfavoravel" | "neutro"
+    fonteUf: string              // legislative source
+  }
+
   // Seção gated (só mostra após signup/pagamento)
   gatedContent: {
     checklistCompleto: string[]
