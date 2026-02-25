@@ -276,6 +276,46 @@ function gerarAlertas(
     alertas.push("📋 Verifique sua situação fiscal no e-CAC da Receita Federal — existem programas de regularização com condições facilitadas antes da reforma entrar em vigor")
   }
 
+  // Pix/card monitoring — high formalization gap sectors
+  if (pressao === "alta" || pressao === "muito_alta") {
+    alertas.push(
+      "📱 A Receita Federal já cruza dados de Pix e cartão com o faturamento declarado. " +
+      "Com a reforma, o Comitê Gestor unificará dados de 27 estados e 5.570 municípios"
+    )
+  }
+
+  // Contract revision — service sectors with material impact
+  if ((input.setor === "servicos" || input.setor === "educacao" || input.setor === "saude") && percentual > 15) {
+    alertas.push(
+      "📝 Contratos de longo prazo sem cláusula de reajuste tributário podem gerar prejuízo. " +
+      "Revise contratos ativos antes de 2027"
+    )
+  }
+
+  // Construction sector specific
+  if (input.setor === "construcao") {
+    alertas.push(
+      "🏗️ Construção civil: maior impacto de formalização entre todos os setores. " +
+      "Mapeie a cadeia de subcontratados e formalize contratos de prestação de serviço"
+    )
+  }
+
+  // Accounting cost — small businesses
+  if (input.faturamento === "ate_81k" || input.faturamento === "81k_360k") {
+    alertas.push(
+      "📊 Espere aumento nos custos contábeis durante a transição (2026-2033). " +
+      "Contadores passam de executores para consultores estratégicos"
+    )
+  }
+
+  // Supplier cost pass-through — Simples/MEI
+  if (input.regime === "simples") {
+    alertas.push(
+      "🔗 Mesmo protegido pelo Simples, seus fornecedores podem repassar aumentos de IBS/CBS nos preços. " +
+      "Avalie o impacto indireto na sua estrutura de custos"
+    )
+  }
+
   // Alertas gerais de timing
   alertas.push("⏰ 2026 é o ano de teste - aproveite para adaptar seus sistemas sem penalidades severas")
   alertas.push("💳 A partir de 2027, o imposto será retido automaticamente nas transações eletrônicas — prepare seu fluxo de caixa")
@@ -364,6 +404,26 @@ function gerarAcoesRecomendadas(
     acoes.push("Avaliar impacto em vendas B2B - clientes podem preferir fornecedores fora do Simples")
   }
 
+  // Pix/card consistency
+  if (pressao !== "baixa") {
+    acoes.push("Verificar consistência entre volume de Pix/cartão e faturamento declarado")
+  }
+
+  // Accounting cost planning — small businesses
+  if (input.faturamento === "ate_81k" || input.faturamento === "81k_360k") {
+    acoes.push("Planejar aumento de custos contábeis e de compliance durante a transição")
+  }
+
+  // Construction specific
+  if (input.setor === "construcao") {
+    acoes.push("Mapear cadeia de subcontratados e avaliar impacto da formalização nos custos de obra")
+  }
+
+  // Education specific
+  if (input.setor === "educacao") {
+    acoes.push("Verificar enquadramento na redução de 60% da alíquota para serviços educacionais")
+  }
+
   return acoes
 }
 
@@ -419,6 +479,27 @@ function gerarChecklistCompleto(
     checklist.push("Planejar recuperação de créditos de ICMS acumulados antes da extinção")
     checklist.push("Verificar enquadramento em regime diferenciado do agronegócio")
   }
+
+  // Construction sector
+  if (input.setor === "construcao") {
+    checklist.push("Mapear toda a cadeia de subcontratados e formalizar contratos de prestação de serviço")
+    checklist.push("Avaliar impacto da formalização de mão de obra nos custos de obra")
+    checklist.push("Revisar contratos de empreitada com cláusula de reajuste tributário")
+  }
+
+  // Education sector
+  if (input.setor === "educacao") {
+    checklist.push("Verificar enquadramento na redução de 60% da alíquota (art. 259 LC 214/2025)")
+    checklist.push("Revisar contratos de matrícula/mensalidade com cláusula de reajuste tributário")
+  }
+
+  // Pix/card consistency for all sectors with gap
+  if (pressao !== "baixa") {
+    checklist.push("Conciliar volume de transações Pix/cartão com faturamento declarado mensalmente")
+  }
+
+  // IS check (general)
+  checklist.push("Verificar se algum produto/serviço está sujeito ao Imposto Seletivo (IS)")
 
   if (input.regime === "lucro_presumido") {
     checklist.push("Realizar simulação comparativa Lucro Presumido vs Lucro Real no novo sistema")

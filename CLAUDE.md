@@ -36,7 +36,7 @@ npm run lint      # ESLint with Next.js + TypeScript rules
 - `src/lib/supabase/` - Supabase clients (server.ts for SSR, client.ts for browser, admin.ts for service role)
 - `src/lib/openrouter/` - LLM client with system prompt template
 - `src/lib/embeddings/` - OpenAI embeddings and hybrid search logic
-- `src/content/` - Static MDX articles organized by category (ibs, cbs, is, transicao, glossario, setores, regimes, faq) — 26 articles total
+- `src/content/` - Static MDX articles organized by category (ibs, cbs, is, transicao, glossario, setores, regimes, faq) — 32 articles total
 - `src/hooks/use-chat.ts` - Client-side chat state management with SSE streaming
 - `src/hooks/use-conversations.ts` - Conversation list management
 - `src/lib/simulator/tax-data.ts` - Cited tax data registry with legislative sources
@@ -226,7 +226,7 @@ Database columns: `diagnostico_purchased_at`, `subscription_tier`, `stripe_custo
 ### Other Tables
 - `conversations` - Chat conversation metadata
 - `messages` - Individual chat messages with role and sources
-- `content_chunks` - RAG knowledge base with embeddings (from 26 articles; re-ingest after adding articles)
+- `content_chunks` - RAG knowledge base with embeddings (from 32 articles; re-ingest after adding articles)
 - `analytics_events` - Custom event tracking
 - `newsletter_subscribers` - Email collection
 - `checklist_progress` - Diagnostic checklist completion state per user
@@ -259,7 +259,7 @@ Run migrations in order in Supabase SQL Editor:
 
 ### Knowledge Base Ingestion
 ```bash
-npx tsx scripts/knowledge-base/ingest.ts --force --verbose  # Ingest all 26 articles into Supabase
+npx tsx scripts/knowledge-base/ingest.ts --force --verbose  # Ingest all 32 articles into Supabase
 npx tsx scripts/knowledge-base/ingest.ts --dry-run          # Preview without writing
 ```
 Loads `.env.local` for credentials. Generates OpenAI embeddings and writes to `content_chunks` table.
