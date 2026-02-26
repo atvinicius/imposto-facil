@@ -569,6 +569,9 @@ export default function LandingPage() {
           <div className="flex flex-col gap-4 text-sm text-slate-600 sm:flex-row sm:items-center sm:justify-between">
             <p>&copy; 2026 ImpostoFácil. Todos os direitos reservados.</p>
             <div className="flex items-center gap-5">
+              <Link href="/reforma" className="transition-colors hover:text-slate-900">
+                Impacto por Setor
+              </Link>
               <Link href="/termos" className="transition-colors hover:text-slate-900">
                 Termos
               </Link>
