@@ -5,6 +5,8 @@ import Link from "next/link"
 import {
   AlertTriangle,
   ArrowRight,
+  BookOpen,
+  Bot,
   CheckCircle,
   Clock,
   HelpCircle,
@@ -15,6 +17,7 @@ import {
   Sparkles,
   TrendingUp,
   X,
+  Zap,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -106,6 +109,124 @@ function ConfidenceExplainer({ score, onClose }: { score: number; onClose: () =>
         </div>
       </div>
     </div>
+  )
+}
+
+function AssistantCTA({ isPaid, setor, nivelRisco }: { isPaid: boolean; setor: string; nivelRisco: string }) {
+  const [showPaywall, setShowPaywall] = useState(false)
+  const riscoLabel = NIVEL_RISCO_LABELS[nivelRisco as keyof typeof NIVEL_RISCO_LABELS]?.label ?? nivelRisco
+
+  const suggestedQuestion = `Meu diagnóstico mostra risco ${riscoLabel.toLowerCase()} para o setor de ${setor}. O que devo priorizar?`
+
+  if (isPaid) {
+    return (
+      <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/5">
+        <CardContent className="p-6 space-y-4">
+          <div className="flex items-start gap-4">
+            <div className="rounded-full bg-primary/10 p-3 shrink-0">
+              <Bot className="h-6 w-6 text-primary" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="font-semibold text-lg">Pergunte à Duda sobre seu diagnóstico</h3>
+              <p className="text-sm text-muted-foreground">
+                Nossa assistente de IA conhece seu perfil, seus alertas e suas projeções.
+                Tire dúvidas em linguagem simples.
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Button asChild className="flex-1">
+              <Link href={`/assistente?q=${encodeURIComponent(suggestedQuestion)}`}>
+                <MessageCircle className="h-4 w-4 mr-2" />
+                &ldquo;O que devo priorizar?&rdquo;
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="flex-1">
+              <Link href="/assistente">
+                <Bot className="h-4 w-4 mr-2" />
+                Abrir assistente
+              </Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <Card className="relative overflow-hidden border-slate-200 dark:border-slate-800">
+      <CardContent className="p-6 space-y-5">
+        {/* Header with avatar */}
+        <div className="flex items-start gap-4">
+          <div className="rounded-full bg-slate-900 dark:bg-slate-100 p-3 shrink-0">
+            <Bot className="h-6 w-6 text-white dark:text-slate-900" />
+          </div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-lg">Assistente Duda</h3>
+              <Badge variant="secondary" className="text-xs">IA</Badge>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Tire dúvidas sobre a reforma em linguagem simples, com respostas personalizadas para o seu perfil.
+            </p>
+          </div>
+        </div>
+
+        {/* Feature highlights */}
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+          <div className="flex items-center gap-2 text-sm p-2.5 rounded-lg bg-muted/40">
+            <Zap className="h-4 w-4 text-amber-500 shrink-0" />
+            <span>Respostas personalizadas</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm p-2.5 rounded-lg bg-muted/40">
+            <BookOpen className="h-4 w-4 text-blue-500 shrink-0" />
+            <span>Base de 32 artigos</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm p-2.5 rounded-lg bg-muted/40">
+            <ShieldAlert className="h-4 w-4 text-emerald-500 shrink-0" />
+            <span>Conhece seu diagnóstico</span>
+          </div>
+        </div>
+
+        {/* Example question preview */}
+        <div className="rounded-lg border bg-muted/20 p-3">
+          <p className="text-xs text-muted-foreground mb-1.5">Exemplo de pergunta:</p>
+          <p className="text-sm italic">&ldquo;{suggestedQuestion}&rdquo;</p>
+        </div>
+
+        {/* CTA button → paywall reveal */}
+        {!showPaywall ? (
+          <Button
+            className="w-full"
+            size="lg"
+            onClick={() => setShowPaywall(true)}
+          >
+            <MessageCircle className="h-4 w-4 mr-2" />
+            Perguntar sobre meu diagnóstico
+          </Button>
+        ) : (
+          <div className="rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20 p-5 text-center space-y-3">
+            <Lock className="h-7 w-7 text-amber-600 mx-auto" />
+            <p className="font-medium text-sm">
+              A assistente Duda está disponível no Diagnóstico Completo
+            </p>
+            <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+              Além da assistente, você desbloqueia todos os alertas, checklist completo,
+              projeção ano a ano, análise de regime e PDF.
+            </p>
+            <Button asChild size="sm">
+              <Link href="/checkout">
+                Desbloquear por R$49
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Link>
+            </Button>
+            <p className="text-xs text-muted-foreground">
+              Pagamento único. Acesso permanente.
+            </p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }
 
@@ -557,6 +678,9 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
           <EntendaMelhorButton question="Quais ações recomendadas são mais urgentes para minha empresa?" />
         </CardContent>
       </Card>
+
+      {/* AI Assistant CTA */}
+      <AssistantCTA isPaid={isPaid} setor={input.setor} nivelRisco={result.nivelRisco} />
 
       {/* Regime Comparison (PAID ONLY) */}
       {result.gatedContent.analiseRegime && (
