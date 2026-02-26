@@ -917,6 +917,9 @@ export default function SimuladorPage() {
                       <BarChart3 className="h-5 w-5 text-violet-500" />
                       Análise de Regime Tributário
                     </CardTitle>
+                    <CardDescription>
+                      Vale a pena mudar de regime? Será que você está pagando imposto à toa?
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="relative">
@@ -967,7 +970,7 @@ export default function SimuladorPage() {
                     Receba seu Diagnóstico Tributário completo
                   </h3>
                   <p className="mb-4 text-primary-foreground/80">
-                    Crie sua conta e veja alertas, checklist de ações e projeção ano a ano
+                    Alertas, checklist de ações, projeção ano a ano — e tire qualquer dúvida sobre seu relatório
                   </p>
                   <Button asChild variant="secondary" size="lg">
                     <Link href="/signup?from=simulador">
