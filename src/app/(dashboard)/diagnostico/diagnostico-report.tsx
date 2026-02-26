@@ -127,7 +127,7 @@ function AssistantCTA({ isPaid, setor, nivelRisco }: { isPaid: boolean; setor: s
               <Bot className="h-6 w-6 text-primary" />
             </div>
             <div className="space-y-1">
-              <h3 className="font-semibold text-lg">Pergunte à Duda sobre seu diagnóstico</h3>
+              <h3 className="font-semibold text-lg">Pergunte sobre seu diagnóstico</h3>
               <p className="text-sm text-muted-foreground">
                 Nossa assistente de IA conhece seu perfil, seus alertas e suas projeções.
                 Tire dúvidas em linguagem simples.
@@ -163,7 +163,7 @@ function AssistantCTA({ isPaid, setor, nivelRisco }: { isPaid: boolean; setor: s
           </div>
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-lg">Assistente Duda</h3>
+              <h3 className="font-semibold text-lg">Assistente de IA</h3>
               <Badge variant="secondary" className="text-xs">IA</Badge>
             </div>
             <p className="text-sm text-muted-foreground">
@@ -208,7 +208,7 @@ function AssistantCTA({ isPaid, setor, nivelRisco }: { isPaid: boolean; setor: s
           <div className="rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20 p-5 text-center space-y-3">
             <Lock className="h-7 w-7 text-amber-600 mx-auto" />
             <p className="font-medium text-sm">
-              A assistente Duda está disponível no Diagnóstico Completo
+              A assistente de IA está disponível no Diagnóstico Completo
             </p>
             <p className="text-xs text-muted-foreground max-w-sm mx-auto">
               Além da assistente, você desbloqueia todos os alertas, checklist completo,
