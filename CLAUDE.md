@@ -34,7 +34,7 @@ npm run lint      # ESLint with Next.js + TypeScript rules
 - `src/lib/supabase/` - Supabase clients (server.ts for SSR with PKCE, client.ts for browser, admin.ts for service role)
 - `src/lib/openrouter/` - LLM client with system prompt template
 - `src/lib/embeddings/` - OpenAI embeddings and hybrid search logic
-- `src/content/` - Static MDX articles organized by category (ibs, cbs, is, transicao, glossario, setores, regimes, faq) — 32 articles total
+- `src/content/` - Static MDX articles organized by category (ibs, cbs, is, transicao, glossario, setores, regimes, faq) — 36 articles total
 - `src/hooks/use-chat.ts` - Client-side chat state management with SSE streaming
 - `src/hooks/use-conversations.ts` - Conversation list management
 - `src/lib/simulator/tax-data.ts` - Cited tax data registry with legislative sources
@@ -49,8 +49,10 @@ npm run lint      # ESLint with Next.js + TypeScript rules
 
 ### Chat System Architecture
 1. **API Route** (`src/app/api/chat/route.ts`): Edge Runtime endpoint that:
+   - **Paywalled**: returns 403 for free users (requires `diagnostico` or `pro` subscription tier)
    - Fetches full user profile for personalized context (nome, UF, setor, porte, regime, faturamento, experiencia, interesses, simulator results, formalization pressure data)
    - Injects diagnostic data into context: impact, risk, alerts, dates, actions, split payment, formalization pressure (effective vs legal rates, enforcement cost)
+   - Injects **common mistakes context** via `getErrosComunsParaChat()` for proactive error coaching
    - Performs hybrid search (70% semantic + 30% full-text) on knowledge base
    - Streams responses via Server-Sent Events
    - Persists messages to Supabase
@@ -100,11 +102,12 @@ Simulator users' profiles are auto-filled from simulator data (`simulatorInputTo
 
 ### Simulator System
 - `src/lib/simulator/tax-data.ts` — **Cited data registry**: all tax rates wrapped in `CitedValue<T>` with `source` (legislation reference), `confidence` (legislada/estimativa_oficial/derivada), and optional `notes`. Includes `FATURAMENTO_MEDIO`, `CARGA_ATUAL`, `CARGA_NOVA`, `AJUSTE_REGIME`, `TRANSICAO_TIMELINE`, `UF_INCENTIVOS_FISCAIS`, `FATOR_EFETIVIDADE` (sector/regime effectiveness ratios), **`ICMS_ALIQUOTA_MODAL`** (27-state modal ICMS rates, 17%-23%, each citing state law), **`ICMS_REFERENCIA_NACIONAL`** (19% GDP-weighted avg), **`MARGEM_BRUTA_ESTIMADA`** (sector gross margins from IBGE), and **`SETORES_ICMS`** (goods-based sectors: comercio, industria, construcao, agronegocio)
-- `src/lib/simulator/types.ts` — All types (`SimuladorInput`, `SimuladorResult`, `SimuladorTeaser`). Result includes `metodologia` field, `confiancaPerfil`, `efetividadeTributaria` (formalization pressure decomposition), and **`ajusteIcmsUf`** (state-specific ICMS rate adjustment data)
-- `src/lib/simulator/calculator.ts` — Core calculation engine, imports all data from `tax-data.ts`. **`calcularAjusteIcmsUf()`** adjusts `CARGA_ATUAL` based on state ICMS rate vs national average (goods sectors, non-Simples only). `calcularImpacto()` decomposes impact into rate change + formalization pressure using effectiveness factors, with state ICMS adjustment applied. UF-aware alerts with quantitative ICMS data, formalization-specific alerts for high-gap sectors
+- `src/lib/simulator/types.ts` — All types (`SimuladorInput`, `SimuladorResult`, `SimuladorTeaser`). Result includes `metodologia` field, `confiancaPerfil`, `efetividadeTributaria` (formalization pressure decomposition), **`ajusteIcmsUf`** (state-specific ICMS rate adjustment data), and **`impactoFluxoCaixa`** (cash flow impact: `retencaoMensal`, `porCadaDezMil`, `capitalGiroAdicional`)
+- `src/lib/simulator/calculator.ts` — Core calculation engine, imports all data from `tax-data.ts`. **`calcularAjusteIcmsUf()`** adjusts `CARGA_ATUAL` based on state ICMS rate vs national average (goods sectors, non-Simples only). `calcularImpacto()` decomposes impact into rate change + formalization pressure using effectiveness factors, with state ICMS adjustment applied. **`calcularImpactoFluxoCaixa()`** computes concrete cash flow numbers (per R$10k retained, monthly retention, annual working capital). UF-aware alerts with quantitative ICMS data, formalization-specific alerts for high-gap sectors
+- `src/lib/simulator/common-mistakes.ts` — **Common Mistakes Engine**: 15 cataloged errors matched by sector, regime, faturamento, UF, and formalization pressure. Returns personalized `ErroComum[]` sorted by severity. Used by diagnostic report, simulator results, and chat context. Exports: `getErrosComuns(input, result, maxItems)` and `getErrosComunsParaChat(input, result)`
 - `src/lib/simulator/storage.ts` — localStorage bridge (`saveSimulatorData`, `getStoredSimulatorData`, `clearStoredSimulatorData`, `simulatorInputToProfile`)
 - `src/components/ui/methodology-card.tsx` — Reusable transparency component: compact mode (expandable line) on simulator, full mode (card with sources/limitations) on diagnostic
-- `src/app/simulador/page.tsx` — 4-step public quiz, persists results to localStorage, shows methodology card on results. CTAs route to `/signup?from=simulador`
+- `src/app/simulador/page.tsx` — 4-step public quiz, persists results to localStorage, shows methodology card and **common mistakes teaser** on results. CTAs route to `/signup?from=simulador`
 
 ### Compliance Reality / Formalization Pressure System
 The simulator accounts for the fact that Brazilian SMEs don't always pay 100% of statutory tax obligations. The reform's automated collection (split payment, 2027+) will close this gap, creating a "hidden cost" beyond rate changes.
@@ -116,23 +119,39 @@ The simulator accounts for the fact that Brazilian SMEs don't always pay 100% of
 - All customer-facing language is non-judgmental (sector-level public data, never individual accusations), uses plain Portuguese (no "split payment" — says "retenção automática" or "cobrança mais rigorosa")
 - Research docs: `docs/COMPLIANCE_RESEARCH.md` (statistics + sources), `docs/EFFECTIVENESS_METHODOLOGY.md` (derivation of each factor value)
 
+### Common Mistakes Engine
+Profile-matched common errors surfaced across multiple product surfaces to drive engagement and conversion.
+
+- `src/lib/simulator/common-mistakes.ts` — Core engine: 15 cataloged errors with profile-matching functions. Each error has `match(ctx)` (boolean filter), `severity(ctx)` (alta/media/baixa), and `build(ctx)` (generates title, description, article link, suggested question). Categories: regime mistakes (LP to LR, Simples hybrid, unknown regime), pricing/contract issues, cash flow planning, MEI-specific (CPF/CNPJ mixing, nanoempreendedor), formalization pressure, state incentives, sector-specific (construction, agro, education)
+- **Diagnostic report**: "Erros Comuns do Seu Perfil" free section with severity dots, descriptions, links to articles and assistant
+- **Simulator results**: Teaser showing top 2 mistakes with locked CTA driving signup
+- **Chat context**: `getErrosComunsParaChat()` injected into system prompt for proactive error coaching
+- **System prompt** (`openrouter/client.ts`): Guidelines for non-accusatory, sector-level error coaching
+
+### Dashboard Urgency Signals
+- `src/app/(dashboard)/dashboard/page.tsx` — Formalization pressure warning banner (alta/muito_alta), low confidence prompt (< 50%), "Proximo Marco: Janeiro 2027" deadline card
+
 ### Diagnostic Report System (`/diagnostico`)
 Protected route (requires auth, does NOT require onboarding completion).
 
 - `src/app/(dashboard)/diagnostico/page.tsx` — Server component: loads profile, runs simulation server-side, checks `isPaid` status
 - `src/app/(dashboard)/diagnostico/diagnostico-client.tsx` — Client bridge: reads localStorage, saves to profile via server action, triggers page refresh
-- `src/app/(dashboard)/diagnostico/diagnostico-report.tsx` — Client component with analytics tracking. Full report UI with 11 sections:
+- `src/app/(dashboard)/diagnostico/diagnostico-report.tsx` — Client component with analytics tracking. Full report UI with sections:
   1. Impact Summary (FREE) — risk badge, R$ range, state ICMS info in profile text
   2. **State ICMS Adjustment Card (FREE)** — shown when |ajustePp| > 0.3; displays state rate, national reference, margin used, and adjustment direction
   3. **O Custo Oculto da Reforma (FREE)** — decomposed impact: rate change + stricter enforcement = total; effective vs legal rates side-by-side; sector context; action guidance for high-pressure sectors
-  4. Methodology (FREE) — `<MethodologyCard>` with sources, confidence, limitations
-  5. Alerts (PARTIAL) — first 2 free, rest gated with `<GatedSection>`
-  6. Timeline (PARTIAL) — first 2 free, rest gated
-  7. Action Checklist (PARTIAL) — first 1 free, rest + full interactive checklist gated (uses `<ChecklistItem>`)
-  8. Regime Comparison (PAID) — full analysis gated
-  9. Year-by-Year Projection (PAID) — 2026-2033 projection with formalization ramp-up gated
-  10. PDF Export (PAID) — `<PdfDownloadButton>` generates PDF via `/api/diagnostico/pdf`
-  11. Upgrade CTA — links to `/checkout`, shows alert count + action count
+  4. **Impacto no Fluxo de Caixa (FREE)** — 3-column grid: per R$10k retained, monthly retention, annual working capital needed
+  5. **Erros Comuns do Seu Perfil (FREE)** — profile-matched common mistakes with severity dots, descriptions, links to articles and assistant
+  6. Methodology (FREE) — `<MethodologyCard>` with sources, confidence, limitations
+  7. Alerts (PARTIAL) — first 2 free, rest gated with `<GatedSection>`
+  8. Timeline (PARTIAL) — first 2 free, rest gated
+  9. Action Checklist (PARTIAL) — first 1 free, rest + full interactive checklist gated (uses `<ChecklistItem>`)
+  10. Regime Comparison (PAID) — full analysis gated
+  11. Year-by-Year Projection (PAID) — 2026-2033 projection with formalization ramp-up gated
+  12. **AI Assistant CTA (PAID)** — `<AssistantCTA>` links to `/assistente`
+  13. PDF Export (PAID) — `<PdfDownloadButton>` generates PDF via `/api/diagnostico/pdf`
+  14. **Recalculate (PAID)** — `<RerunGatedCTA>` at bottom, gated behind paywall
+  15. Upgrade CTA — links to `/checkout`, shows alert count + action count
 - `src/app/(dashboard)/diagnostico/actions.ts` — `saveSimulatorDataToProfile()` and `toggleChecklistItem()` server actions
 - `src/app/(dashboard)/diagnostico/checklist-item.tsx` — Interactive checkbox with optimistic UI
 - `src/components/ui/gated-section.tsx` — Reusable `<GatedSection locked={boolean}>` component: renders real content with `blur(5px)` + lock icon overlay when locked
@@ -140,7 +159,7 @@ Protected route (requires auth, does NOT require onboarding completion).
 ### Checkout & Payment Flow (`/checkout`)
 Protected route. Stripe Checkout integration + promo code bypass.
 
-- `src/app/(dashboard)/checkout/page.tsx` — Client component: side-by-side Free vs Paid tier comparison, Stripe checkout button, promo code input
+- `src/app/(dashboard)/checkout/page.tsx` — Client component: side-by-side Free vs Paid tier comparison, Stripe checkout button, promo code input, profile-based urgency banners (formalization pressure, high impact %), money-back guarantee
 - `src/app/(dashboard)/checkout/actions.ts` — `redeemPromoCode()` server action: validates against `VALID_PROMO_CODES` map (currently: "amigos"), updates `subscription_tier` + `diagnostico_purchased_at`
 - `src/app/api/stripe/checkout/route.ts` — Creates Stripe Checkout Session, redirects to Stripe
 - `src/app/api/stripe/webhook/route.ts` — Handles `checkout.session.completed` webhook, updates user profile
@@ -239,7 +258,7 @@ Database columns: `diagnostico_purchased_at`, `subscription_tier`, `stripe_custo
 ### Other Tables
 - `conversations` - Chat conversation metadata
 - `messages` - Individual chat messages with role and sources
-- `content_chunks` - RAG knowledge base with embeddings (from 32 articles; re-ingest after adding articles)
+- `content_chunks` - RAG knowledge base with embeddings (from 36 articles; re-ingest after adding articles)
 - `analytics_events` - Custom event tracking
 - `newsletter_subscribers` - Email collection
 - `checklist_progress` - Diagnostic checklist completion state per user
@@ -272,7 +291,7 @@ Run migrations in order in Supabase SQL Editor:
 
 ### Knowledge Base Ingestion
 ```bash
-npx tsx scripts/knowledge-base/ingest.ts --force --verbose  # Ingest all 32 articles into Supabase
+npx tsx scripts/knowledge-base/ingest.ts --force --verbose  # Ingest all 36 articles into Supabase
 npx tsx scripts/knowledge-base/ingest.ts --dry-run          # Preview without writing
 ```
 Loads `.env.local` for credentials. Generates OpenAI embeddings and writes to `content_chunks` table.
