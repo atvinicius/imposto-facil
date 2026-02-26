@@ -36,7 +36,20 @@ export async function POST(request: Request) {
       .from("user_profiles")
       .select("*")
       .eq("id", user.id)
-      .single() as { data: { nome?: string; uf?: string; setor?: string; porte_empresa?: string; regime_tributario?: string; faturamento?: string; nivel_experiencia?: string; interesses?: string[]; subscription_tier?: string; simulator_result?: import("@/lib/simulator/types").SimuladorResult } | null }
+      .single() as { data: { nome?: string; uf?: string; setor?: string; porte_empresa?: string; regime_tributario?: string; faturamento?: string; nivel_experiencia?: string; interesses?: string[]; subscription_tier?: string; diagnostico_purchased_at?: string; simulator_result?: import("@/lib/simulator/types").SimuladorResult } | null }
+
+    // Gate: assistant is only available for paid users
+    const hasPaid = !!(
+      profile?.diagnostico_purchased_at ||
+      profile?.subscription_tier === "diagnostico" ||
+      profile?.subscription_tier === "pro"
+    )
+    if (!hasPaid) {
+      return new Response(
+        JSON.stringify({ error: "Assistente disponível apenas no Diagnóstico Completo." }),
+        { status: 403, headers: { "Content-Type": "application/json" } }
+      )
+    }
 
     // Get the last user message for context search
     const lastUserMessage = messages.filter((m: { role: string }) => m.role === "user").pop()
@@ -97,7 +110,7 @@ export async function POST(request: Request) {
       if (profile.interesses && profile.interesses.length > 0) contextParts.push(`Interesses: ${profile.interesses.join(", ")}`)
       if (profile.simulator_result) {
         const sim = profile.simulator_result
-        const isPaid = profile.subscription_tier === "diagnostico" || profile.subscription_tier === "pro"
+        const isPaid = !!(profile.diagnostico_purchased_at || profile.subscription_tier === "diagnostico" || profile.subscription_tier === "pro")
 
         const diagParts: string[] = []
         diagParts.push(`## Dados do Diagnostico do Usuario`)

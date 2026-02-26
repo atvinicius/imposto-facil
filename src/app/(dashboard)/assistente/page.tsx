@@ -14,10 +14,17 @@ export default async function AssistentePage({ searchParams }: AssistentePagePro
 
   // Load diagnostic data for personalized welcome
   let diagnosticSummary: DiagnosticSummary | null = null
+  let isPaid = false
 
   try {
     const profile = await getUserProfile()
     if (profile) {
+      isPaid = !!(
+        profile.diagnostico_purchased_at ||
+        profile.subscription_tier === "diagnostico" ||
+        profile.subscription_tier === "pro"
+      )
+
       const input = buildSimulatorInputFromProfile(profile)
       if (input) {
         const result = calcularSimulacao(input)
@@ -40,6 +47,7 @@ export default async function AssistentePage({ searchParams }: AssistentePagePro
     <AssistenteClient
       initialQuestion={initialQuestion}
       diagnosticSummary={diagnosticSummary}
+      isPaid={isPaid}
     />
   )
 }

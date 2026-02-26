@@ -15,9 +15,10 @@ import type { DiagnosticSummary } from "@/components/chat/chat-welcome"
 interface AssistenteClientProps {
   initialQuestion?: string | null
   diagnosticSummary?: DiagnosticSummary | null
+  isPaid?: boolean
 }
 
-export function AssistenteClient({ initialQuestion, diagnosticSummary }: AssistenteClientProps) {
+export function AssistenteClient({ initialQuestion, diagnosticSummary, isPaid = false }: AssistenteClientProps) {
   const { conversations, isLoading: convLoading, fetchConversations, deleteConversation } =
     useConversations()
 
@@ -30,13 +31,14 @@ export function AssistenteClient({ initialQuestion, diagnosticSummary }: Assiste
   })
 
   // Auto-send initial question from URL params (e.g. from "Entenda melhor" buttons)
+  // Only auto-send for paid users to avoid triggering paywall silently
   const initialQuestionSent = useRef(false)
   useEffect(() => {
-    if (initialQuestion && !initialQuestionSent.current) {
+    if (initialQuestion && !initialQuestionSent.current && isPaid) {
       initialQuestionSent.current = true
       chat.sendMessage(initialQuestion)
     }
-  }, [initialQuestion, chat])
+  }, [initialQuestion, chat, isPaid])
 
   const handleSelectConversation = useCallback(
     (id: string) => {
@@ -83,7 +85,7 @@ export function AssistenteClient({ initialQuestion, diagnosticSummary }: Assiste
           />
           <h1 className="text-lg font-semibold">Tire Dúvidas</h1>
         </div>
-        <ChatContainer chat={chat} diagnosticSummary={diagnosticSummary} />
+        <ChatContainer chat={chat} diagnosticSummary={diagnosticSummary} isPaid={isPaid} />
       </div>
     </div>
   )
