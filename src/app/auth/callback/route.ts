@@ -120,7 +120,9 @@ export async function GET(request: Request) {
     if (!error && data.user) {
       await saveSimulatorMetadataToProfile(data.user)
       const next = resolveRedirect(nextParam, data.user, appOrigin)
-      return buildRedirect(next)
+      const isNewSignup = type === "signup" || type === "email"
+      const sep = next.includes("?") ? "&" : "?"
+      return buildRedirect(isNewSignup ? `${next}${sep}signup=1` : next)
     }
   }
 
@@ -130,7 +132,11 @@ export async function GET(request: Request) {
     if (!error && data.user) {
       await saveSimulatorMetadataToProfile(data.user)
       const next = resolveRedirect(nextParam, data.user, appOrigin)
-      return buildRedirect(next)
+      // For OAuth, check if user was created in the last 60 seconds (new signup)
+      const isNew = data.user.created_at &&
+        Date.now() - new Date(data.user.created_at).getTime() < 60_000
+      const sep = next.includes("?") ? "&" : "?"
+      return buildRedirect(isNew ? `${next}${sep}signup=1` : next)
     }
   }
 
