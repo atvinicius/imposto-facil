@@ -238,6 +238,8 @@ Database columns: `diagnostico_purchased_at`, `subscription_tier`, `stripe_custo
 - **Security headers** (`next.config.ts`): `X-Frame-Options: DENY` (clickjacking), `X-Content-Type-Options: nosniff`, `Strict-Transport-Security` (HSTS, 2 years), `Referrer-Policy: strict-origin-when-cross-origin`. No CSP (Supabase/Stripe/Google Fonts compatibility)
 - **Paywall hardening**: GatedSection renders skeleton placeholders (not blurred real content) when locked. Server-side data stripping in `diagnostico/page.tsx` ensures paid content never reaches the RSC payload for free users
 - **Stripe webhook**: Generic error responses, env var validation, idempotency (won't double-process)
+- **Newsletter RLS**: SELECT and UPDATE policies restricted to service role only (migration `00008`). Public retains INSERT-only access. App uses `createAdminClient()` for reads/updates
+- **Rate limiting** (`src/lib/rate-limit.ts`): In-memory per-instance rate limiter (Edge Runtime compatible). Applied to: chat API (30 msgs/hr per user, 429 + Retry-After), analytics API (60 events/min per session, silent drop). For global consistency across serverless instances, upgrade to Upstash Redis
 
 ## Database Schema
 
@@ -293,6 +295,8 @@ Run migrations in order in Supabase SQL Editor:
 4. `supabase/migrations/00004_analytics_checklist_newsletter.sql` — Analytics events, checklist progress, newsletter subscribers
 5. `supabase/migrations/00005_deep_personalization.sql` — Deep personalization columns on `user_profiles`
 6. `supabase/migrations/00006_feedback.sql` — Feedback collection table
+7. `supabase/migrations/00007_diagnostico_runs.sql` — Adds `diagnostico_runs_remaining` to `user_profiles`
+8. `supabase/migrations/00008_fix_newsletter_rls.sql` — Drops overly permissive SELECT/UPDATE RLS on `newsletter_subscribers`
 
 ### Knowledge Base Ingestion
 ```bash

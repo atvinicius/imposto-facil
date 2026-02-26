@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { createOpenRouterClient, DEFAULT_MODEL, SYSTEM_PROMPT, isValidModel } from "@/lib/openrouter/client"
 import { hybridSearch } from "@/lib/embeddings/search"
+import { checkRateLimit } from "@/lib/rate-limit"
 
 export const runtime = "edge"
 
@@ -27,6 +28,21 @@ export async function POST(request: Request) {
       return new Response(
         JSON.stringify({ error: "Nao autorizado" }),
         { status: 401, headers: { "Content-Type": "application/json" } }
+      )
+    }
+
+    // Rate limit: 30 messages per hour per user
+    const rateLimit = checkRateLimit(`chat:${user.id}`, 30, 60 * 60 * 1000)
+    if (!rateLimit.allowed) {
+      return new Response(
+        JSON.stringify({ error: "Limite de mensagens atingido. Tente novamente em breve." }),
+        {
+          status: 429,
+          headers: {
+            "Content-Type": "application/json",
+            "Retry-After": String(Math.ceil((rateLimit.resetAt - Date.now()) / 1000)),
+          },
+        }
       )
     }
 
