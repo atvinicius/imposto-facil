@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
-import { createClient, createOtpClient } from "@/lib/supabase/server"
+import { createClient } from "@/lib/supabase/server"
 import { getURL } from "@/lib/get-url"
 
 function translateAuthError(message: string): string {
@@ -20,19 +20,21 @@ function translateAuthError(message: string): string {
 }
 
 export async function signupWithMagicLink(formData: FormData) {
-  const supabase = createOtpClient()
+  const supabase = await createClient()
 
   const email = formData.get("email") as string
   const nome = formData.get("nome") as string
   const from = formData.get("from") as string | null
   const simulatorInputRaw = formData.get("simulator_input") as string | null
 
-  const callbackUrl = from === "simulador"
-    ? `${getURL()}auth/callback?next=/diagnostico`
-    : `${getURL()}auth/callback`
+  const redirectPath = from === "simulador" ? "/diagnostico" : "/dashboard"
 
-  // Include simulator input in user metadata so it survives cross-device flows
-  const metadata: Record<string, unknown> = { nome }
+  // Include simulator input + redirect destination in user metadata
+  // so they survive cross-device flows and custom email templates
+  const metadata: Record<string, unknown> = {
+    nome,
+    redirect_to: redirectPath,
+  }
   if (simulatorInputRaw) {
     try {
       metadata.simulator_input = JSON.parse(simulatorInputRaw)
@@ -45,7 +47,7 @@ export async function signupWithMagicLink(formData: FormData) {
     email,
     options: {
       data: metadata,
-      emailRedirectTo: callbackUrl,
+      emailRedirectTo: `${getURL()}auth/callback?next=${encodeURIComponent(redirectPath)}`,
       shouldCreateUser: true,
     },
   })
@@ -58,7 +60,7 @@ export async function signupWithMagicLink(formData: FormData) {
 }
 
 export async function loginWithMagicLink(formData: FormData) {
-  const supabase = createOtpClient()
+  const supabase = await createClient()
 
   const email = formData.get("email") as string
   const redirectTo = (formData.get("redirect") as string) || "/dashboard"
@@ -67,12 +69,10 @@ export async function loginWithMagicLink(formData: FormData) {
     ? redirectTo
     : "/dashboard"
 
-  const callbackUrl = `${getURL()}auth/callback?next=${encodeURIComponent(safeRedirect)}`
-
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: callbackUrl,
+      emailRedirectTo: `${getURL()}auth/callback?next=${encodeURIComponent(safeRedirect)}`,
       shouldCreateUser: false,
     },
   })
