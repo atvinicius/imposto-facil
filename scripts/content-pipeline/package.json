@@ -8,7 +8,14 @@
     "generate:video": "tsx generate-video.ts",
     "post:video": "tsx post-video.ts",
     "pipeline": "tsx pipeline.ts",
-    "test": "tsx test-voice.ts"
+    "test": "tsx test-voice.ts",
+    "content:generate": "tsx cli.ts generate",
+    "content:review": "tsx cli.ts review",
+    "content:render": "tsx cli.ts render-all",
+    "content:post": "tsx cli.ts post",
+    "content:process": "tsx cli.ts process",
+    "content:list": "tsx cli.ts list",
+    "content:stats": "tsx cli.ts stats"
   },
   "dependencies": {
     "elevenlabs": "^1.0.0",

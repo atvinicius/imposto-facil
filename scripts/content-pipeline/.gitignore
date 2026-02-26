@@ -4,6 +4,9 @@ node_modules/
 # Output files (generated content)
 output/
 
+# Queue data (generated scripts, statuses)
+queue-data/
+
 # Config with real API keys
 config.ts
 
