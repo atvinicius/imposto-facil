@@ -6,7 +6,7 @@ ImpostoFacil uses a **two-layer AI architecture** built on a shared ground truth
 
 1. **Deterministic Layer** — The Impact Simulator and Diagnostic Report (`src/lib/simulator/`). Produces exact, reproducible results from cited tax data. This is the source of truth for all tax impact numbers.
 
-2. **Probabilistic Layer** — The AI chat assistant "Duda" (`src/app/api/chat/`, `src/lib/openrouter/`). Uses RAG over the knowledge base + user diagnostic data to answer questions conversationally.
+2. **Probabilistic Layer** — The AI chat assistant (`src/app/api/chat/`, `src/lib/openrouter/`). Uses RAG over the knowledge base + user diagnostic data to answer questions conversationally.
 
 Both layers share the same ground truth: `src/lib/simulator/tax-data.ts` (for rates and calculations) and `src/content/` (for explanatory content).
 
@@ -57,13 +57,13 @@ The chat API (`src/app/api/chat/route.ts`) injects the user's full `SimuladorRes
 
 The system prompt (`src/lib/openrouter/client.ts`) includes:
 
-1. **Diagnostic data routing** — Duda is instructed to use diagnostic data exclusively for factual questions about the user's tax impact, rather than generating its own estimates.
+1. **Diagnostic data routing** — The assistant is instructed to use diagnostic data exclusively for factual questions about the user's tax impact, rather than generating its own estimates.
 
-2. **Anti-hallucination rules** — Explicit prohibition against inventing tax rates, percentages, monetary values, or dates not present in provided contexts. When no data is available, Duda must use qualifiers ("geralmente", "em media", "depende do caso").
+2. **Anti-hallucination rules** — Explicit prohibition against inventing tax rates, percentages, monetary values, or dates not present in provided contexts. When no data is available, the assistant must use qualifiers ("geralmente", "em media", "depende do caso").
 
-3. **Source attribution** — When citing diagnostic numbers, Duda prefixes with "De acordo com seu diagnostico, ..." to distinguish calculated data from AI-generated content.
+3. **Source attribution** — When citing diagnostic numbers, the assistant prefixes with "De acordo com seu diagnostico, ..." to distinguish calculated data from AI-generated content.
 
-4. **Upsell routing** — When free-tier users ask about gated content, Duda suggests unlocking the full diagnostic at `/checkout`.
+4. **Upsell routing** — When free-tier users ask about gated content, the assistant suggests unlocking the full diagnostic at `/checkout`.
 
 ## Future Improvements
 
@@ -75,7 +75,7 @@ The system prompt (`src/lib/openrouter/client.ts`) includes:
 
 - **A3: Unify tax-data.ts and MDX articles as single data source** — Currently the simulator uses `tax-data.ts` while the knowledge base uses MDX articles. Numbers could theoretically diverge. A shared data layer would guarantee consistency. Best implemented when chat becomes a paid feature.
 
-- **B2: Post-generation grounding check** — After Duda generates a response, run a lightweight check comparing any numbers in the response against `tax-data.ts` values. Flag or suppress responses that contain numbers not traceable to ground truth. Implement when chat becomes a paid feature.
+- **B2: Post-generation grounding check** — After the assistant generates a response, run a lightweight check comparing any numbers in the response against `tax-data.ts` values. Flag or suppress responses that contain numbers not traceable to ground truth. Implement when chat becomes a paid feature.
 
 ### Medium Priority
 
@@ -89,4 +89,4 @@ The system prompt (`src/lib/openrouter/client.ts`) includes:
 
 - **D1: Source confidence badges on chat messages** — Visual indicators in the chat UI showing whether a response is backed by `legislada`, `estimativa_oficial`, or `derivada` data.
 
-- **D2: "Powered by your diagnostic" visual indicator** — When Duda uses diagnostic data in a response, show a small badge/chip indicating the numbers come from the user's personalized diagnostic, not generic AI output.
+- **D2: "Powered by your diagnostic" visual indicator** — When the assistant uses diagnostic data in a response, show a small badge/chip indicating the numbers come from the user's personalized diagnostic, not generic AI output.

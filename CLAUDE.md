@@ -42,7 +42,7 @@ npm run lint      # ESLint with Next.js + TypeScript rules
 - `src/lib/pdf/diagnostico-pdf.tsx` - PDF generation for diagnostic report
 - `src/lib/analytics/` - Event tracking (track.ts for client, track-server.ts for server)
 - `src/lib/readiness/score.ts` - Readiness score calculation for dashboard
-- `src/components/chat/` - Chat UI (container, messages, sidebar, Duda avatar/welcome, follow-up suggestions)
+- `src/components/chat/` - Chat UI (container, messages, sidebar, avatar/welcome, follow-up suggestions)
 - `src/components/feedback/` - Inline feedback collection (`FeedbackPrompt` reusable component)
 - `src/app/actions/feedback.ts` - Server action for feedback submission
 - `supabase/migrations/` - SQL migration files for database setup
@@ -58,7 +58,7 @@ npm run lint      # ESLint with Next.js + TypeScript rules
 
 2. **Client Hook** (`src/hooks/use-chat.ts`): Manages streaming response parsing, message queue, and conversation state
 
-3. **Chat UI** (`src/components/chat/`): "Duda" branded assistant with conversation sidebar, follow-up suggestion chips, and category-colored source badges
+3. **Chat UI** (`src/components/chat/`): AI assistant with conversation sidebar, follow-up suggestion chips, and category-colored source badges
 
 4. **System Prompt**: Located in `src/lib/openrouter/client.ts` with `{{USER_CONTEXT}}` and `{{KNOWLEDGE_CONTEXT}}` placeholders. Includes compliance reality guidelines (non-judgmental sector-level framing, e-CAC/PGFN guidance, formalization-as-opportunity positioning). Model selection in `src/lib/openrouter/models.ts`
 
