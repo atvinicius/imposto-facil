@@ -17,14 +17,14 @@ import { Button } from "@/components/ui/button"
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://impostofacil.com.br"
 
 export const metadata: Metadata = {
-  title: "Guias da Reforma Tributaria | ImpostoFácil",
+  title: "Guias da Reforma Tributária | ImpostoFácil",
   description:
-    "23 guias gratuitos sobre a reforma tributaria brasileira (EC 132/2023). IBS, CBS, Imposto Seletivo, cronograma de transicao, impacto por setor e regime — verificados com fontes legislativas oficiais.",
+    "23 guias gratuitos sobre a reforma tributária brasileira (EC 132/2023). IBS, CBS, Imposto Seletivo, cronograma de transição, impacto por setor e regime — verificados com fontes legislativas oficiais.",
   alternates: { canonical: `${BASE_URL}/guias` },
   openGraph: {
-    title: "Guias da Reforma Tributaria — ImpostoFácil",
+    title: "Guias da Reforma Tributária — ImpostoFácil",
     description:
-      "23 guias gratuitos sobre a reforma tributaria brasileira. Verificados com fontes legislativas oficiais.",
+      "23 guias gratuitos sobre a reforma tributária brasileira. Verificados com fontes legislativas oficiais.",
     url: `${BASE_URL}/guias`,
     siteName: "ImpostoFácil",
     type: "website",
@@ -71,8 +71,8 @@ export default function GuiasIndexPage() {
     "@graph": [
       {
         "@type": "CollectionPage",
-        name: "Guias da Reforma Tributaria",
-        description: `${totalArticles} guias gratuitos sobre a reforma tributaria brasileira, verificados com fontes legislativas oficiais.`,
+        name: "Guias da Reforma Tributária",
+        description: `${totalArticles} guias gratuitos sobre a reforma tributária brasileira, verificados com fontes legislativas oficiais.`,
         url: `${BASE_URL}/guias`,
         publisher: {
           "@type": "Organization",
@@ -83,7 +83,7 @@ export default function GuiasIndexPage() {
       {
         "@type": "BreadcrumbList",
         itemListElement: [
-          { "@type": "ListItem", position: 1, name: "Inicio", item: BASE_URL },
+          { "@type": "ListItem", position: 1, name: "Início", item: BASE_URL },
           { "@type": "ListItem", position: 2, name: "Guias" },
         ],
       },
@@ -101,11 +101,11 @@ export default function GuiasIndexPage() {
         {/* Header */}
         <header className="mb-10 text-center">
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl lg:text-5xl mb-4">
-            Guias da Reforma Tributaria
+            Guias da Reforma Tributária
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             {totalArticles} guias gratuitos, verificados com fontes legislativas oficiais.
-            Tudo que voce precisa saber sobre IBS, CBS, Imposto Seletivo e a transicao ate 2033.
+            Tudo que você precisa saber sobre IBS, CBS, Imposto Seletivo e a transição até 2033.
           </p>
         </header>
 
@@ -137,7 +137,7 @@ export default function GuiasIndexPage() {
             Quer saber o impacto real na sua empresa?
           </h2>
           <p className="text-sm text-muted-foreground mb-5 max-w-xl mx-auto">
-            Os guias explicam a teoria. O simulador calcula o impacto personalizado para o seu negocio
+            Os guias explicam a teoria. O simulador calcula o impacto personalizado para o seu negócio
             — em menos de 2 minutos, sem cadastro.
           </p>
           <Button asChild size="lg">

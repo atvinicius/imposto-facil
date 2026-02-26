@@ -66,7 +66,7 @@ export default async function KnowledgePage({ searchParams }: KnowledgePageProps
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Base de Conhecimento</h1>
         <p className="text-muted-foreground mt-2">
-          Explore artigos sobre a reforma tributaria brasileira
+          Explore artigos sobre a reforma tributária brasileira
         </p>
       </div>
 

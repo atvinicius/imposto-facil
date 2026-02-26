@@ -16,7 +16,7 @@ export default async function ProfilePage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Meu Perfil</h1>
         <p className="text-muted-foreground mt-2">
-          Configure suas informacoes para receber orientacoes personalizadas
+          Configure suas informações para receber orientações personalizadas
         </p>
       </div>
 

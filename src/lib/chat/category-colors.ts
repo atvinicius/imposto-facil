@@ -25,13 +25,13 @@ const categoryMap: Record<string, CategoryConfig> = {
     borderClass: "border-amber-200 dark:border-amber-800",
   },
   transicao: {
-    label: "Transicao",
+    label: "Transição",
     bgClass: "bg-emerald-50 dark:bg-emerald-950",
     textClass: "text-emerald-700 dark:text-emerald-300",
     borderClass: "border-emerald-200 dark:border-emerald-800",
   },
   glossario: {
-    label: "Glossario",
+    label: "Glossário",
     bgClass: "bg-gray-50 dark:bg-gray-950",
     textClass: "text-gray-700 dark:text-gray-300",
     borderClass: "border-gray-200 dark:border-gray-800",
@@ -39,7 +39,7 @@ const categoryMap: Record<string, CategoryConfig> = {
 }
 
 const defaultConfig: CategoryConfig = {
-  label: "Referencia",
+  label: "Referência",
   bgClass: "bg-gray-50 dark:bg-gray-950",
   textClass: "text-gray-700 dark:text-gray-300",
   borderClass: "border-gray-200 dark:border-gray-800",

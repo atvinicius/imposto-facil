@@ -50,7 +50,6 @@ import {
   getClientesInsight,
   getExportInsight,
   getActiveSteps,
-  getStepProgress,
   type StepAnswers,
   type Insight,
   type SimuladorInput,
@@ -134,7 +133,16 @@ export default function SimuladorPage() {
 
   const activeSteps = useMemo(() => getActiveSteps(answers), [answers])
   const currentStep = activeSteps[stepIndex]
-  const progress = getStepProgress(activeSteps, stepIndex)
+
+  // Freeze the progress total so it only updates when the step actually
+  // advances (question phase at a new stepIndex). This prevents the bar
+  // from going backward when an answer activates a conditional step
+  // during the insight interstitial.
+  const frozenTotalRef = useRef(activeSteps.length)
+  if (phase === "question") {
+    frozenTotalRef.current = activeSteps.length
+  }
+  const progress = { current: stepIndex + 1, total: frozenTotalRef.current }
 
   // --- Helpers ---
   const handleCurrencyChange = useCallback((raw: string) => {

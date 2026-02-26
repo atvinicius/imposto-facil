@@ -45,13 +45,13 @@ export interface ArticleSummary {
 export const categories = {
   ibs: {
     name: "IBS",
-    description: "Imposto sobre Bens e Servicos",
-    fullName: "Imposto sobre Bens e Servicos (IBS)",
+    description: "Imposto sobre Bens e Serviços",
+    fullName: "Imposto sobre Bens e Serviços (IBS)",
   },
   cbs: {
     name: "CBS",
-    description: "Contribuicao sobre Bens e Servicos",
-    fullName: "Contribuicao sobre Bens e Servicos (CBS)",
+    description: "Contribuição sobre Bens e Serviços",
+    fullName: "Contribuição sobre Bens e Serviços (CBS)",
   },
   is: {
     name: "IS",
@@ -59,14 +59,14 @@ export const categories = {
     fullName: "Imposto Seletivo (IS)",
   },
   transicao: {
-    name: "Transicao",
-    description: "Periodo de transicao e cronograma",
-    fullName: "Periodo de Transicao",
+    name: "Transição",
+    description: "Período de transição e cronograma",
+    fullName: "Período de Transição",
   },
   glossario: {
-    name: "Glossario",
-    description: "Termos e definicoes importantes",
-    fullName: "Glossario de Termos",
+    name: "Glossário",
+    description: "Termos e definições importantes",
+    fullName: "Glossário de Termos",
   },
   setores: {
     name: "Setores",
@@ -75,8 +75,8 @@ export const categories = {
   },
   regimes: {
     name: "Regimes",
-    description: "Guias por regime tributario",
-    fullName: "Guias por Regime Tributario",
+    description: "Guias por regime tributário",
+    fullName: "Guias por Regime Tributário",
   },
   faq: {
     name: "FAQ",

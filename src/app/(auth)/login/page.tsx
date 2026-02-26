@@ -33,12 +33,12 @@ function LoginForm() {
   const [sentEmail, setSentEmail] = useState("")
   const [resendCountdown, setResendCountdown] = useState(0)
   const [resending, setResending] = useState(false)
-  const [defaultEmail, setDefaultEmail] = useState("")
+  const [email, setEmail] = useState("")
 
   useEffect(() => {
     if (callbackError === "auth_callback_error" || callbackError === "verification_error") {
       const stored = localStorage.getItem("impostofacil_pending_email")
-      if (stored) setDefaultEmail(stored)
+      if (stored) setEmail(stored)
     }
   }, [callbackError])
 
@@ -177,12 +177,12 @@ function LoginForm() {
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
-              key={defaultEmail}
               id="email"
               name="email"
               type="email"
               placeholder="seu@email.com"
-              defaultValue={defaultEmail}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
               autoComplete="email"
             />

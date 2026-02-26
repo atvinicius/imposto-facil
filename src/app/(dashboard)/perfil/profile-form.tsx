@@ -28,12 +28,12 @@ const UF_OPTIONS = [
 
 const SETOR_OPTIONS = [
   "Agricultura",
-  "Comercio",
-  "Construcao",
-  "Educacao",
-  "Industria",
-  "Saude",
-  "Servicos",
+  "Comércio",
+  "Construção",
+  "Educação",
+  "Indústria",
+  "Saúde",
+  "Serviços",
   "Tecnologia",
   "Transporte",
   "Outro",
@@ -43,21 +43,21 @@ const PORTE_OPTIONS = [
   { value: "MEI", label: "MEI (Microempreendedor Individual)" },
   { value: "ME", label: "ME (Microempresa)" },
   { value: "EPP", label: "EPP (Empresa de Pequeno Porte)" },
-  { value: "MEDIO", label: "Medio Porte" },
+  { value: "MEDIO", label: "Médio Porte" },
   { value: "GRANDE", label: "Grande Porte" },
 ]
 
 const NIVEL_EXPERIENCIA_OPTIONS = [
-  { value: "iniciante", label: "Iniciante - Pouco conhecimento sobre tributacao" },
-  { value: "intermediario", label: "Intermediario - Entendo o basico de impostos" },
-  { value: "avancado", label: "Avancado - Experiencia profissional na area" },
+  { value: "iniciante", label: "Iniciante - Pouco conhecimento sobre tributação" },
+  { value: "intermediario", label: "Intermediário - Entendo o básico de impostos" },
+  { value: "avancado", label: "Avançado - Experiência profissional na área" },
 ]
 
 const REGIME_TRIBUTARIO_OPTIONS = [
   { value: "simples", label: "Simples Nacional" },
   { value: "lucro_presumido", label: "Lucro Presumido" },
   { value: "lucro_real", label: "Lucro Real" },
-  { value: "nao_sei", label: "Nao sei" },
+  { value: "nao_sei", label: "Não sei" },
 ]
 
 interface ProfileFormProps {
@@ -97,9 +97,9 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
     <form action={handleSubmit} className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Informacoes Pessoais</CardTitle>
+          <CardTitle>Informações Pessoais</CardTitle>
           <CardDescription>
-            Dados basicos da sua conta
+            Dados básicos da sua conta
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -123,12 +123,12 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
               className="bg-muted"
             />
             <p className="text-xs text-muted-foreground">
-              O email nao pode ser alterado
+              O email não pode ser alterado
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="nivel_experiencia">Nivel de experiencia com tributacao</Label>
+            <Label htmlFor="nivel_experiencia">Nível de experiência com tributação</Label>
             <Select name="nivel_experiencia" defaultValue={initialData.nivel_experiencia}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione seu nivel" />
@@ -147,9 +147,9 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Informacoes da Empresa</CardTitle>
+          <CardTitle>Informações da Empresa</CardTitle>
           <CardDescription>
-            Esses dados ajudam a personalizar as orientacoes sobre a reforma
+            Esses dados ajudam a personalizar as orientações sobre a reforma
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -170,7 +170,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="setor">Setor de Atuacao</Label>
+            <Label htmlFor="setor">Setor de Atuação</Label>
             <Select name="setor" defaultValue={initialData.setor}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione o setor" />
@@ -202,7 +202,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="regime_tributario">Regime Tributario</Label>
+            <Label htmlFor="regime_tributario">Regime Tributário</Label>
             <Select name="regime_tributario" defaultValue={initialData.regime_tributario}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione o regime" />
@@ -232,7 +232,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
       )}
 
       <Button type="submit" disabled={loading}>
-        {loading ? "Salvando..." : "Salvar alteracoes"}
+        {loading ? "Salvando..." : "Salvar alterações"}
       </Button>
     </form>
   )
