@@ -83,14 +83,39 @@ export default async function DiagnosticoPage({ searchParams }: DiagnosticoPageP
     updated_at: null,
   }
 
+  // Full counts for CTAs (always accurate regardless of stripping)
+  const fullCounts = {
+    alertCount: result.alertas.length,
+    timelineCount: result.datasImportantes.length,
+    actionCount: result.acoesRecomendadas.length,
+    gatedChecklistCount: result.gatedContent.checklistCompleto.length,
+    hasAnaliseRegime: result.gatedContent.analiseRegime !== null,
+  }
+
+  // Strip gated data for free users so paid content never reaches the client
+  const clientResult: SimuladorResult = isPaid ? result : {
+    ...result,
+    alertas: result.alertas.slice(0, 2),
+    datasImportantes: result.datasImportantes.slice(0, 2),
+    acoesRecomendadas: result.acoesRecomendadas.slice(0, 1),
+    gatedContent: {
+      checklistCompleto: [],
+      projecaoAnual: [],
+      analiseRegime: null,
+      analiseDetalhada: "",
+      comparativoRegimes: result.gatedContent.comparativoRegimes,
+    },
+  }
+
   return (
     <DiagnosticoReport
-      result={result}
+      result={clientResult}
       input={input}
       isPaid={isPaid}
       justUnlocked={justUnlocked}
       checklistProgress={checklistProgress}
       runsRemaining={runsRemaining}
+      fullCounts={fullCounts}
     />
   )
 }

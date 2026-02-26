@@ -40,6 +40,14 @@ export interface ChecklistProgress {
   updated_at: string | null
 }
 
+interface FullCounts {
+  alertCount: number
+  timelineCount: number
+  actionCount: number
+  gatedChecklistCount: number
+  hasAnaliseRegime: boolean
+}
+
 interface DiagnosticoReportProps {
   result: SimuladorResult
   input: SimuladorInput
@@ -47,6 +55,7 @@ interface DiagnosticoReportProps {
   justUnlocked?: boolean
   checklistProgress?: ChecklistProgress
   runsRemaining?: number
+  fullCounts?: FullCounts
 }
 
 function EntendaMelhorButton({ question }: { question: string }) {
@@ -275,11 +284,18 @@ function RerunGatedCTA() {
   )
 }
 
-export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checklistProgress, runsRemaining = 0 }: DiagnosticoReportProps) {
+export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checklistProgress, runsRemaining = 0, fullCounts }: DiagnosticoReportProps) {
   const { track } = useAnalytics()
   const trackedRef = useRef(false)
   const [showConfidenceExplainer, setShowConfidenceExplainer] = useState(false)
   const errosComuns = getErrosComuns(input, result, 4)
+
+  // Use fullCounts from server (accurate) or fall back to local data (for paid users)
+  const alertCount = fullCounts?.alertCount ?? result.alertas.length
+  const timelineCount = fullCounts?.timelineCount ?? result.datasImportantes.length
+  const actionCount = fullCounts?.actionCount ?? result.acoesRecomendadas.length
+  const gatedChecklistCount = fullCounts?.gatedChecklistCount ?? result.gatedContent.checklistCompleto.length
+  const hasAnaliseRegime = fullCounts?.hasAnaliseRegime ?? (result.gatedContent.analiseRegime !== null)
 
   useEffect(() => {
     if (!trackedRef.current) {
@@ -294,11 +310,7 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
   const freeTimelineCount = 2
 
   const completedItems = checklistProgress?.completed ?? []
-  const allChecklistItems = [
-    ...result.acoesRecomendadas,
-    ...result.gatedContent.checklistCompleto,
-  ]
-  const totalChecklistItems = allChecklistItems.length
+  const totalChecklistItems = actionCount + gatedChecklistCount
   const completedCount = completedItems.length
 
   function getItemId(index: number, text: string): string {
@@ -472,8 +484,8 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
         <Card className="bg-gradient-to-r from-slate-900 to-slate-800 text-white border-0">
           <CardContent className="p-8 text-center space-y-4">
             <h3 className="text-2xl font-bold">
-              Seu diagnóstico tem {result.alertas.length} alertas e{" "}
-              {result.gatedContent.checklistCompleto.length} ações
+              Seu diagnóstico tem {alertCount} alertas e{" "}
+              {gatedChecklistCount} ações
             </h3>
             <p className="text-slate-300 max-w-lg mx-auto">
               Desbloqueie o relatório completo com análise de regime, projeção ano a ano, checklist de adequação e exportação em PDF.
@@ -640,7 +652,7 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-amber-600" />
-            Alertas ({result.alertas.length})
+            Alertas ({alertCount})
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -649,8 +661,8 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
               <span>{alerta}</span>
             </div>
           ))}
-          {result.alertas.length > freeAlertCount && (
-            <GatedSection locked={!isPaid} ctaText={`Desbloqueie +${result.alertas.length - freeAlertCount} alertas`}>
+          {alertCount > freeAlertCount && (
+            <GatedSection locked={!isPaid} ctaText={`Desbloqueie +${alertCount - freeAlertCount} alertas`} placeholderLines={Math.min(alertCount - freeAlertCount, 5)}>
               {result.alertas.slice(freeAlertCount).map((alerta, i) => (
                 <div key={i} className="flex items-start gap-2 text-sm p-3 bg-muted/30 rounded-lg">
                   <span>{alerta}</span>
@@ -667,7 +679,7 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5 text-primary" />
-            Datas Importantes ({result.datasImportantes.length})
+            Datas Importantes ({timelineCount})
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -689,8 +701,8 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
                 <span className="text-sm">{data.descricao}</span>
               </div>
             ))}
-            {result.datasImportantes.length > freeTimelineCount && (
-              <GatedSection locked={!isPaid} ctaText={`Desbloqueie +${result.datasImportantes.length - freeTimelineCount} datas`}>
+            {timelineCount > freeTimelineCount && (
+              <GatedSection locked={!isPaid} ctaText={`Desbloqueie +${timelineCount - freeTimelineCount} datas`} placeholderLines={Math.min(timelineCount - freeTimelineCount, 5)}>
                 {result.datasImportantes.slice(freeTimelineCount).map((data, i) => (
                   <div key={i} className="flex items-start gap-3">
                     <Badge
@@ -786,7 +798,7 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
       <AssistantCTA isPaid={isPaid} setor={input.setor} nivelRisco={result.nivelRisco} />
 
       {/* Regime Comparison (PAID ONLY) */}
-      {result.gatedContent.analiseRegime && (
+      {(result.gatedContent.analiseRegime || (!isPaid && hasAnaliseRegime)) && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -795,40 +807,42 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <GatedSection locked={!isPaid} ctaText="Desbloqueie a análise de regime">
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div className="p-3 bg-muted/30 rounded-lg">
-                    <p className="text-xs text-muted-foreground">Regime Atual</p>
-                    <p className="font-medium">{result.gatedContent.analiseRegime.regimeAtual}</p>
+            <GatedSection locked={!isPaid} ctaText="Desbloqueie a análise de regime" placeholderLines={5}>
+              {result.gatedContent.analiseRegime ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="p-3 bg-muted/30 rounded-lg">
+                      <p className="text-xs text-muted-foreground">Regime Atual</p>
+                      <p className="font-medium">{result.gatedContent.analiseRegime.regimeAtual}</p>
+                    </div>
+                    {result.gatedContent.analiseRegime.regimeSugerido && (
+                      <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg border border-emerald-200 dark:border-emerald-900">
+                        <p className="text-xs text-muted-foreground">Regime Sugerido</p>
+                        <p className="font-medium text-emerald-800 dark:text-emerald-300">
+                          {result.gatedContent.analiseRegime.regimeSugerido}
+                        </p>
+                      </div>
+                    )}
                   </div>
-                  {result.gatedContent.analiseRegime.regimeSugerido && (
-                    <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg border border-emerald-200 dark:border-emerald-900">
-                      <p className="text-xs text-muted-foreground">Regime Sugerido</p>
-                      <p className="font-medium text-emerald-800 dark:text-emerald-300">
-                        {result.gatedContent.analiseRegime.regimeSugerido}
+                  {result.gatedContent.analiseRegime.economiaEstimada && (
+                    <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg text-center">
+                      <p className="text-sm text-muted-foreground">Economia estimada com migração</p>
+                      <p className="text-2xl font-bold text-emerald-700">
+                        R$ {result.gatedContent.analiseRegime.economiaEstimada.toLocaleString("pt-BR")}/ano
                       </p>
                     </div>
                   )}
+                  <p className="text-sm">{result.gatedContent.analiseRegime.justificativa}</p>
+                  <ul className="space-y-2">
+                    {result.gatedContent.analiseRegime.fatores.map((fator, i) => (
+                      <li key={i} className="text-sm flex items-start gap-2">
+                        <ArrowRight className="h-3 w-3 mt-1 shrink-0 text-muted-foreground" />
+                        {fator}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                {result.gatedContent.analiseRegime.economiaEstimada && (
-                  <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg text-center">
-                    <p className="text-sm text-muted-foreground">Economia estimada com migração</p>
-                    <p className="text-2xl font-bold text-emerald-700">
-                      R$ {result.gatedContent.analiseRegime.economiaEstimada.toLocaleString("pt-BR")}/ano
-                    </p>
-                  </div>
-                )}
-                <p className="text-sm">{result.gatedContent.analiseRegime.justificativa}</p>
-                <ul className="space-y-2">
-                  {result.gatedContent.analiseRegime.fatores.map((fator, i) => (
-                    <li key={i} className="text-sm flex items-start gap-2">
-                      <ArrowRight className="h-3 w-3 mt-1 shrink-0 text-muted-foreground" />
-                      {fator}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              ) : null}
             </GatedSection>
             <EntendaMelhorButton question="Vale a pena mudar meu regime tributário?" />
           </CardContent>

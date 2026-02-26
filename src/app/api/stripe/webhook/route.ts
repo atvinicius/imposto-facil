@@ -13,6 +13,15 @@ export async function POST(request: Request) {
     )
   }
 
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+  if (!webhookSecret) {
+    console.error("STRIPE_WEBHOOK_SECRET is not configured")
+    return NextResponse.json(
+      { error: "Webhook not configured" },
+      { status: 500 }
+    )
+  }
+
   const stripe = createStripeClient()
 
   let event
@@ -20,13 +29,13 @@ export async function POST(request: Request) {
     event = stripe.webhooks.constructEvent(
       body,
       signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
+      webhookSecret
     )
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error"
     console.error("Webhook signature verification failed:", message)
     return NextResponse.json(
-      { error: `Webhook Error: ${message}` },
+      { error: "Webhook verification failed" },
       { status: 400 }
     )
   }
@@ -44,6 +53,17 @@ export async function POST(request: Request) {
     }
 
     const supabase = createAdminClient()
+
+    // Idempotency: skip if user already has diagnostico_purchased_at
+    const { data: existing } = await supabase
+      .from("user_profiles")
+      .select("diagnostico_purchased_at")
+      .eq("id", userId)
+      .single()
+
+    if (existing?.diagnostico_purchased_at) {
+      return NextResponse.json({ received: true })
+    }
 
     const { error } = await supabase
       .from("user_profiles")

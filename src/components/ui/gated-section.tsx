@@ -9,6 +9,7 @@ interface GatedSectionProps {
   children: React.ReactNode
   ctaText?: string
   className?: string
+  placeholderLines?: number
 }
 
 export function GatedSection({
@@ -16,6 +17,7 @@ export function GatedSection({
   children,
   ctaText = "Desbloqueie o diagnóstico completo",
   className,
+  placeholderLines = 3,
 }: GatedSectionProps) {
   if (!locked) {
     return <div className={className}>{children}</div>
@@ -25,10 +27,18 @@ export function GatedSection({
     <div className={cn("relative", className)}>
       <div
         className="select-none pointer-events-none"
-        style={{ filter: "blur(5px)" }}
         aria-hidden="true"
       >
-        {children}
+        <div className="space-y-3">
+          {Array.from({ length: placeholderLines }).map((_, i) => (
+            <div key={i} className="flex items-start gap-2 p-3 bg-muted/30 rounded-lg">
+              <div
+                className="h-4 bg-muted rounded animate-pulse"
+                style={{ width: `${65 + ((i * 17) % 30)}%` }}
+              />
+            </div>
+          ))}
+        </div>
       </div>
       <Link
         href="/checkout"
