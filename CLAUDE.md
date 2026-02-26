@@ -173,6 +173,31 @@ The public landing page (`src/app/page.tsx`) is a conversion-focused single-file
 
 Landing page styles are in `src/app/globals.css` (`.landing-root`, `.landing-backdrop`, `.landing-grid`, `.landing-reveal` animations).
 
+### Programmatic SEO (`/reforma/`)
+~308 statically generated public pages targeting long-tail keywords like "reforma tributaria comercio sao paulo". Each page has unique content from the calculator (ICMS rates, effectiveness factors, risk levels, formalization pressure). All pages are pure SSG — no API calls at build time, calculator runs in <1ms per call.
+
+**Route tiers:**
+- **Tier 1 — Sector × State (243 pages)**: `/reforma/[setor]/[uf]` — 9 sectors × 27 UFs. Each has unique ICMS rate, sector margin, effectiveness factor, and conditional narratives
+- **Tier 2 — Sector × Regime (27 pages)**: `/reforma/[setor]/regime/[regime]` — 9 sectors × 3 regimes (slugs: `simples-nacional`, `lucro-presumido`, `lucro-real`)
+- **Tier 3 — State ICMS (27 pages)**: `/reforma/icms/[uf]` — ICMS extinction impact per state across goods sectors
+- **Hub pages (11)**: `/reforma` (master), `/reforma/[setor]` (9 sector hubs), `/reforma/icms` (ICMS hub)
+
+**Key directories:**
+- `src/lib/seo/slug-maps.ts` — Display name/slug/preposition mappings for sectors, regimes, UFs. Validation helpers (`isValidSetor`, `isValidUf`, `isValidRegimeSlug`). `REGIME_SLUG_TO_KEY` maps URL slugs to `RegimeTributario` keys
+- `src/lib/seo/reforma-data.ts` — Data computation: `computeSetorUfData()`, `computeSetorRegimeData()`, `computeIcmsUfData()`. Combination generators: `getAllSetorUfCombinations()`, `getAllSetorRegimeCombinations()`. Reuses `calcularSimulacao()` from calculator
+- `src/lib/seo/content-blocks.ts` — Portuguese narrative generators (template-driven, no AI). Builds overview, burden analysis, hidden cost, ICMS impact, action items, FAQ entries. JSON-LD builders for Article, BreadcrumbList, FAQPage schemas
+- `src/components/reforma/` — Server-only components: `reforma-header`, `burden-comparison`, `effectiveness-card`, `icms-card`, `timeline-highlights`, `action-list`, `sources-section`, `internal-links`, `reforma-cta`, `reforma-breadcrumbs`
+
+**Design decisions:**
+- "outro" sector and "nao_sei" regime excluded (no unique data → thin content)
+- Representative faturamento bracket: `360k_4.8m` (EPP midpoint) for all SEO pages
+- All narratives are conditional logic from calculator outputs — not AI-generated (Google penalizes AI content at scale)
+- Every page cites EC 132/2023, LC 214/2025, and state ICMS laws
+- CTA links to `/simulador` ("Estes dados são médias. Simule o impacto exato para sua empresa")
+- Internal linking: same-sector/other-states, same-state/other-sectors, regime links, hub links
+
+**Sitemap:** All ~308 URLs added to `src/app/sitemap.ts` with priority 0.7 and monthly changeFrequency.
+
 ### Feedback Collection System
 Inline `<FeedbackPrompt>` cards at key decision points — non-intrusive, appear after a delay, dismissed via localStorage.
 
