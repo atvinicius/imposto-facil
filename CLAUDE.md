@@ -134,7 +134,7 @@ Profile-matched common errors surfaced across multiple product surfaces to drive
 ### Diagnostic Report System (`/diagnostico`)
 Protected route (requires auth, does NOT require onboarding completion).
 
-- `src/app/(dashboard)/diagnostico/page.tsx` — Server component: loads profile, runs simulation server-side, checks `isPaid` status
+- `src/app/(dashboard)/diagnostico/page.tsx` — Server component: loads profile, runs simulation server-side, checks `isPaid` status. **Strips gated data for free users** (alertas → 2, timeline → 2, actions → 1, gatedContent emptied) so paid content never reaches client RSC payload. Passes `fullCounts` prop with real totals for CTAs
 - `src/app/(dashboard)/diagnostico/diagnostico-client.tsx` — Client bridge: reads localStorage, saves to profile via server action, triggers page refresh
 - `src/app/(dashboard)/diagnostico/diagnostico-report.tsx` — Client component with analytics tracking. Full report UI with sections:
   1. Impact Summary (FREE) — risk badge, R$ range, state ICMS info in profile text
@@ -154,7 +154,7 @@ Protected route (requires auth, does NOT require onboarding completion).
   15. Upgrade CTA — links to `/checkout`, shows alert count + action count
 - `src/app/(dashboard)/diagnostico/actions.ts` — `saveSimulatorDataToProfile()` and `toggleChecklistItem()` server actions
 - `src/app/(dashboard)/diagnostico/checklist-item.tsx` — Interactive checkbox with optimistic UI
-- `src/components/ui/gated-section.tsx` — Reusable `<GatedSection locked={boolean}>` component: renders real content with `blur(5px)` + lock icon overlay when locked
+- `src/components/ui/gated-section.tsx` — Reusable `<GatedSection locked={boolean} placeholderLines={number}>` component: when locked, renders skeleton placeholder bars + lock icon overlay (**no real content in DOM** — prevents DevTools bypass). When unlocked, renders `{children}` normally
 
 ### Checkout & Payment Flow (`/checkout`)
 Protected route. Stripe Checkout integration + promo code bypass.
@@ -162,7 +162,7 @@ Protected route. Stripe Checkout integration + promo code bypass.
 - `src/app/(dashboard)/checkout/page.tsx` — Client component: side-by-side Free vs Paid tier comparison, Stripe checkout button, promo code input, profile-based urgency banners (formalization pressure, high impact %), money-back guarantee
 - `src/app/(dashboard)/checkout/actions.ts` — `redeemPromoCode()` server action: validates against `VALID_PROMO_CODES` map (currently: "amigos"), updates `subscription_tier` + `diagnostico_purchased_at`
 - `src/app/api/stripe/checkout/route.ts` — Creates Stripe Checkout Session, redirects to Stripe
-- `src/app/api/stripe/webhook/route.ts` — Handles `checkout.session.completed` webhook, updates user profile
+- `src/app/api/stripe/webhook/route.ts` — Handles `checkout.session.completed` webhook, updates user profile. Hardened: generic error responses (no internal details leaked), env var validation, idempotency check (skips if `diagnostico_purchased_at` already set)
 - `src/lib/stripe/client.ts` — Stripe SDK initialization
 - On success: redirects to `/diagnostico?unlocked=true` which shows a success banner
 
@@ -233,6 +233,11 @@ Inline `<FeedbackPrompt>` cards at key decision points — non-intrusive, appear
 - **Pro (R$199/month)**: Unlimited AI chat, updated diagnostics, priority models — coming later
 
 Database columns: `diagnostico_purchased_at`, `subscription_tier`, `stripe_customer_id` in `user_profiles`. Stripe Checkout is live.
+
+### Security
+- **Security headers** (`next.config.ts`): `X-Frame-Options: DENY` (clickjacking), `X-Content-Type-Options: nosniff`, `Strict-Transport-Security` (HSTS, 2 years), `Referrer-Policy: strict-origin-when-cross-origin`. No CSP (Supabase/Stripe/Google Fonts compatibility)
+- **Paywall hardening**: GatedSection renders skeleton placeholders (not blurred real content) when locked. Server-side data stripping in `diagnostico/page.tsx` ensures paid content never reaches the RSC payload for free users
+- **Stripe webhook**: Generic error responses, env var validation, idempotency (won't double-process)
 
 ## Database Schema
 
