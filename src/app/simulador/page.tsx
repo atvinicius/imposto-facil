@@ -29,6 +29,7 @@ import {
   calcularSimulacao,
   gerarTeaser,
   saveSimulatorData,
+  getErrosComuns,
   NIVEL_RISCO_LABELS,
   SETOR_OPTIONS,
   UF_OPTIONS,
@@ -277,6 +278,13 @@ export default function SimuladorPage() {
 
   const canProceed = isCurrentStepComplete()
   const contextualizer = currentStep ? getContextualizer(currentStep.id) : ""
+
+  // --- Erros Comuns (computed when result is available) ---
+  const errosComuns = useMemo(() => {
+    if (!result) return []
+    const input = buildInput()
+    return getErrosComuns(input, result, 3)
+  }, [result])
 
   // --- ICMS options ---
   const ICMS_OPTIONS = [
@@ -808,6 +816,39 @@ export default function SimuladorPage() {
                   </p>
                 </CardContent>
               </Card>
+
+              {/* Common Mistakes Hook */}
+              {errosComuns.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <AlertTriangle className="h-5 w-5 text-rose-500" />
+                      Erros que empresas do seu setor cometem
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {errosComuns.slice(0, 2).map((erro) => (
+                      <div key={erro.id} className="flex items-start gap-3 text-sm p-3 bg-muted/30 rounded-lg">
+                        <div className={`mt-1.5 h-2.5 w-2.5 rounded-full shrink-0 ${
+                          erro.severidade === "alta" ? "bg-red-500" :
+                          erro.severidade === "media" ? "bg-amber-500" :
+                          "bg-slate-400"
+                        }`} />
+                        <div>
+                          <p className="font-medium">{erro.titulo}</p>
+                          <p className="text-muted-foreground mt-0.5">{erro.descricao}</p>
+                        </div>
+                      </div>
+                    ))}
+                    {errosComuns.length > 2 && (
+                      <p className="text-sm text-muted-foreground flex items-center gap-1">
+                        <Lock className="h-4 w-4" />
+                        +{errosComuns.length - 2} erros identificados no diagnostico completo
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Year-by-year projection teaser */}
               <Card className="overflow-hidden">

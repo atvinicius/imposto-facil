@@ -210,6 +210,35 @@ function calcularImpacto(input: SimuladorInput): ImpactoResult {
   }
 }
 
+/**
+ * Calculate the cash flow impact of automatic tax retention (split payment).
+ * Today: full payment arrives → business pays tax ~40 days later.
+ * After 2027: tax is retained at point of sale → business receives net amount.
+ * The difference = working capital the business no longer has access to.
+ */
+function calcularImpactoFluxoCaixa(
+  faturamento: number,
+  cargaNovaPct: number,
+  ajuste: number,
+): SimuladorResult["impactoFluxoCaixa"] {
+  // Effective new tax rate applied to revenue
+  const taxRatePct = cargaNovaPct * ajuste
+
+  // Monthly tax retained automatically at point of sale
+  const retencaoMensal = Math.round((faturamento * taxRatePct / 100) / 12)
+
+  // Per R$10,000 in sales — concrete, intuitive example
+  const porCadaDezMil = Math.round(10000 * taxRatePct / 100)
+
+  // Working capital that used to be available for ~40 days between
+  // receiving payment and paying tax. Split payment eliminates this buffer.
+  // Annual float = annual tax × (40 days / 365 days)
+  const annualTax = faturamento * taxRatePct / 100
+  const capitalGiroAdicional = Math.round(annualTax * 40 / 365)
+
+  return { retencaoMensal, porCadaDezMil, capitalGiroAdicional }
+}
+
 function determinarNivelRisco(
   percentualMudanca: number,
   setor: Setor,
@@ -758,6 +787,9 @@ export function calcularSimulacao(input: SimuladorInput): SimuladorResult {
   const impacto = calcularImpacto(input)
   const nivelRisco = determinarNivelRisco(impacto.percentualMedio, input.setor, input.regime)
   const icmsAjustePp = impacto.icmsAjuste?.ajustePp ?? 0
+  const cargaNova = CARGA_NOVA[input.setor].value
+  const cargaNovaMedia = (cargaNova.min + cargaNova.max) / 2
+  const ajusteVal = computeAjuste(input)
 
   return {
     impactoAnual: {
@@ -780,6 +812,7 @@ export function calcularSimulacao(input: SimuladorInput): SimuladorResult {
       impactoTotalEstimado: impacto.efetividade.impactoTotal,
       pressaoFormalizacao: impacto.efetividade.pressao,
     },
+    impactoFluxoCaixa: calcularImpactoFluxoCaixa(impacto.faturamentoBase, cargaNovaMedia, ajusteVal),
     ajusteIcmsUf: impacto.icmsAjuste ?? undefined,
     gatedContent: {
       checklistCompleto: gerarChecklistCompleto(input, impacto.efetividade.pressao),

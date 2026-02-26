@@ -51,6 +51,8 @@ export async function POST(request: Request) {
       )
     }
 
+    type FaixaFaturamento = import("@/lib/simulator/types").FaixaFaturamento
+
     // Get the last user message for context search
     const lastUserMessage = messages.filter((m: { role: string }) => m.role === "user").pop()
 
@@ -160,6 +162,25 @@ export async function POST(request: Request) {
         }
 
         contextParts.push(diagParts.join("\n"))
+
+        // Common mistakes context for proactive guidance
+        if (sim) {
+          // Dynamic import to avoid edge runtime issues
+          const { getErrosComunsParaChat } = await import("@/lib/simulator/common-mistakes")
+          const errosContext = getErrosComunsParaChat(
+            // Reconstruct minimal input from profile
+            {
+              regime: (profile.regime_tributario || "nao_sei") as import("@/lib/simulator/types").RegimeTributario,
+              setor: (profile.setor || "outro") as import("@/lib/simulator/types").Setor,
+              faturamento: (profile.faturamento || "360k_4.8m") as FaixaFaturamento,
+              uf: profile.uf || "",
+            },
+            sim,
+          )
+          if (errosContext) {
+            contextParts.push(errosContext)
+          }
+        }
       }
       if (contextParts.length > 0) {
         userContext = contextParts.join("\n")

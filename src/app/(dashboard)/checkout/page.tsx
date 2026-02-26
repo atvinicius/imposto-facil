@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge"
 import { redeemPromoCode } from "./actions"
 import { useAnalytics } from "@/lib/analytics/track"
 import { FeedbackPrompt } from "@/components/feedback/feedback-prompt"
+import { getStoredSimulatorData } from "@/lib/simulator"
 
 const FEATURES = [
   "Todos os alertas com explicações detalhadas",
@@ -49,6 +50,18 @@ export default function CheckoutPage() {
       track("checkout_viewed")
     }
   }, [track])
+
+  const simData = (() => {
+    if (typeof window === "undefined") return null
+    try {
+      const stored = getStoredSimulatorData()
+      if (stored?.result && stored?.input?.setor) {
+        return { result: stored.result, setor: stored.input.setor }
+      }
+    } catch { /* ignore localStorage errors */ }
+    return null
+  })()
+
   const [stripeLoading, setStripeLoading] = useState(false)
   const [stripeError, setStripeError] = useState<string | null>(null)
 
@@ -117,6 +130,27 @@ export default function CheckoutPage() {
           Acesse todas as análises, projeções e o checklist de adequação para preparar sua empresa.
         </p>
       </div>
+
+      {/* Profile-based urgency messaging */}
+      {simData && (
+        <div className="max-w-xl mx-auto">
+          {simData.result.efetividadeTributaria?.pressaoFormalizacao === "muito_alta" || simData.result.efetividadeTributaria?.pressaoFormalizacao === "alta" ? (
+            <div className="rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 p-4 text-center">
+              <p className="text-sm text-amber-950 dark:text-amber-200">
+                <strong>No setor de {simData.setor}</strong>, o custo da cobrança mais rigorosa pode ser maior que a própria mudança de alíquotas.
+                O diagnóstico completo mostra exatamente quanto e como se preparar.
+              </p>
+            </div>
+          ) : simData.result.impactoAnual?.percentual > 30 ? (
+            <div className="rounded-lg bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-800 p-4 text-center">
+              <p className="text-sm text-rose-950 dark:text-rose-200">
+                Seu impacto estimado é de <strong>+{simData.result.impactoAnual.percentual}%</strong> na carga tributária.
+                O diagnóstico completo inclui projeção ano a ano e checklist para reduzir esse impacto.
+              </p>
+            </div>
+          ) : null}
+        </div>
+      )}
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Free tier */}
@@ -191,6 +225,11 @@ export default function CheckoutPage() {
             {stripeError && (
               <p className="text-sm text-destructive text-center">{stripeError}</p>
             )}
+
+            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+              <CheckCircle className="h-4 w-4 text-emerald-500" />
+              <span>Não ficou satisfeito? Devolvemos seu dinheiro em até 7 dias.</span>
+            </div>
 
             {/* Promo code */}
             <div className="border-t pt-4">

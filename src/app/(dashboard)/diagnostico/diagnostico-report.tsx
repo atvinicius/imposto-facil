@@ -15,6 +15,7 @@ import {
   RefreshCw,
   ShieldAlert,
   Sparkles,
+  Target,
   TrendingUp,
   X,
   Zap,
@@ -31,6 +32,7 @@ import { useAnalytics } from "@/lib/analytics/track"
 import { ChecklistItem } from "./checklist-item"
 import { toggleChecklistItem } from "./actions"
 import { FeedbackPrompt } from "@/components/feedback/feedback-prompt"
+import { getErrosComuns } from "@/lib/simulator/common-mistakes"
 import { RerunForm } from "./rerun-form"
 
 export interface ChecklistProgress {
@@ -277,6 +279,7 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
   const { track } = useAnalytics()
   const trackedRef = useRef(false)
   const [showConfidenceExplainer, setShowConfidenceExplainer] = useState(false)
+  const errosComuns = getErrosComuns(input, result, 4)
 
   useEffect(() => {
     if (!trackedRef.current) {
@@ -418,6 +421,52 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
         </div>
       )}
 
+      {/* Erros Comuns do Seu Perfil (FREE) */}
+      {errosComuns.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-rose-500" />
+              Erros Comuns do Seu Perfil
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Com base no seu setor, regime e porte, estes são os erros mais frequentes entre empresas similares.
+            </p>
+            <div className="space-y-3">
+              {errosComuns.map((erro) => (
+                <div key={erro.id} className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
+                  <div className={`mt-1.5 h-2.5 w-2.5 rounded-full shrink-0 ${
+                    erro.severidade === "alta" ? "bg-red-500" :
+                    erro.severidade === "media" ? "bg-amber-500" :
+                    "bg-slate-400"
+                  }`} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium">{erro.titulo}</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">{erro.descricao}</p>
+                    <div className="flex items-center gap-3 mt-2">
+                      {erro.artigoUrl && (
+                        <Link href={erro.artigoUrl} className="text-xs text-primary hover:underline">
+                          Saiba mais
+                        </Link>
+                      )}
+                      <Link
+                        href={`/assistente?q=${encodeURIComponent(erro.perguntaSugerida)}`}
+                        className="text-xs text-primary hover:underline flex items-center gap-1"
+                      >
+                        <MessageCircle className="h-3 w-3" />
+                        Pergunte à assistente
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Upgrade CTA (for free users — placed early to drive conversion) */}
       {!isPaid && (
         <Card className="bg-gradient-to-r from-slate-900 to-slate-800 text-white border-0">
@@ -528,6 +577,60 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
               individuais da sua empresa. Empresas que já pagam todos os impostos em dia terão impacto menor.
             </p>
             <EntendaMelhorButton question={`O que significa a cobrança mais rigorosa para o setor de ${input.setor}? Como me preparar?`} />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Cash flow impact from split payment (FREE) */}
+      {result.impactoFluxoCaixa.retencaoMensal > 0 && (
+        <Card className="border border-sky-200 dark:border-sky-900">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-sky-600" />
+              Impacto no Seu Fluxo de Caixa
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              A partir de 2027, o imposto é retido automaticamente a cada venda —
+              antes do dinheiro chegar na sua conta. Veja como isso afeta seu caixa:
+            </p>
+
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div className="p-3 bg-sky-50 dark:bg-sky-950/20 rounded-lg text-center">
+                <div className="text-xs text-muted-foreground">A cada R$10 mil em vendas</div>
+                <div className="text-xl font-bold text-sky-700 dark:text-sky-300">
+                  R$ {result.impactoFluxoCaixa.porCadaDezMil.toLocaleString("pt-BR")}
+                </div>
+                <div className="text-xs text-muted-foreground">retidos na hora</div>
+              </div>
+              <div className="p-3 bg-sky-50 dark:bg-sky-950/20 rounded-lg text-center">
+                <div className="text-xs text-muted-foreground">Retenção mensal estimada</div>
+                <div className="text-xl font-bold text-sky-700 dark:text-sky-300">
+                  R$ {result.impactoFluxoCaixa.retencaoMensal.toLocaleString("pt-BR")}
+                </div>
+                <div className="text-xs text-muted-foreground">/mês</div>
+              </div>
+              <div className="p-3 bg-sky-50 dark:bg-sky-950/20 rounded-lg text-center">
+                <div className="text-xs text-muted-foreground">Capital de giro adicional</div>
+                <div className="text-xl font-bold text-sky-700 dark:text-sky-300">
+                  R$ {result.impactoFluxoCaixa.capitalGiroAdicional.toLocaleString("pt-BR")}
+                </div>
+                <div className="text-xs text-muted-foreground">necessário</div>
+              </div>
+            </div>
+
+            <p className="text-sm">
+              Hoje, quando você recebe R$10.000, o valor integral vai para sua conta e você tem
+              cerca de 40 dias para pagar o imposto. Com a retenção automática, R$ {result.impactoFluxoCaixa.porCadaDezMil.toLocaleString("pt-BR")} vão
+              direto para o governo — você recebe apenas R$ {(10000 - result.impactoFluxoCaixa.porCadaDezMil).toLocaleString("pt-BR")}.
+            </p>
+
+            <p className="text-xs text-muted-foreground">
+              Estimativa com base na alíquota projetada de IBS+CBS para o setor de {input.setor}.
+              Retenção automática prevista a partir de 2027.
+            </p>
+            <EntendaMelhorButton question="Como planejar meu fluxo de caixa para a retenção automática de impostos?" />
           </CardContent>
         </Card>
       )}

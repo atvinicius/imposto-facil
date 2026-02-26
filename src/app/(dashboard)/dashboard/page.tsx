@@ -1,5 +1,6 @@
 import Link from "next/link"
 import {
+  AlertTriangle,
   ArrowRight,
   Bell,
   BookOpen,
@@ -9,6 +10,7 @@ import {
   FileText,
   LineChart,
   MessageCircle,
+  Target,
 } from "lucide-react"
 import {
   Card,
@@ -19,6 +21,7 @@ import { Button } from "@/components/ui/button"
 import { getUser, getUserProfile } from "@/lib/supabase/server"
 import { categories, getArticlesByCategory } from "@/lib/content"
 import { calculateReadinessScore } from "@/lib/readiness/score"
+import type { SimuladorResult } from "@/lib/simulator/types"
 import { ReadinessScoreCard } from "./readiness-score"
 
 export default async function DashboardPage() {
@@ -168,6 +171,77 @@ export default async function DashboardPage() {
         </Card>
       )}
 
+      {/* Priority insights — shown when user has simulator data */}
+      {hasSimulatorData && profile?.simulator_result && (() => {
+        const sim = profile.simulator_result as unknown as SimuladorResult
+        const pressao = sim.efetividadeTributaria?.pressaoFormalizacao
+        const isPaid = profile.subscription_tier === "diagnostico" || profile.subscription_tier === "pro"
+        const confianca = sim.confiancaPerfil
+
+        // Only show if there's something urgent to say
+        if (!pressao || pressao === "baixa") return null
+
+        return (
+          <div className="space-y-3">
+            {/* Formalization pressure warning */}
+            {(pressao === "alta" || pressao === "muito_alta") && (
+              <Card className="border-amber-200 bg-amber-50/50">
+                <CardContent className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-lg bg-amber-100 p-2">
+                      <AlertTriangle className="h-5 w-5 text-amber-700" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">
+                        Pressão de formalização {pressao === "muito_alta" ? "muito alta" : "alta"} no seu setor
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        A cobrança automática a partir de 2027 pode ter impacto maior que a mudança de alíquotas.
+                        {!isPaid && " Desbloqueie o diagnóstico para ver o impacto detalhado."}
+                      </p>
+                    </div>
+                  </div>
+                  <Button asChild size="sm" variant={isPaid ? "outline" : "default"}>
+                    <Link href="/diagnostico">
+                      {isPaid ? "Ver detalhes" : "Ver diagnóstico"}
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Low confidence prompt */}
+            {confianca != null && confianca < 50 && (
+              <Card className="border-sky-200 bg-sky-50/50">
+                <CardContent className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-lg bg-sky-100 p-2">
+                      <Target className="h-5 w-5 text-sky-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">
+                        Diagnóstico com precisão de {confianca}%
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Complete seu perfil no simulador para resultados mais precisos —
+                        dados como faturamento exato e estrutura de custos fazem grande diferença.
+                      </p>
+                    </div>
+                  </div>
+                  <Button asChild size="sm" variant="outline">
+                    <Link href="/simulador">
+                      Atualizar dados
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        )
+      })()}
+
       {/* Main tools */}
       <section>
         <h2 className="mb-4 text-lg font-semibold tracking-tight">
@@ -235,6 +309,30 @@ export default async function DashboardPage() {
           Destaques da reforma
         </h2>
         <div className="grid gap-3 lg:grid-cols-2">
+          <Card className="lg:col-span-2">
+            <CardContent className="flex items-start gap-4 p-5">
+              <div className="shrink-0 rounded-lg bg-red-50 p-2">
+                <AlertTriangle className="h-4 w-4 text-red-600" />
+              </div>
+              <div>
+                <h3 className="font-medium">Próximo Marco: Janeiro 2027</h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  CBS entra em vigor, PIS/Cofins são extintos e inicia a retenção
+                  automática de impostos nas transações eletrônicas.
+                </p>
+                <Button
+                  variant="link"
+                  asChild
+                  className="mt-1 h-auto p-0 text-sm"
+                >
+                  <Link href="/conhecimento/transicao/cronograma">
+                    Ver cronograma completo
+                  </Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardContent className="flex items-start gap-4 p-5">
               <div className="shrink-0 rounded-lg bg-sky-50 p-2">

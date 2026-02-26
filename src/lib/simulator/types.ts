@@ -100,6 +100,13 @@ export interface SimuladorResult {
     pressaoFormalizacao: "baixa" | "moderada" | "alta" | "muito_alta"
   }
 
+  // Cash flow impact from split payment (automatic tax retention)
+  impactoFluxoCaixa: {
+    retencaoMensal: number         // R$/month retained at point of sale
+    porCadaDezMil: number          // R$ retained per R$10,000 in sales
+    capitalGiroAdicional: number   // estimated additional working capital needed (annual)
+  }
+
   // State-specific ICMS adjustment (goods sectors, non-Simples only)
   ajusteIcmsUf?: {
     ufAliquota: number           // state modal ICMS rate (e.g., 23)
