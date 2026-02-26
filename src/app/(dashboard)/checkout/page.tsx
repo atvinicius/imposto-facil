@@ -226,11 +226,6 @@ export default function CheckoutPage() {
               <p className="text-sm text-destructive text-center">{stripeError}</p>
             )}
 
-            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-              <CheckCircle className="h-4 w-4 text-emerald-500" />
-              <span>Não ficou satisfeito? Devolvemos seu dinheiro em até 7 dias.</span>
-            </div>
-
             {/* Promo code */}
             <div className="border-t pt-4">
               <p className="text-sm font-medium mb-3 flex items-center gap-2">

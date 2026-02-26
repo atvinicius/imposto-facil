@@ -159,7 +159,7 @@ Protected route (requires auth, does NOT require onboarding completion).
 ### Checkout & Payment Flow (`/checkout`)
 Protected route. Stripe Checkout integration + promo code bypass.
 
-- `src/app/(dashboard)/checkout/page.tsx` — Client component: side-by-side Free vs Paid tier comparison, Stripe checkout button, promo code input, profile-based urgency banners (formalization pressure, high impact %), money-back guarantee
+- `src/app/(dashboard)/checkout/page.tsx` — Client component: side-by-side Free vs Paid tier comparison, Stripe checkout button, promo code input, profile-based urgency banners (formalization pressure, high impact %)
 - `src/app/(dashboard)/checkout/actions.ts` — `redeemPromoCode()` server action: validates against `VALID_PROMO_CODES` map (currently: "amigos"), updates `subscription_tier` + `diagnostico_purchased_at`
 - `src/app/api/stripe/checkout/route.ts` — Creates Stripe Checkout Session, redirects to Stripe
 - `src/app/api/stripe/webhook/route.ts` — Handles `checkout.session.completed` webhook, updates user profile. Hardened: generic error responses (no internal details leaked), env var validation, idempotency check (skips if `diagnostico_purchased_at` already set)

@@ -440,7 +440,7 @@ export default function LandingPage() {
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
-              <p className="mt-3 text-center text-xs text-slate-500">Economia de R$48 · Garantia de 7 dias</p>
+              <p className="mt-3 text-center text-xs text-slate-500">Economia de R$48</p>
             </article>
 
             {/* Pro */}
