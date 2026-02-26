@@ -10,6 +10,7 @@ import {
   HelpCircle,
   Lock,
   MessageCircle,
+  RefreshCw,
   ShieldAlert,
   Sparkles,
   TrendingUp,
@@ -108,6 +109,49 @@ function ConfidenceExplainer({ score, onClose }: { score: number; onClose: () =>
   )
 }
 
+function RerunGatedCTA() {
+  const [showMessage, setShowMessage] = useState(false)
+
+  return (
+    <div className="flex flex-col items-center text-center space-y-3">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => setShowMessage(true)}
+        className="gap-2"
+      >
+        <RefreshCw className="h-4 w-4" />
+        Recalcular com outros dados
+      </Button>
+
+      {showMessage && (
+        <Card className="w-full border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20">
+          <CardContent className="p-5 text-center space-y-3">
+            <div className="flex justify-center">
+              <Lock className="h-8 w-8 text-amber-600" />
+            </div>
+            <p className="font-medium text-sm">
+              Recálculos estão disponíveis no Diagnóstico Completo
+            </p>
+            <p className="text-xs text-muted-foreground max-w-md mx-auto">
+              Desbloqueie recálculos ilimitados, projeção ano a ano, análise de regime, checklist interativo e exportação em PDF.
+            </p>
+            <Button asChild size="sm" className="mt-2">
+              <Link href="/checkout">
+                Desbloquear por R$49
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Link>
+            </Button>
+            <p className="text-xs text-muted-foreground">
+              Pagamento único. Acesso permanente.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  )
+}
+
 export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checklistProgress, runsRemaining = 0 }: DiagnosticoReportProps) {
   const { track } = useAnalytics()
   const trackedRef = useRef(false)
@@ -164,13 +208,6 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
           </div>
         </div>
       )}
-
-      {/* Re-run form */}
-      <RerunForm
-        currentInput={input}
-        isPaid={isPaid}
-        runsRemaining={runsRemaining}
-      />
 
       {/* Header */}
       <div className="text-center space-y-4">
@@ -614,6 +651,17 @@ export function DiagnosticoReport({ result, input, isPaid, justUnlocked, checkli
           <PdfDownloadButton isPaid={isPaid} />
         </CardContent>
       </Card>
+
+      {/* Recalculate section */}
+      {isPaid ? (
+        <RerunForm
+          currentInput={input}
+          isPaid={isPaid}
+          runsRemaining={runsRemaining}
+        />
+      ) : (
+        <RerunGatedCTA />
+      )}
 
       {/* Methodology (moved to bottom — supporting detail, not the key message) */}
       <MethodologyCard metodologia={result.metodologia} />
