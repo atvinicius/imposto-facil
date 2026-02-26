@@ -208,7 +208,7 @@ function AssistantCTA({ isPaid, setor, nivelRisco }: { isPaid: boolean; setor: s
           <div className="rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20 p-5 text-center space-y-3">
             <Lock className="h-7 w-7 text-amber-600 mx-auto" />
             <p className="font-medium text-sm">
-              A assistente de IA está disponível no Diagnóstico Completo
+              O assistente de IA está disponível no Diagnóstico Completo
             </p>
             <p className="text-xs text-muted-foreground max-w-sm mx-auto">
               Além da assistente, você desbloqueia todos os alertas, checklist completo,

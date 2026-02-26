@@ -134,7 +134,7 @@ export function ChatContainer({ chat, diagnosticSummary, isPaid = false }: ChatC
               <Lock className="h-6 w-6 text-teal-600 dark:text-teal-400" />
             </div>
             <h3 className="text-lg font-semibold mb-1">
-              A Duda é exclusiva do Diagnóstico Completo
+              O assistente de IA é exclusivo do Diagnóstico Completo
             </h3>
             <p className="text-sm text-muted-foreground mb-4 max-w-sm mx-auto">
               Desbloqueie o assistente de IA personalizado que responde com base no seu perfil,
