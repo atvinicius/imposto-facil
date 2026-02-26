@@ -29,11 +29,9 @@ npm run lint      # ESLint with Next.js + TypeScript rules
 - `src/app/` - Next.js App Router with route groups:
   - `(auth)` - Login, signup, password reset
   - `(dashboard)` - Protected app routes (dashboard, diagnostico, assistente, conhecimento, perfil)
-  - `(onboarding)` - Post-signup onboarding wizard
 - `src/components/ui/` - shadcn/ui components
-- `src/components/onboarding/` - Onboarding-specific components (step indicator)
 - `src/components/landing/` - Landing page section components
-- `src/lib/supabase/` - Supabase clients (server.ts for SSR, client.ts for browser, admin.ts for service role)
+- `src/lib/supabase/` - Supabase clients (server.ts for SSR with PKCE, client.ts for browser, admin.ts for service role)
 - `src/lib/openrouter/` - LLM client with system prompt template
 - `src/lib/embeddings/` - OpenAI embeddings and hybrid search logic
 - `src/content/` - Static MDX articles organized by category (ibs, cbs, is, transicao, glossario, setores, regimes, faq) — 32 articles total
@@ -72,27 +70,16 @@ Hybrid search in `src/lib/embeddings/search.ts` combines:
 ### Authentication & Routing Flow
 - **Proxy** in `src/proxy.ts` handles route protection (Next.js 16 convention)
 - **Session logic** in `src/lib/supabase/middleware.ts` with `updateSession()`:
-  - Protects dashboard, onboarding, and diagnostico routes
+  - Protects dashboard, diagnostico, and other app routes
   - Redirects unauthenticated users to `/login`
-  - Redirects users without completed onboarding to `/onboarding` (except `/diagnostico` — allows bypass)
   - Redirects authenticated users away from auth pages
-- **Auth callback** at `src/app/auth/callback/route.ts` supports `?next=` param for flexible post-auth redirects (e.g., `/diagnostico`)
-- **Auth actions** in `src/app/(auth)/actions.ts` — signup accepts `from=simulador` to redirect through `/diagnostico` flow
-
-### Onboarding Flow
-Post-signup wizard at `/onboarding` collects user profile data in 4 steps:
-1. **About You**: Name, experience level with taxation
-2. **Your Business**: State (UF), sector, company size
-3. **Tax Regime**: Current tax classification (Simples, Lucro Presumido, etc.)
-4. **Interests**: Multi-select reform topics (IBS, CBS, transition, etc.)
-
-Key files:
-- `src/app/(onboarding)/onboarding/page.tsx` - Server component with auth/redirect logic
-- `src/app/(onboarding)/onboarding/onboarding-wizard.tsx` - Client wizard with step state
-- `src/app/(onboarding)/onboarding/actions.ts` - Server actions (save, complete, skip)
-- `src/app/(onboarding)/onboarding/constants.ts` - All dropdown/select options
-
-Users can skip onboarding but will see a reminder card on the dashboard.
+- **Auth callback** at `src/app/auth/callback/route.ts` — server-side route handler with two flows:
+  1. `token_hash` + `type` → `verifyOtp()` — Email auth (magic link, signup). Supabase-recommended SSR approach, works cross-device. Requires custom email templates that send `token_hash` directly as a query parameter.
+  2. `code` → `exchangeCodeForSession()` — OAuth (Google sign-in). Uses PKCE code_verifier from cookies (same-device).
+  - `resolveRedirect()` reads destination from `?next=` URL param, then falls back to `user.user_metadata.redirect_to`
+- **Auth confirm** at `src/app/auth/confirm/route.ts` — redirects to `/auth/callback` preserving all query params (fallback for old email templates)
+- **Auth actions** in `src/app/(auth)/actions.ts` — uses standard SSR PKCE client (`createClient()`) for `signInWithOtp()`. Stores `redirect_to` in user metadata for cross-device support. Signup accepts `from=simulador` to set redirect to `/diagnostico`.
+- **Supabase email templates** (configured in dashboard) must use `token_hash` format: `{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=signup` (not `{{ .ConfirmationURL }}`)
 
 ### User Funnel (Product-Led Growth)
 
@@ -109,7 +96,7 @@ LANDING PAGE → SIMULATOR (public, no login) → RESULTS + localStorage persist
                                               [free sections + blurred paid sections]
 ```
 
-Simulator users skip the 4-step onboarding wizard — their profile is auto-filled from simulator data (`simulatorInputToProfile()` in `src/lib/simulator/storage.ts`).
+Simulator users' profiles are auto-filled from simulator data (`simulatorInputToProfile()` in `src/lib/simulator/storage.ts`). There is no onboarding wizard — profile data comes from the simulator flow or the `/perfil` page.
 
 ### Simulator System
 - `src/lib/simulator/tax-data.ts` — **Cited data registry**: all tax rates wrapped in `CitedValue<T>` with `source` (legislation reference), `confidence` (legislada/estimativa_oficial/derivada), and optional `notes`. Includes `FATURAMENTO_MEDIO`, `CARGA_ATUAL`, `CARGA_NOVA`, `AJUSTE_REGIME`, `TRANSICAO_TIMELINE`, `UF_INCENTIVOS_FISCAIS`, `FATOR_EFETIVIDADE` (sector/regime effectiveness ratios), **`ICMS_ALIQUOTA_MODAL`** (27-state modal ICMS rates, 17%-23%, each citing state law), **`ICMS_REFERENCIA_NACIONAL`** (19% GDP-weighted avg), **`MARGEM_BRUTA_ESTIMADA`** (sector gross margins from IBGE), and **`SETORES_ICMS`** (goods-based sectors: comercio, industria, construcao, agronegocio)
